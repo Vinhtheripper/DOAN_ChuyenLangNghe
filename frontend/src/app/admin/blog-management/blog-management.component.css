@@ -1,0 +1,81 @@
+.blog-management {
+    padding: 20px;
+}
+
+.blog-management h2 {
+    color: #8b0000;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-purple {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: white;
+}
+
+.btn-purple:hover {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+}
+
+.btn-purple:disabled {
+    background-color: #c0a8e0;
+    border-color: #c0a8e0;
+    cursor: not-allowed;
+}
+
+.img-thumbnail {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: cover;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+.pagination-controls {
+    padding: 1rem 0;
+}
+
+.text-center.py-5 {
+    color: #6c757d;
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+

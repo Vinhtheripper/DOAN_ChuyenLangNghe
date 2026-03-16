@@ -1,0 +1,127 @@
+.modal-content {
+  max-width: 100%;
+  border: none;
+  box-shadow: 0 0 15px rgba(27, 23, 23, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #EEEBDD;
+  color: #1B1717;
+}
+
+.modal-header {
+  background: linear-gradient(90deg, #630000, #810000);
+  color: #EEEBDD;
+  border-bottom: none;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.modal-title {
+  font-weight: 700;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-close {
+  background: #EEEBDD;
+  border: none;
+  color: #810000;
+  font-size: 1.1rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-close:hover {
+  background-color: #810000;
+  color: #EEEBDD;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.nav-tabs {
+  border-bottom: 1px solid rgba(99, 0, 0, 0.2);
+}
+
+.nav-tabs .nav-link {
+  cursor: pointer;
+  font-weight: 600;
+  color: #1B1717;
+  border: none;
+  border-radius: 0;
+  padding: 0.6rem 1.2rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #810000;
+  background-color: rgba(99, 0, 0, 0.05);
+}
+
+.nav-tabs .nav-link.active {
+  color: #810000;
+  border-bottom: 3px solid #810000;
+}
+
+.tab-content {
+  margin-top: 1rem;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #CCC3B8;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: #FFF9F5;
+  box-shadow: 0 2px 8px rgba(27, 23, 23, 0.1);
+}
+
+.modal-footer {
+  align-items: center;
+  background-color: #EEEBDD;
+  border-top: 1px solid #CCC3B8;
+  padding: 1rem;
+}
+
+.modal-footer .btn-success {
+  background-color: #810000;
+  color: #EEEBDD;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  transition: all 0.3s ease;
+}
+
+.modal-footer .btn-success:hover {
+  background-color: #630000;
+}
+
+.modal-footer .btn-danger {
+  background-color: #1B1717;
+  color: #EEEBDD;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  transition: all 0.3s ease;
+}
+
+.modal-footer .btn-danger:hover {
+  background-color: #630000;
+}
+
+.text-danger {
+  color: #810000;
+  font-weight: 600;
+}

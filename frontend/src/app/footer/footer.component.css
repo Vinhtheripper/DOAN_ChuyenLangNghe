@@ -1,0 +1,145 @@
+.main-footer {
+  width: 100%;
+  background: #BA680F;
+  padding: 50px 0 30px;
+  color: #FFFFFF;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.footer-logo-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.footer-logo {
+  width: 159px;
+  height: 159px;
+  margin-bottom: 20px;
+}
+
+.footer-description {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 25px;
+  text-align: center;
+  color: #FFFFFF;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.footer-contact {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 25px;
+  color: #FFFFFF;
+}
+
+.contact-item i {
+  width: 25px;
+  height: 25px;
+  color: #FFCF33;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-divider {
+  border: none;
+  border-top: 1px dashed rgba(255, 255, 255, 0.3);
+  margin: 30px 0;
+}
+
+.footer-menu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+  margin-top: 30px;
+}
+
+.footer-column h6 {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 25px;
+  color: #FFFFFF;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 8px;
+}
+
+.footer-column ul li a {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 25px;
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-column ul li a:hover {
+  color: #FFCF33;
+}
+
+.social-icons {
+  display: flex;
+  gap: 25px;
+}
+
+.social-icons a {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #FFCF33;
+}
+
+@media (max-width: 992px) {
+  .footer-menu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-contact {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-menu {
+    grid-template-columns: 1fr;
+  }
+}

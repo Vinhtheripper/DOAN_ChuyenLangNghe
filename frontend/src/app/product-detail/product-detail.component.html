@@ -1,0 +1,78 @@
+<div class="product-details-container">
+  <div class="product-gallery">
+    <div class="main-image-wrap">
+      <button *ngIf="images.length > 1" class="nav-arrow nav-prev" (click)="prevImage()" aria-label="Ảnh trước">
+        ‹
+      </button>
+      <img [src]="images[selectedImageIndex]" alt="{{ product.product_name }}" class="main-image" />
+      <button *ngIf="images.length > 1" class="nav-arrow nav-next" (click)="nextImage()" aria-label="Ảnh sau">
+        ›
+      </button>
+    </div>
+    <div class="thumbnail-row">
+      <img *ngFor="let image of images; let i = index" [src]="image" alt="Thumbnail" (click)="selectImage(i)"
+        [class.selected]="i === selectedImageIndex" class="thumbnail" />
+    </div>
+  </div>
+
+  <div class="product-info">
+    <p class="product-category">{{ product.product_dept || 'Làng nghề' }}</p>
+    <div class="product-title-row">
+      <h1>{{ product.product_name || 'Sản phẩm' }}</h1>
+      <span [ngClass]="{ 'in-stock': product.stocked_quantity > 0, 'out-of-stock': product.stocked_quantity === 0 }">
+        {{ product.stocked_quantity > 0 ? 'Còn hàng' : 'Hết hàng' }}
+      </span>
+    </div>
+
+    <div class="rating-row">
+      <span class="rating-value-num">{{ (averageRating || product.rating) | number:'1.1-1' }}</span>
+      <div class="rating">
+        <div *ngFor="let star of [1, 2, 3, 4, 5]" class="star" (mouseenter)="onStarHover()" (mouseleave)="onStarLeave()">
+          <div class="star-full" [ngStyle]="{ width: getStarFillPercentage(averageRating || product.rating, star) + '%' }"></div>
+        </div>
+      </div>
+      <span class="review-count">({{ reviewCount }} đánh giá)</span>
+    </div>
+
+    <div class="price-row">
+      <span class="current-price">{{ product.unit_price | currency: 'VND' }}</span>
+      <span *ngIf="getOriginalPrice() !== null" class="original-price">{{ getOriginalPrice() | currency: 'VND' }}</span>
+    </div>
+
+    <p class="product-desc-brief">{{ product.product_detail || 'Nguyên liệu chọn lọc 100% tự nhiên, sản xuất thủ công theo công thức truyền thống. Đảm bảo an toàn vệ sinh thực phẩm, hương vị đậm đà chuẩn vị vùng miền.' }}</p>
+
+    <div *ngIf="sizeOptions.length" class="size-section">
+      <label class="size-label">Khối lượng:</label>
+      <div class="size-buttons">
+        <button *ngFor="let opt of sizeOptions; let i = index" (click)="selectSize(i)"
+          [class.selected]="i === selectedSizeIndex" [disabled]="isOutOfStock">{{ opt.label }}</button>
+      </div>
+    </div>
+
+    <div class="purchase-row">
+      <div class="quantity-selector">
+        <button type="button" (click)="decreaseQuantity()" [disabled]="isOutOfStock">−</button>
+        <input type="number" [(ngModel)]="quantity" min="1" (input)="validateQuantity()" [disabled]="isOutOfStock" />
+        <button type="button" (click)="increaseQuantity()"
+          [disabled]="isOutOfStock || quantity >= product.stocked_quantity">+</button>
+      </div>
+      <div class="action-buttons">
+        <button (click)="addToCart($event)" class="btn btn-add-cart" [disabled]="isOutOfStock">Thêm vào giỏ</button>
+        <button (click)="buyNow()" class="btn btn-buy-now" [disabled]="isOutOfStock">Mua ngay</button>
+        <button type="button" class="btn btn-wishlist" aria-label="Yêu thích" [disabled]="isOutOfStock">♡</button>
+      </div>
+    </div>
+
+    <div class="product-meta">
+      <p><strong>Mã SP:</strong> {{ product._id || 'N/A' }}</p>
+      <p><strong>Nhãn:</strong> Làng nghề, {{ product.product_dept || 'Việt Nam' }}</p>
+    </div>
+
+    <div class="share-row">
+      <span>Chia sẻ:</span>
+      <a href="#" class="share-icon" aria-label="Facebook">f</a>
+      <a href="#" class="share-icon" aria-label="Twitter">𝕏</a>
+      <a href="#" class="share-icon" aria-label="Zalo">Z</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+<div class="coupon-page">
+  <h3 class="mb-3">Quản lý mã giảm giá</h3>
+
+  <form [formGroup]="couponForm" class="coupon-form" (ngSubmit)="submitCoupon()">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Mã giảm giá</label>
+        <input class="form-control" formControlName="code" placeholder="VD: SALE10" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Loại</label>
+        <select class="form-select" formControlName="type">
+          <option value="percentage">Giảm theo tỉ lệ %</option>
+          <option value="item_threshold_amount">Mua từ X món giảm Y</option>
+        </select>
+      </div>
+      <div class="col-md-3" *ngIf="isPercentageType">
+        <label class="form-label">Tỉ lệ giảm (%)</label>
+        <input type="number" class="form-control" formControlName="percentageOff" min="1" max="100" />
+      </div>
+      <div class="col-md-3" *ngIf="!isPercentageType">
+        <label class="form-label">Số món tối thiểu</label>
+        <input type="number" class="form-control" formControlName="minItems" min="1" />
+      </div>
+      <div class="col-md-3" *ngIf="!isPercentageType">
+        <label class="form-label">Giảm cố định (VND)</label>
+        <input type="number" class="form-control" formControlName="discountAmount" min="1000" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Giới hạn lượt dùng</label>
+        <input type="number" class="form-control" formControlName="usageLimit" min="1" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Hiệu lực từ</label>
+        <input type="datetime-local" class="form-control" formControlName="validFrom" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Hiệu lực đến</label>
+        <input type="datetime-local" class="form-control" formControlName="validTo" />
+      </div>
+      <div class="col-md-12">
+        <label class="form-label">Mô tả</label>
+        <input class="form-control" formControlName="description" placeholder="Mô tả mã giảm giá" />
+      </div>
+      <div class="col-md-12 d-flex align-items-center justify-content-between">
+        <label class="form-check-label d-flex align-items-center gap-2">
+          <input type="checkbox" class="form-check-input" formControlName="isActive" />
+          Kích hoạt ngay
+        </label>
+        <button class="btn btn-primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Đang tạo...' : 'Phát hành mã' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="mt-4">
+    <h5>Danh sách mã giảm giá</h5>
+    <div *ngIf="loading" class="text-muted">Đang tải...</div>
+
+    <table class="table table-bordered" *ngIf="!loading && coupons.length > 0">
+      <thead>
+        <tr>
+          <th>Mã</th>
+          <th>Quy tắc</th>
+          <th>Lượt dùng</th>
+          <th>Hiệu lực</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let coupon of coupons">
+          <td><strong>{{ coupon.code }}</strong></td>
+          <td>{{ formatRule(coupon) }}</td>
+          <td>{{ coupon.usedCount || 0 }} / {{ coupon.usageLimit || '∞' }}</td>
+          <td>
+            <div>Từ: {{ coupon.validFrom ? (coupon.validFrom | date:'short') : 'Ngay' }}</div>
+            <div>Đến: {{ coupon.validTo ? (coupon.validTo | date:'short') : 'Khong gioi han' }}</div>
+          </td>
+          <td>
+            <span [class.text-success]="coupon.isActive" [class.text-danger]="!coupon.isActive">
+              {{ coupon.isActive ? 'Đang bật' : 'Đang tắt' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm" [class.btn-outline-danger]="coupon.isActive" [class.btn-outline-success]="!coupon.isActive" (click)="toggleCouponStatus(coupon)">
+              {{ coupon.isActive ? 'Tắt' : 'Bật' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && coupons.length === 0" class="text-muted">Chưa có mã giảm giá nào.</div>
+  </div>
+</div>

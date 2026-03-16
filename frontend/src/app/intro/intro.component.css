@@ -1,0 +1,621 @@
+/* About page - Chuyện Làng Nghề style - warm brown/cream palette */
+:host {
+  display: block;
+}
+
+.about-page {
+  background-color: #f8f5f0;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+  background-size: auto;
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Hero Section - full viewport, extends under fixed header (no gap) */
+.about-hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.about-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Phần sau video: 2 cột (tiêu đề trái, văn bản phải) + gallery ảnh ngang */
+.about-after-video {
+  padding: 56px 0 48px;
+  background-color: #f5f2ec;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+  box-sizing: border-box;
+}
+
+.about-after-video-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.about-two-col {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.about-col-heading {
+  flex: 0 0 42%;
+  max-width: 42%;
+}
+
+.about-big-heading {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  color: #2d2d2d;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  margin: 0;
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+
+.about-col-text {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.about-after-video-text {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1.65;
+  margin: 0 0 14px 0;
+  font-family: 'Manrope', sans-serif;
+}
+
+.about-after-video-text:last-of-type {
+  margin-bottom: 20px;
+}
+
+.btn-about-buy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6em 1.2em;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: #7A4726;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  width: fit-content;
+}
+
+.btn-about-buy:hover {
+  background: #5e3419;
+  color: #fff;
+}
+
+/* Gallery ảnh ngang - full màn hình, tự scroll phải sang trái */
+.about-gallery-row {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  overflow: hidden;
+  padding: 32px 0;
+  box-sizing: border-box;
+}
+
+.about-gallery-autoscroll .about-gallery-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: about-gallery-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+.about-gallery-autoscroll:hover .about-gallery-track {
+  animation-play-state: paused;
+}
+
+@keyframes about-gallery-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.about-gallery-img {
+  width: 280px;
+  min-width: 280px;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  border-radius: 4px;
+  border: 1px solid #e0dbd4;
+  transition: box-shadow 0.2s ease;
+}
+
+.about-gallery-img:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Full Screen Video Section */
+.intro-video-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f5f0;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+  padding: 0 48px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.intro-fullscreen-video {
+  width: 80%;
+  max-width: 1200px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Trang trí 2 bên - xoay theo scroll */
+.hat-decoration {
+  position: absolute;
+  top: 50%;
+  transform-origin: center center;
+  width: 480px;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+  transition: transform 0.15s ease-out;
+}
+
+.hat-left {
+  left: -240px;
+}
+
+.hat-left .hat-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hat-right {
+  right: -240px;
+}
+
+.hat-right .hat-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+/* Bamboo Divider */
+.about-divider {
+  width: 100%;
+  overflow: hidden;
+}
+
+.about-bamboo-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 80px;
+}
+
+/* SẢN PHẨM Section */
+.about-products-top {
+  background: #8A4B29;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.about-products-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.about-products-desc {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.about-products-sand {
+  min-height: 280px;
+  background: linear-gradient(180deg, #e4cda7 0%, #c19c72 100%);
+  background-size: cover;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.about-product-display {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.about-product-item {
+  max-height: 180px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.about-product-hat {
+  max-height: 140px;
+}
+
+.about-product-pot {
+  max-height: 200px;
+}
+
+.about-product-basket {
+  max-height: 160px;
+}
+
+/* Ảnh làng nghề đan tre mây - full màn hình, crop vừa viewport */
+.craft-heritage-section {
+  width: 100%;
+  height: 100vh;
+  min-height: 500px;
+  padding: 0;
+  background: #2d2416;
+}
+
+.craft-heritage-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.craft-heritage-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 3 ô thống kê - giữa hình, bằng nhau */
+.craft-stats-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 20px;
+  padding: 24px 32px;
+  width: 90%;
+  max-width: 1100px;
+}
+
+.craft-stat-item {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(248, 245, 240, 0.92);
+  padding: 22px 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(45, 36, 22, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.craft-stat-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(45, 36, 22, 0.4);
+}
+
+.craft-stat-number {
+  display: block;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #6B3410;
+  margin-bottom: 8px;
+  font-family: 'Manrope', sans-serif;
+}
+
+.craft-stat-text {
+  display: block;
+  font-size: 0.9rem;
+  color: #4A3520;
+  line-height: 1.4;
+  font-family: 'Manrope', sans-serif;
+}
+
+@media (max-width: 992px) {
+  .craft-stats-overlay {
+    gap: 16px;
+    padding: 20px 24px;
+  }
+  .craft-stat-number {
+    font-size: 1.55rem;
+  }
+  .craft-stat-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .craft-heritage-section {
+    min-height: 600px;
+  }
+  .craft-stats-overlay {
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 12px;
+    width: 85%;
+  }
+  .craft-stat-item {
+    max-width: 100%;
+    padding: 18px 20px;
+  }
+  .craft-stat-number {
+    font-size: 1.5rem;
+  }
+  .craft-stat-text {
+    font-size: 0.85rem;
+  }
+}
+
+/* GIẤY CHỨNG NHẬN Section */
+.about-certificates {
+  padding: 60px 24px;
+  background-color: #f8f5f0;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+}
+
+.cert-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cert-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+}
+
+.cert-gallery {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  min-height: 420px;
+}
+
+.cert-left {
+  flex: 0 0 55%;
+  max-width: 55%;
+  min-height: 420px;
+}
+
+.cert-main-img {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.cert-right {
+  flex: 0 0 43%;
+  max-width: 43%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cert-right-top {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.cert-small-img {
+  flex: 1;
+  width: 50%;
+  height: 100%;
+  min-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.cert-right-bottom {
+  flex: 1;
+  min-height: 0;
+}
+
+.cert-bottom-img {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Scroll to top */
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #8A4B29;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 8px rgba(138, 75, 41, 0.4);
+}
+
+.scroll-to-top:hover {
+  background: #6B3A1F;
+}
+
+/* Responsive - about sau video */
+@media (max-width: 992px) {
+  .about-two-col {
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+
+  .about-col-heading {
+    flex: 0 0 45%;
+    max-width: 45%;
+  }
+
+  .about-col-text {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .about-gallery-img {
+    width: 240px;
+    min-width: 240px;
+    height: 180px;
+  }
+
+  .cert-gallery {
+    gap: 12px;
+  }
+
+  .cert-left {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .cert-right {
+    flex: 0 0 48%;
+    max-width: 48%;
+  }
+
+  .about-product-display {
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-after-video {
+    padding: 40px 16px 32px;
+  }
+
+  .about-two-col {
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .about-col-heading,
+  .about-col-text {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .about-big-heading {
+    font-size: 1.5rem;
+  }
+
+  .about-gallery-track {
+    gap: 12px;
+  }
+
+  .about-gallery-img {
+    width: 200px;
+    min-width: 200px;
+    height: 160px;
+  }
+
+  .about-product-display {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .about-product-item {
+    max-height: 140px;
+  }
+
+  .about-products-title {
+    font-size: 1.3rem;
+  }
+
+  .cert-gallery {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .cert-left,
+  .cert-right {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .cert-main-img {
+    height: auto;
+    max-height: 300px;
+  }
+
+  .cert-right-top {
+    flex-direction: row;
+  }
+
+  .cert-small-img {
+    height: 120px;
+  }
+
+  .cert-bottom-img {
+    height: 150px;
+  }
+}

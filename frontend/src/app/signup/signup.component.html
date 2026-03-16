@@ -1,0 +1,85 @@
+<div class="signup-page">
+  <a routerLink="/" class="back-to-home" aria-label="Về trang chủ">
+    <i class="fas fa-arrow-left"></i>
+    <span>Trang chủ</span>
+  </a>
+  <div class="signup-shell">
+    <div class="signup-left">
+      <div class="signup-form-wrap">
+        <div class="welcome">Chào mừng bạn đến với</div>
+        <img class="brand-logo" src="assets/New web images/logowebfinal.png" alt="Chuyện Làng Nghề" />
+        <h1 class="signup-title">Đăng ký</h1>
+
+        <div class="social-icons">
+          <button type="button" aria-label="Apple"><img src="assets/apple.png" alt="Apple" /></button>
+          <button type="button" aria-label="Google"><img src="assets/google.png" alt="Google" /></button>
+          <button type="button" aria-label="Facebook"><img src="assets/fb.png" alt="Facebook" /></button>
+        </div>
+        <div class="separator-text">Hoặc</div>
+
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="signup-form" id="forms">
+          <div *ngIf="signupError" class="error-box">{{ signupError }}</div>
+
+          <div class="name-row">
+            <div class="field-group">
+              <label>Họ <span>*</span></label>
+              <input type="text" formControlName="lastName" placeholder="Chuyện Làng" />
+            </div>
+            <div class="field-group">
+              <label>Tên <span>*</span></label>
+              <input type="text" formControlName="firstName" placeholder="Nghề" />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Email <span>*</span></label>
+            <input type="email" formControlName="email" placeholder="Nhập địa chỉ email của bạn" autocomplete="email" />
+          </div>
+
+          <div class="field-group">
+            <label>Mật khẩu <span>*</span></label>
+            <div class="password-wrap">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                placeholder="Nhập mật khẩu của bạn" autocomplete="new-password" />
+              <button type="button" class="toggle-pass" (click)="togglePassword()" aria-label="Toggle password">
+                <i class="fa" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+            </div>
+            <small class="hint">Sử dụng 8 ký tự trở lên, bao gồm chữ cái, chữ hoa, số và ký hiệu.</small>
+          </div>
+
+          <div class="field-group">
+            <label>Xác nhận mật khẩu <span>*</span></label>
+            <div class="password-wrap">
+              <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
+                placeholder="Nhập lại mật khẩu của bạn" autocomplete="new-password" />
+              <button type="button" class="toggle-pass" (click)="toggleConfirmPassword()" aria-label="Toggle password">
+                <i class="fa" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+            </div>
+            <div *ngIf="signupForm.hasError('mismatch') && signupForm.get('confirmPassword')?.touched" class="field-error">
+              Mật khẩu xác nhận không khớp.
+            </div>
+          </div>
+
+          <div class="field-group terms-checkbox">
+            <label class="checkbox-opt">
+              <input type="checkbox" formControlName="termsAccepted" />
+              Tôi đã đọc và đồng ý với các <a routerLink="/term" class="terms-link">Điều khoản sử dụng</a>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-signup-main" [disabled]="signupForm.invalid">Tạo tài khoản</button>
+        </form>
+
+        <p class="login-line">
+          Bạn đã có tài khoản? <a routerLink="/login">Đăng nhập</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="signup-right">
+      <img src="assets/New web images/pottery-hands.png" alt="Nghệ nhân gốm" />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<!-- Top banner -->
+<div class="top-banner">
+  <span>"Kể chuyện làng, giữ chuyện nghề"</span>
+</div>
+
+<!-- Main header -->
+<header class="main-header">
+  <div class="header-accent"></div>
+  <div class="header-content">
+    <div class="logo-container">
+      <img src="assets/New web images/logowebfinal.png" alt="Logo Chuyện Làng Nghề" class="logo" routerLink="/" style="cursor: pointer;">
+    </div>
+    <nav class="main-nav">
+      <a routerLink="/" class="nav-link">Trang chủ</a>
+      <a routerLink="/about" class="nav-link">Về chúng tôi</a>
+      <a routerLink="/catalog" class="nav-link">Cửa hàng</a>
+      <a routerLink="/blog" class="nav-link">Tin tức</a>
+      <a routerLink="/contact" class="nav-link">Liên hệ</a>
+    </nav>
+
+    <!-- Right side actions -->
+    <div class="header-actions">
+      <form class="search-form" (submit)="performSearch(searchInput)">
+        <input #searchInput class="search-input" type="search" name="search"
+          placeholder="Tìm kiếm..." [(ngModel)]="searchTerm">
+        <i class="fas fa-search"></i>
+      </form>
+
+      <a routerLink="/cart" class="icon-button">
+        <i class="fas fa-shopping-cart"></i>
+        <span *ngIf="cartItemCount > 0" class="cart-badge">{{ cartItemCount }}</span>
+      </a>
+
+      <a routerLink="/personal-info" class="icon-button">
+        <i class="fas fa-user"></i>
+      </a>
+
+      <button class="btn-login" (click)="handleLogout()">
+        {{ isLoggedIn ? 'Đăng xuất' : 'Đăng nhập' }}
+      </button>
+
+      <a *ngIf="isAdmin" routerLink="/admin" class="btn-admin">
+        <i class="fas fa-cog"></i> Admin
+      </a>
+    </div>
+  </div>
+</header>

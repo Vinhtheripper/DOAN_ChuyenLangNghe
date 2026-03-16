@@ -1,0 +1,166 @@
+<div class="container my-5">
+    <h2 class="mb-4">THÔNG TIN THANH TOÁN</h2>
+    <form [formGroup]="paymentForm" (ngSubmit)="placeOrder()">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="order-info p-4 rounded shadow-sm bg-white">
+                    <h4>Thông tin đơn hàng</h4>
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <label for="firstName">Họ</label>
+                            <input type="text" id="firstName" class="form-control" formControlName="firstName"
+                                placeholder="Nhập họ" required>
+                            <div *ngIf="paymentForm.get('firstName')?.invalid && paymentForm.get('firstName')?.touched"
+                                class="text-danger">
+                                Họ là bắt buộc.
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="lastName">Tên</label>
+                            <input type="text" id="lastName" class="form-control" formControlName="lastName"
+                                placeholder="Nhập tên" required>
+                            <div *ngIf="paymentForm.get('lastName')?.invalid && paymentForm.get('lastName')?.touched"
+                                class="text-danger">
+                                Tên là bắt buộc.
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="company">Tên công ty (không bắt buộc)</label>
+                            <input type="text" id="company" class="form-control" formControlName="company"
+                                placeholder="Tên công ty">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address">Địa chỉ nhận hàng <span class="label-hint">(Vui lòng dùng thông tin sau sáp nhập)</span></label>
+                        <input type="text" id="address" class="form-control" formControlName="address"
+                            placeholder="Nhập địa chỉ - Vui lòng điền cụ thể Số nhà, Tòa nhà, Tên đường" required>
+                        <div *ngIf="paymentForm.get('address')?.invalid && paymentForm.get('address')?.touched"
+                            class="text-danger">
+                            Địa chỉ là bắt buộc.
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="province">Tỉnh/ Thành phố</label>
+                            <select id="province" class="form-select" formControlName="selectedProvince"
+                                (change)="onProvinceChange()">
+                                <option value="" disabled selected>Chọn</option>
+                                <option *ngFor="let province of provinces" [value]="province.code">{{ province.name }}
+                                </option>
+                            </select>
+                            <div *ngIf="paymentForm.get('selectedProvince')?.invalid && paymentForm.get('selectedProvince')?.touched"
+                                class="text-danger">
+                                Vui lòng chọn tỉnh/thành phố.
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="district">Quận/ Huyện</label>
+                            <select id="district" class="form-select" formControlName="selectedDistrict"
+                                (change)="onDistrictChange()">
+                                <option value="" disabled selected>Chọn</option>
+                                <option *ngFor="let district of districts" [value]="district.code">{{ district.name }}
+                                </option>
+                            </select>
+                            <div *ngIf="paymentForm.get('selectedDistrict')?.invalid && paymentForm.get('selectedDistrict')?.touched"
+                                class="text-danger">
+                                Vui lòng chọn quận/huyện.
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="ward">Phường/ Xã</label>
+                            <select id="ward" class="form-select" formControlName="selectedWard">
+                                <option value="" disabled selected>Chọn</option>
+                                <option *ngFor="let ward of wards" [value]="ward.code">{{ ward.name }}</option>
+                            </select>
+                            <div *ngIf="paymentForm.get('selectedWard')?.invalid && paymentForm.get('selectedWard')?.touched"
+                                class="text-danger">
+                                Vui lòng chọn phường/xã.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-control" formControlName="email"
+                                placeholder="Nhập email" required>
+                            <div *ngIf="paymentForm.get('email')?.invalid && paymentForm.get('email')?.touched"
+                                class="text-danger">
+                                Email không hợp lệ.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="text" id="phone" class="form-control" formControlName="phone"
+                                placeholder="Nhập số điện thoại" required>
+                            <div *ngIf="paymentForm.get('phone')?.invalid && paymentForm.get('phone')?.touched"
+                                class="text-danger">
+                                Số điện thoại không hợp lệ.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="checkbox" id="shipToDifferentAddress" class="form-check-input"
+                            formControlName="shipToDifferentAddress">
+                        <label for="shipToDifferentAddress" class="form-check-label">Vận chuyển đến một địa chỉ
+                            khác</label>
+                    </div>
+                    <div class="mb-3">
+                        <h5>Yêu cầu bổ sung</h5>
+                        <textarea class="form-control" formControlName="additionalNotes"
+                            placeholder="Ghi chú về đơn hàng của bạn, yêu cầu vận chuyển đặc biệt,..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="order-summary p-4 rounded shadow-sm bg-white">
+                    <h4>Tổng Đơn Hàng</h4>
+                    <div *ngFor="let item of selectedItems" class="d-flex justify-content-between mt-2">
+                        <div class="d-flex align-items-center">
+                            <img [src]="item.image_1" alt="{{ item.product_name }}" class="me-2">
+                            <span>{{ item.product_name }} x{{ item.quantity }}</span>
+                        </div>
+                        <span>{{ item.unit_price * item.quantity | currency: 'VND' }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Tổng tiền hàng:</span>
+                        <span>{{ subtotalPrice | currency: 'VND' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between" *ngIf="discountAmount > 0">
+                        <span>Giảm giá ({{ couponCode }}):</span>
+                        <span>-{{ discountAmount | currency: 'VND' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Phí vận chuyển:</span>
+                        <span>Miễn phí</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <span>Thành tiền:</span>
+                        <span>{{ totalPrice | currency: 'VND' }}</span>
+                    </div>
+                    <h5 class="mt-4">Phương thức thanh toán</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="cod" formControlName="paymentMethod"
+                            value="cash_on_delivery">
+                        <label class="form-check-label" for="cod">Thanh toán khi nhận hàng</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="banking" formControlName="paymentMethod"
+                            value="internet_banking">
+                        <label class="form-check-label" for="banking">Internet Banking</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="momo" formControlName="paymentMethod"
+                            value="momo">
+                        <label class="form-check-label" for="momo">Momo</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-4 rounded-pill">Đặt hàng</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <app-qr *ngIf="isModalVisible" [isVisible]="isModalVisible" [modalPaymentMethod]="modalPaymentMethod"
+        (close)="closeModal()" (paymentSuccess)="handlePaymentSuccess()">
+    </app-qr>
+</div>

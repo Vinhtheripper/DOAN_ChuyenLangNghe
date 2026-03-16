@@ -1,0 +1,78 @@
+<div class="order-management container mt-4">
+    <h2 class="text-center mb-4">Quản lý Đơn hàng</h2>
+
+    <div class="order-controls d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-primary" (click)="createOrder()" *ngIf="canEdit">+ Tạo Order</button>
+        <div class="d-flex align-items-center">
+            <select class="form-select me-2" [(ngModel)]="filterOption">
+                <option value="orderId">Order ID</option>
+                <option value="user">User</option>
+            </select>
+            <input type="text" class="form-control me-2" placeholder="Tìm kiếm" [(ngModel)]="searchQuery">
+            <select class="form-select me-2" [(ngModel)]="statusFilter">
+                <option value="">Tình trạng</option>
+                <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}</option>
+            </select>
+            <button class="btn btn-secondary" (click)="loadOrders()">Lọc</button>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Tổng giá trị</th>
+                <th>Thanh toán</th>
+                <th>Order Dt</th>
+                <th>Tình trạng</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let order of orders">
+                <td>{{ order._id || 'N/A' }}</td>
+                <td>{{ order.userName || 'Anonymous' }}</td>
+                <td>{{ order.totalPrice | currency }}</td>
+                <td>
+                    <input type="checkbox" class="form-check-input" [checked]="isPaid(order)" disabled>
+                </td>
+                <td>{{ order.createdAt | date: 'dd/MM/yyyy hh:mm a' }}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i [class]="getStatusIcon(order.status)" [ngClass]="getStatusClass(order.status)"></i>
+                        <select class="form-select ms-2" [(ngModel)]="order.status"
+                            (change)="updateOrderStatus(order, order.status)">
+                            <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}
+                            </option>
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-danger btn-sm" [disabled]="!order._id" (click)="cancelOrder(order._id!)"
+                            *ngIf="canEdit">Hủy đơn</button>
+                        <button class="btn btn-success btn-sm" [disabled]="!order._id"
+                            (click)="downloadInvoice(order._id!)">Xuất hóa đơn</button>
+                    </div>
+                </td>
+            </tr>
+            <tr *ngIf="!orders || orders.length === 0">
+                <td colspan="7" class="text-center">Không có đơn hàng nào</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination-controls d-flex justify-content-between align-items-center mt-3">
+        <span>Hiển thị từ {{ (currentPage - 1) * pageSize + 1 }} đến
+            {{ currentPage * pageSize > totalOrders ? totalOrders : currentPage * pageSize }} trong
+            {{ totalOrders }} kết quả</span>
+        <div>
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === 1"
+                (click)="previousPage()">Trước</button>
+            <span>{{ currentPage }}</span>
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === totalPages"
+                (click)="nextPage()">Sau</button>
+        </div>
+    </div>
+</div>

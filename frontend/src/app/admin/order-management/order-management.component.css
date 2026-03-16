@@ -1,0 +1,158 @@
+.order-management {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.order-management h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #7A4726;
+    text-transform: uppercase;
+}
+
+.order-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.order-controls .form-select,
+.order-controls .form-control {
+    max-width: 200px;
+    margin-right: 10px;
+}
+
+.order-controls .form-select.status-filter {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.table th,
+.table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+}
+
+.table-light {
+    background-color: #f8f9fa;
+}
+
+.table td .action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.table td .btn {
+    width: 80px;
+    margin: 2px;
+    font-size: 10px;
+}
+
+.table td .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.table td .btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.table td .status-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+.table td .status-icon {
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination-controls span {
+    font-weight: bold;
+}
+
+.pagination-controls .btn {
+    min-width: 80px;
+    padding: 5px 10px;
+}
+
+.btn-primary,
+.btn-secondary {
+    font-weight: 500;
+    padding: 5px 15px;
+    font-size: 0.9rem;
+}
+
+/* Enhanced filter button styling */
+.btn-secondary {
+    background: #7A4726 !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s !important;
+}
+
+.btn-secondary:hover {
+    background: #5e3419 !important;
+    color: white !important;
+}
+
+.btn-secondary:focus {
+    box-shadow: 0 0 0 2px rgba(122, 71, 38, 0.3) !important;
+    outline: none !important;
+}
+
+.select-status {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.text-center {
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .order-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .order-controls .form-select,
+    .order-controls .form-control {
+        margin-bottom: 10px;
+    }
+
+    .action-buttons {
+        flex-direction: row;
+        gap: 10px;
+    }
+}

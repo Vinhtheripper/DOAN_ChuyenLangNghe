@@ -1,0 +1,33 @@
+<div class="product-card card shadow-sm" (click)="goToDetail()">
+  <div class="product-image position-relative">
+    <img [src]="product.image_1" alt="{{ product.product_name }}" class="card-img-top img-fluid rounded">
+    <span class="badge badge-label label-new" *ngIf="product.isNew">New</span>
+    <span class="badge badge-label label-discount" *ngIf="product.discount > 0">
+      -{{ (product.discount * 100) | number:'1.0-0' }}%
+    </span>
+
+    <div class="overlay d-flex flex-column align-items-center justify-content-center">
+      <button *ngIf="product.stocked_quantity > 0" class="btn add-to-cart" (click)="addToCart($event)">Add to
+        cart</button>
+
+      <div class="actions d-flex justify-content-center mt-2">
+        <span class="mx-2" (click)="shareOnFacebook($event)">
+          <i class="fas fa-share-alt"></i> Share
+        </span>
+        <span *ngIf="isLoggedIn" class="mx-2" (click)="toggleLike($event)">
+          <i class="fas fa-heart" [class.liked]="isLiked"></i> Like
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="product-info text-center p-3">
+    <h3 class="product-title">{{ product.product_name }}</h3>
+    <p class="price">
+      <span class="current-price">{{ product.unit_price | currency:'VND' }}</span>
+      <span class="original-price text-muted" *ngIf="getOriginalPrice()">
+        {{ getOriginalPrice() | currency:'VND' }}
+      </span>
+    </p>
+  </div>
+</div>

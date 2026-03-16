@@ -1,0 +1,148 @@
+<div class="contact-management container mt-4">
+    <h2 class="text-center mb-4 fs-2">Quản lý Liên hệ</h2>
+
+    <div class="contact-list card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h4>Danh sách liên hệ</h4>
+            <div class="d-flex gap-2 flex-wrap">
+                <input type="text" class="form-control" placeholder="Tìm kiếm..." 
+                       [(ngModel)]="searchText" (keyup.enter)="onSearch()" style="width: 250px;">
+                <button class="btn btn-primary" (click)="onSearch()">
+                    <i class="fas fa-search"></i>
+                </button>
+                <select class="form-control" [(ngModel)]="filterStatus" (change)="onFilterStatus(filterStatus)" style="width: 150px;">
+                    <option value="">Tất cả</option>
+                    <option value="new">Mới</option>
+                    <option value="read">Đã đọc</option>
+                    <option value="replied">Đã trả lời</option>
+                </select>
+            </div>
+        </div>
+
+        <div *ngIf="loading" class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+            <p class="mt-3">Đang tải...</p>
+        </div>
+
+        <table class="table table-bordered table-hover mt-3" *ngIf="!loading">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Tin nhắn</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let contact of contacts; let i = index" [class.table-warning]="contact.status === 'new'">
+                    <td>{{ i + 1 + (currentPage - 1) * pageSize }}</td>
+                    <td>
+                        <strong>{{ contact.fullName }}</strong>
+                        <span *ngIf="contact.status === 'new'" class="badge bg-danger ms-2">New</span>
+                    </td>
+                    <td>{{ contact.email || 'N/A' }}</td>
+                    <td>{{ contact.phone || 'N/A' }}</td>
+                    <td>
+                        <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                            {{ contact.message }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge" [ngClass]="getStatusClass(contact.status)">
+                            {{ getStatusLabel(contact.status) }}
+                        </span>
+                    </td>
+                    <td>{{ formatDate(contact.submittedAt) }}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm me-2" (click)="viewContact(contact)">
+                            <i class="fas fa-eye"></i> Xem
+                        </button>
+                        <button *ngIf="canEdit" class="btn btn-danger btn-sm" (click)="deleteContact(contact._id!)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr *ngIf="contacts.length === 0">
+                    <td colspan="8" class="text-center">Không có liên hệ nào</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination-controls d-flex justify-content-between align-items-center mt-3" *ngIf="!loading && totalContacts > 0">
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === 1"
+                (click)="previousPage()">Trước</button>
+            <span>Trang {{ currentPage }} / {{ totalPages }} (Tổng: {{ totalContacts }} liên hệ)</span>
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === totalPages"
+                (click)="nextPage()">Sau</button>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal" [class.show]="selectedContact" [style.display]="selectedContact ? 'block' : 'none'" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" *ngIf="selectedContact">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết liên hệ</h5>
+                <button type="button" class="btn-close" (click)="closeDetail()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Họ tên:</strong>
+                        <p>{{ selectedContact.fullName }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Email:</strong>
+                        <p>{{ selectedContact.email || 'N/A' }}</p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Số điện thoại:</strong>
+                        <p>{{ selectedContact.phone || 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Thời gian:</strong>
+                        <p>{{ formatDate(selectedContact.submittedAt) }}</p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Tin nhắn:</strong>
+                        <div class="alert alert-light mt-2">
+                            {{ selectedContact.message }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Trạng thái:</strong>
+                        <span class="badge ms-2" [ngClass]="getStatusClass(selectedContact.status)">
+                            {{ getStatusLabel(selectedContact.status) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" *ngIf="canEdit">
+                <button type="button" class="btn btn-warning" (click)="updateStatus(selectedContact._id!, 'read')">
+                    Đánh dấu đã đọc
+                </button>
+                <button type="button" class="btn btn-success" (click)="updateStatus(selectedContact._id!, 'replied')">
+                    Đã trả lời
+                </button>
+                <button type="button" class="btn btn-danger" (click)="deleteContact(selectedContact._id!)">
+                    Xóa
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="closeDetail()">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" [class.show]="selectedContact" *ngIf="selectedContact" (click)="closeDetail()"></div>

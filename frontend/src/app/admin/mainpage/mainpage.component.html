@@ -1,0 +1,138 @@
+<div class="admin-dashboard container-fluid">
+    <section class="hero-banner mb-4">
+        <div class="hero-content">
+            <h1 class="hero-title">Bảng điều khiển quản trị</h1>
+            <p class="hero-subtitle">Quản lý hoạt động, cập nhật dữ liệu và theo dõi hiệu suất hệ thống Chuyện Làng Nghề.</p>
+        </div>
+        <div class="hero-metrics">
+            <div class="metric-card" *ngFor="let stat of dashboardStats">
+                <span class="metric-label">{{ stat.label }}</span>
+                <span class="metric-value">{{ stat.value }}</span>
+                <span class="metric-trend" [ngClass]="{
+                    'positive': stat.trend.startsWith('+'),
+                    'negative': stat.trend.startsWith('-')
+                }">{{ stat.trend }}</span>
+            </div>
+        </div>
+    </section>
+    <div class="row welcome-section align-items-center">
+        <div class="col-12 col-md mb-3 mb-md-0">
+            <h2 class="welcome-message">Xin chào, {{ profileName }}</h2>
+        </div>
+        <div class="col-12 col-md-auto text-md-end action-buttons">
+            <button class="btn btn-custom-primary me-2 mb-2 mb-md-0" (click)="navigateToHome()">Trở về trang
+                web</button>
+            <button class="btn btn-custom-outline">Đổi mật khẩu</button>
+        </div>
+    </div>
+
+    <div class="main-content row g-4 mt-2">
+        <div class="col-12 col-lg-7">
+            <div class="section-card recent-activity-section h-100">
+                <div class="section-heading" data-bs-toggle="collapse" data-bs-target="#recentActivities"
+                    aria-expanded="true">
+                    <div>
+                        <h5><i class="fa fa-history me-2"></i>Hoạt động gần đây</h5>
+                        <p class="section-description">Theo dõi những thay đổi mới nhất được thực hiện trong hệ thống.</p>
+                    </div>
+                    <i class="fa fa-angle-down"></i>
+                </div>
+                <div id="recentActivities" class="collapse show section-body">
+                    <div *ngIf="loadingActivities" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-3 mb-0">Đang tải hoạt động gần đây...</p>
+                    </div>
+
+                    <div *ngIf="!loadingActivities && activitiesError" class="alert alert-danger mb-0">
+                        {{ activitiesError }}
+                    </div>
+
+                    <ng-container *ngIf="!loadingActivities && !activitiesError">
+                        <div *ngIf="recentActivities.length === 0" class="text-center text-muted py-4">
+                            <i class="fa fa-inbox fa-2x mb-2"></i>
+                            <div>Chưa có hoạt động nào gần đây.</div>
+                        </div>
+
+                        <div class="recent-activity-card"
+                             *ngFor="let activity of recentActivities; trackBy: trackActivity"
+                             [class.clickable]="isActivityNavigable(activity)"
+                             role="button"
+                             [attr.tabindex]="isActivityNavigable(activity) ? '0' : null"
+                             (click)="onActivityClick(activity)"
+                             (keyup.enter)="onActivityKeyup($event, activity)"
+                             (keyup.space)="onActivityKeyup($event, activity)">
+                            <div class="activity-icon">
+                                <i class="fa fa-edit" *ngIf="activity.action === 'edit'"></i>
+                                <i class="fa fa-eye" *ngIf="activity.action !== 'edit'"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-meta">{{ activity.category }} · {{ activity.item }}</div>
+                                <div class="activity-name">{{ activity.name }}</div>
+                            </div>
+                            <div class="activity-time">
+                                <i class="fa fa-clock me-1"></i>{{ formatRelativeTime(activity.timestamp) }}
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5 admin-menu-section">
+            <div class="menu-intro">
+                <h5>Trung tâm quản trị</h5>
+                <p>Truy cập nhanh các khu vực quan trọng để vận hành và phát triển hệ thống.</p>
+            </div>
+            <div class="card mb-3 menu-card">
+                <div class="card-header menu-header" data-bs-toggle="collapse"
+                    data-bs-target="#authMenu" aria-expanded="true">
+                    <div class="menu-header-text">
+                        <div class="menu-title"><i class="fa fa-shield me-2"></i> Xác thực</div>
+                        <span class="menu-subtitle">Quản lý tài khoản & phân quyền</span>
+                    </div>
+                    <i class="fa fa-angle-down toggle-icon"></i>
+                </div>
+                <ul id="authMenu" class="collapse show list-group list-group-flush menu-list">
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/user-adm'" class="menu-link">Tài khoản <i
+                                class="fa fa-edit float-end"></i></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card menu-card">
+                <div class="card-header menu-header" data-bs-toggle="collapse"
+                    data-bs-target="#mainMenu" aria-expanded="true">
+                    <div class="menu-header-text">
+                        <div class="menu-title"><i class="fa fa-cogs me-2"></i> Chức năng</div>
+                        <span class="menu-subtitle">Điều hành sản phẩm, nội dung và đơn hàng</span>
+                    </div>
+                    <i class="fa fa-angle-down toggle-icon"></i>
+                </div>
+                <ul id="mainMenu" class="collapse show list-group list-group-flush menu-list">
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/product-adm'" class="menu-link">Sản phẩm <i
+                                class="fa fa-edit float-end"></i></a>
+                    </li>
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/contact-adm'" class="menu-link">Liên hệ <i class="fa fa-envelope float-end"></i></a>
+                    </li>
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/order-adm'" class="menu-link">Đơn hàng <i
+                                class="fa fa-edit float-end"></i></a>
+                    </li>
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/blog-adm'" class="menu-link">Blogs <i class="fa fa-edit float-end"></i></a>
+                    </li>
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/coupon-adm'" class="menu-link">Mã giảm giá <i class="fa fa-ticket float-end"></i></a>
+                    </li>
+                    <li class="list-group-item menu-item">
+                        <a [routerLink]="'/admin/dashboard'" class="menu-link">Biểu đồ <i class="fa fa-bar-chart float-end"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

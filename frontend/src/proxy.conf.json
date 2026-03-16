@@ -1,0 +1,42 @@
+{
+  "/products": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/user": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/orders": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/feedback": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/cart": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/blogs": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/dashboard": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/coupons": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

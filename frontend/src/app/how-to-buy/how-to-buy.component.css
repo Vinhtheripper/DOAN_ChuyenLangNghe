@@ -1,0 +1,264 @@
+.how-to-buy-page {
+  background-color: #f8f4ec;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, rgba(33, 0, 0, 0.8), rgba(129, 0, 0, 0.88)), url('/assets/aboutanh3.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 90px 20px 70px;
+  text-align: center;
+  color: #fdf8f2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  font-weight: 500;
+  max-width: 760px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.purchase-section {
+  margin-top: -50px;
+  background-color: #fff;
+  border-radius: 24px;
+  padding: 50px 40px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+}
+
+.section-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #630000;
+  text-align: center;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+.section-intro {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #2c1c1c;
+  text-align: justify;
+  margin-bottom: 36px;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.step-card {
+  background: linear-gradient(145deg, rgba(238, 235, 221, 0.85), rgba(248, 236, 224, 0.95));
+  border-radius: 20px;
+  padding: 32px 26px;
+  position: relative;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(129, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 36px rgba(129, 0, 0, 0.18);
+}
+
+.step-number {
+  position: absolute;
+  top: -18px;
+  left: 20px;
+  background: linear-gradient(135deg, #ffb347, #ff5f6d);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(255, 95, 109, 0.3);
+}
+
+.step-title {
+  margin-top: 10px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #400000;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.step-description,
+.step-card p {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #2c1c1c;
+  text-align: justify;
+  margin: 0;
+}
+
+.step-list {
+  list-style: decimal inside;
+  margin: 0;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-list > li {
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: #2c1c1c;
+}
+
+.payment-methods {
+  list-style: disc inside;
+  margin: 12px 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payment-methods li {
+  font-size: 1rem;
+  color: #2c1c1c;
+}
+
+.step-list a {
+  color: #b20000;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.step-list a:hover {
+  text-decoration: underline;
+}
+
+.commitment-section {
+  margin-top: 40px;
+}
+
+.commitment-card {
+  background: linear-gradient(135deg, rgba(99, 0, 0, 0.88), rgba(129, 0, 0, 0.92));
+  border-radius: 24px;
+  padding: 40px 36px;
+  color: #fdf8f2;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
+}
+
+.commitment-card .section-title {
+  color: #ffd8b8;
+  margin-bottom: 24px;
+}
+
+.commitment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.commitment-list li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.commitment-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb347, #ff5f6d);
+  box-shadow: 0 0 0 4px rgba(255, 181, 95, 0.2);
+}
+
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 2.4rem;
+  }
+
+  .purchase-section {
+    padding: 40px 28px;
+  }
+
+  .steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 70px 16px 60px;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .purchase-section {
+    margin-top: -40px;
+    padding: 32px 20px;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-card {
+    padding: 28px 22px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .commitment-card {
+    padding: 32px 24px;
+  }
+
+  .commitment-card p,
+  .step-card p,
+  .section-intro,
+  .step-list > li {
+    font-size: 0.98rem;
+  }
+}

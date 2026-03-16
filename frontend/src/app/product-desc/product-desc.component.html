@@ -1,0 +1,111 @@
+<div class="product-desc-container">
+  <div class="tabs">
+    <button (click)="selectTab('description')" [class.active]="selectedTab === 'description'">Mô tả</button>
+    <button (click)="selectTab('additional')" [class.active]="selectedTab === 'additional'">Thông tin bổ sung</button>
+    <button (click)="selectTab('reviews')" [class.active]="selectedTab === 'reviews'">Đánh giá</button>
+  </div>
+
+  <div *ngIf="selectedTab === 'description'" class="tab-content">
+    <div class="product-description">
+      <h4>Về sản phẩm</h4>
+      <p class="description-text">{{ product?.product_detail || 'Sản phẩm làng nghề được tạo nên bởi bàn tay nghệ nhân, giữ trọn tinh hoa thủ công truyền thống Việt Nam. Mỗi tác phẩm đều mang theo câu chuyện của làng nghề và nét độc đáo riêng.' }}</p>
+    </div>
+    <ul class="product-details">
+      <li><strong>Tên sản phẩm:</strong> {{ product?.product_name || 'Sản phẩm' }}</li>
+      <li><strong>Loại:</strong> Sản phẩm làng nghề, thủ công truyền thống</li>
+      <li><strong>Xuất xứ:</strong> {{ product?.product_dept || 'Việt Nam' }}</li>
+      <li><strong>Đặc điểm:</strong> Làm thủ công, mỗi sản phẩm có nét độc đáo riêng</li>
+    </ul>
+  </div>
+
+  <div *ngIf="selectedTab === 'additional'" class="tab-content">
+    <table class="info-table">
+      <tr><th>Mã sản phẩm</th><td>{{ product?._id || 'N/A' }}</td></tr>
+      <tr><th>Xuất xứ</th><td>{{ product?.product_dept || 'Việt Nam' }}</td></tr>
+      <tr><th>Loại sản phẩm</th><td>Làng nghề truyền thống</td></tr>
+    </table>
+  </div>
+
+  <div *ngIf="selectedTab === 'reviews'" class="tab-content">
+    <div *ngIf="reviewLoadError" class="review-error">{{ reviewLoadError }}</div>
+
+    <div class="review-summary">
+      <div class="overall-rating">
+        <span class="rating-big">{{ averageRating | number:'1.1-1' }}</span>
+        <span class="rating-out-of">trên 5</span>
+        <div class="stars-row">
+          <span *ngFor="let s of [1,2,3,4,5]" class="star-icon">★</span>
+        </div>
+        <span class="total-reviews">({{ totalReviews }} đánh giá)</span>
+      </div>
+      <div class="rating-bars">
+        <div *ngFor="let bar of ratingBars" class="bar-row">
+          <span class="bar-label">{{ bar.stars }} sao</span>
+          <div class="bar-track"><div class="bar-fill" [style.width.%]="bar.percent"></div></div>
+          <span class="bar-percent">{{ bar.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-list-header">
+      <h4>Danh sách đánh giá</h4>
+      <p class="result-info">Hiển thị {{ getStartIndex() }}-{{ getEndIndex() }} trong {{ totalReviews }} kết quả</p>
+      <select [(ngModel)]="sortOrder" (ngModelChange)="applySort()" class="sort-select">
+        <option value="newest">Mới nhất</option>
+        <option value="oldest">Cũ nhất</option>
+      </select>
+    </div>
+
+    <div *ngFor="let review of reviews" class="review-card">
+      <div class="review-header">
+        <div class="reviewer-avatar">{{ getInitials(review.userName) }}</div>
+        <div class="reviewer-meta">
+          <span class="review-user">{{ review.userName }}</span>
+          <span class="verified-badge" *ngIf="review.verified">Đã xác thực</span>
+        </div>
+      </div>
+      <h5 class="review-title">{{ (review.comment | slice:0:60) }}{{ review.comment.length > 60 ? '...' : '' }}</h5>
+      <p class="review-comment">{{ review.comment }}</p>
+      <div class="review-images" *ngIf="review.images?.length">
+        <a *ngFor="let img of review.images" [href]="img" target="_blank" rel="noopener" class="review-thumb">
+          <img [src]="img" alt="Ảnh đánh giá" />
+        </a>
+      </div>
+      <div class="review-footer">
+        <span class="review-rating">{{ review.rating | number:'1.1-1' }} ★</span>
+        <span class="review-time">{{ formatReviewDate(review.createdAt) }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="isLoggedIn; else loginPrompt" class="add-review">
+      <h4 class="add-review-title">Viết đánh giá của bạn</h4>
+      <div class="rating-input">
+        <span class="rating-label">Đánh giá:</span>
+        <button type="button" *ngFor="let star of [1,2,3,4,5]" class="star-btn" (click)="setRating(star)" [class.active]="star <= newReviewRating">★</button>
+      </div>
+      <textarea [(ngModel)]="newComment" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." rows="4"></textarea>
+      <div class="image-upload-row">
+        <label class="upload-label">
+          <input type="file" accept="image/*" multiple (change)="onFileSelect($event)" />
+          Thêm ảnh (tối đa 5)
+        </label>
+        <div class="image-preview-list">
+          <div *ngFor="let img of newReviewImages; let i = index" class="preview-item">
+            <img [src]="img" alt="Preview" />
+            <button type="button" class="remove-preview" (click)="removeReviewImage(i)" aria-label="Xóa ảnh">×</button>
+          </div>
+        </div>
+      </div>
+      <button (click)="addReview()" [disabled]="submitLoading || newReviewRating < 1" class="btn btn-submit-review">
+        {{ submitLoading ? 'Đang gửi...' : 'Gửi đánh giá' }}
+      </button>
+    </div>
+    <ng-template #loginPrompt>
+      <p class="login-prompt">Vui lòng đăng nhập để thêm đánh giá.</p>
+    </ng-template>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button *ngFor="let page of totalPagesArray" (click)="goToPage(page)" [class.active]="currentPage === page">{{ page }}</button>
+    </div>
+  </div>
+</div>

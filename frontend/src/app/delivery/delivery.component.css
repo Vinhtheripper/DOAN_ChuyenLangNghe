@@ -1,0 +1,169 @@
+.delivery-policy-page {
+  background-color: #f8f4ec;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, rgba(99, 0, 0, 0.85), rgba(129, 0, 0, 0.9)), url('/assets/aboutanh1.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 90px 20px 70px;
+  text-align: center;
+  color: #fdf8f2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  font-weight: 500;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.policy-section {
+  margin-top: -50px;
+  background-color: #fff;
+  border-radius: 24px;
+  padding: 50px 40px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+}
+
+.section-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #630000;
+  text-align: center;
+  margin-bottom: 40px;
+  letter-spacing: 1px;
+}
+
+.policy-block {
+  background: linear-gradient(135deg, rgba(238, 235, 221, 0.6), rgba(248, 236, 224, 0.85));
+  border-left: 4px solid #810000;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.block-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #410000;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.policy-block p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #2c1c1c;
+  text-align: justify;
+  margin-bottom: 16px;
+}
+
+.timeline-list,
+.highlight-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.timeline-list li,
+.highlight-list li {
+  position: relative;
+  padding-left: 32px;
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #2c1c1c;
+}
+
+.timeline-list li::before,
+.highlight-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb347, #ff5f6d);
+  box-shadow: 0 0 0 4px rgba(255, 181, 95, 0.25);
+}
+
+.label {
+  font-weight: 700;
+  color: #630000;
+}
+
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 2.4rem;
+  }
+
+  .policy-section {
+    padding: 40px 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 70px 16px 60px;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .policy-section {
+    margin-top: -40px;
+    padding: 32px 20px;
+  }
+
+  .policy-block {
+    padding: 24px 20px;
+  }
+
+  .block-title {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .policy-block p,
+  .timeline-list li,
+  .highlight-list li {
+    font-size: 0.98rem;
+  }
+}

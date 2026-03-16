@@ -1,0 +1,113 @@
+.chatbot-container {
+    position: fixed;
+    bottom: 132px;
+    right: 11px;
+    z-index: 1050;
+}
+
+.chatbox {
+    width: 350px;
+    border-radius: 10px;
+}
+
+.message-bubble {
+    max-width: 80%;
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    margin-left: auto;
+}
+
+.assistant-message {
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #e9ecef;
+}
+
+.message-content {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+.message-time {
+    display: block;
+    opacity: 0.7;
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+
+.unread-badge {
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Style cho ô nhắn tin */
+.card-footer .form-control {
+    background-color: #810000 !important;
+    color: white !important;
+    border-color: #810000 !important;
+    border-radius: 20px 0 0 20px !important;
+}
+
+.card-footer .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.card-footer .form-control:focus {
+    background-color: #6b0000 !important;
+    border-color: #6b0000 !important;
+    box-shadow: 0 0 0 0.2rem rgba(129, 0, 0, 0.25) !important;
+    color: white !important;
+}
+
+/* Style cho nút Send */
+.card-footer .btn-primary {
+    background-color: #810000 !important;
+    border-color: #810000 !important;
+    border-radius: 0 20px 20px 0 !important;
+    color: white !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.card-footer .btn-primary:hover {
+    background-color: #6b0000 !important;
+    border-color: #6b0000 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(129, 0, 0, 0.3);
+}
+
+.card-footer .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(129, 0, 0, 0.3);
+}
+
+.card-footer .btn-primary:disabled {
+    background-color: #ccc !important;
+    border-color: #ccc !important;
+    cursor: not-allowed;
+}
+
+.card-footer .form-control:disabled {
+    background-color: #555 !important;
+    color: #999 !important;
+    cursor: not-allowed;
+}

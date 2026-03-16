@@ -1,0 +1,81 @@
+<div class="cart-page">
+    <div class="cart-container">
+        <nav class="cart-breadcrumb">Trang chủ / Giỏ hàng</nav>
+        <h1 class="cart-title">Giỏ hàng của bạn</h1>
+
+        <div class="cart-layout">
+            <section class="cart-items-section">
+                <div *ngFor="let item of cartItems" class="cart-item">
+                    <label class="cart-item-checkbox">
+                        <input type="checkbox" [(ngModel)]="item.isSelected" (ngModelChange)="onItemSelectChange()" />
+                    </label>
+                    <div class="cart-item-image-wrap">
+                        <img [src]="item.image_1 || 'assets/default-image.png'" alt="{{ item.product_name || 'Sản phẩm' }}" />
+                    </div>
+                    <div class="cart-item-body">
+                        <h3 class="cart-item-name">{{ item.product_name || 'Sản phẩm' }}</h3>
+                        <p class="cart-item-price">{{ item.unit_price | currency: 'VND' }}</p>
+                        <span class="cart-item-status" [class.out-of-stock]="!item.stocked_quantity || item.stocked_quantity <= 0">
+                            {{ item.stocked_quantity && item.stocked_quantity > 0 ? 'Còn hàng' : 'Hết hàng' }}
+                        </span>
+                        <div class="cart-item-controls">
+                            <div class="quantity-selector">
+                                <button type="button" (click)="decreaseQuantity(item)" [disabled]="item.tempQuantity <= 1" aria-label="Giảm số lượng">−</button>
+                                <input type="number" [(ngModel)]="item.tempQuantity" min="1" [max]="item.stocked_quantity"
+                                    (change)="updateTempQuantity(item.productId, item.tempQuantity)" />
+                                <button type="button" (click)="increaseQuantity(item)"
+                                    [disabled]="item.tempQuantity >= (item.stocked_quantity || 0)" aria-label="Tăng số lượng">+</button>
+                            </div>
+                            <div class="cart-item-actions">
+                                <button type="button" class="btn-link" (click)="saveChanges(item.productId)">Lưu</button>
+                                <button type="button" class="btn-link btn-remove" (click)="confirmRemoveFromCart(item.productId)">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-item-total">
+                        {{ (item.unit_price * item.tempQuantity) | currency: 'VND' }}
+                    </div>
+                </div>
+
+                <div class="cart-section-actions">
+                    <button type="button" class="btn-outline" routerLink="/">← Quay lại cửa hàng</button>
+                    <button type="button" class="btn-outline" (click)="toggleSelectAll()">Chọn tất cả</button>
+                </div>
+            </section>
+
+            <aside class="cart-summary-section">
+                <div class="cart-summary-card">
+                    <h3 class="summary-title">Tổng giỏ hàng</h3>
+                    <div class="summary-row">
+                        <span>Tổng tiền hàng</span>
+                        <span>{{ totalSelectedPrice | currency: 'VND' }}</span>
+                    </div>
+                    <div class="summary-row" *ngIf="discountAmount > 0">
+                        <span>Giảm giá ({{ appliedCouponCode }})</span>
+                        <span>-{{ discountAmount | currency: 'VND' }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span class="free">Miễn phí</span>
+                    </div>
+                    <hr class="summary-divider" />
+                    <div class="summary-row summary-total">
+                        <span>Thành tiền</span>
+                        <span>{{ finalTotal | currency: 'VND' }}</span>
+                    </div>
+                    <button type="button" class="btn-checkout" (click)="proceedToCheckout()">Thanh toán</button>
+                </div>
+                <div class="coupon-card">
+                    <h4 class="coupon-title">Mã ưu đãi</h4>
+                    <div class="coupon-input-wrap">
+                        <input type="text" placeholder="Nhập mã ưu đãi" [(ngModel)]="couponCode" />
+                        <button type="button" class="btn-coupon" (click)="applyCoupon()" [disabled]="applyingCoupon">
+                            {{ applyingCoupon ? 'Đang áp dụng...' : 'Áp dụng' }}
+                        </button>
+                    </div>
+                    <small *ngIf="couponMessage">{{ couponMessage }}</small>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>

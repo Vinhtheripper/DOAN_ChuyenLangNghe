@@ -1,0 +1,110 @@
+<div class="about-page">
+    <!-- Hero: Video full viewport -->
+    <section class="about-hero">
+        <video class="about-hero-img" autoplay muted loop playsinline preload="auto" poster="assets/about-hero-pottery.png">
+            <source src="assets/about-banner-video.mp4" type="video/mp4">
+        </video>
+    </section>
+
+    <!-- Sau video: bố cục 2 cột (tiêu đề trái, đoạn văn phải) + gallery ảnh ngang -->
+    <section class="about-after-video">
+        <div class="about-after-video-container">
+            <div class="about-two-col">
+                <div class="about-col-heading">
+                    <h2 class="about-big-heading">MỖI SẢN PHẨM LÀ MỘT CÂU CHUYỆN VĂN HÓA</h2>
+                </div>
+                <div class="about-col-text">
+                    <p class="about-after-video-text">
+                        Chuyện Làng Nghề ra đời từ tình yêu dành cho những giá trị thủ công truyền thống Việt Nam – nơi mỗi sản phẩm không chỉ là một món đồ, mà còn là câu chuyện của bàn tay, thời gian và tâm hồn người nghệ nhân.
+                    </p>
+                    <p class="about-after-video-text">
+                        Chúng tôi tuyển chọn và giới thiệu các sản phẩm thủ công mỹ nghệ đặc sắc từ nhiều làng nghề trên khắp cả nước: gốm thủ công, tranh nghệ thuật, đồ trang trí và quà tặng mang đậm dấu ấn văn hóa Việt.
+                    </p>
+                    <a routerLink="/catalog" class="btn-about-buy">Mua ngay →</a>
+                </div>
+            </div>
+        </div>
+        <div class="about-gallery-row about-gallery-autoscroll">
+                <div class="about-gallery-track">
+                    <img src="assets/grid-pottery.png" alt="Gốm thủ công" class="about-gallery-img">
+                    <img src="assets/grid-candles.png" alt="Nến thủ công" class="about-gallery-img">
+                    <img src="assets/grid-weaving1.png" alt="Đan lát truyền thống" class="about-gallery-img">
+                    <img src="assets/grid-bamboo.png" alt="Tre nứa" class="about-gallery-img">
+                    <img src="assets/grid-weaving2.png" alt="Nghệ nhân đan lát" class="about-gallery-img">
+                    <img src="assets/grid-mats.png" alt="Dệt chiếu" class="about-gallery-img">
+                    <!-- Nhân đôi để loop mượt -->
+                    <img src="assets/grid-pottery.png" alt="Gốm thủ công" class="about-gallery-img">
+                    <img src="assets/grid-candles.png" alt="Nến thủ công" class="about-gallery-img">
+                    <img src="assets/grid-weaving1.png" alt="Đan lát truyền thống" class="about-gallery-img">
+                    <img src="assets/grid-bamboo.png" alt="Tre nứa" class="about-gallery-img">
+                    <img src="assets/grid-weaving2.png" alt="Nghệ nhân đan lát" class="about-gallery-img">
+                    <img src="assets/grid-mats.png" alt="Dệt chiếu" class="about-gallery-img">
+                </div>
+            </div>
+    </section>
+
+    <!-- Full Screen Video Section -->
+    <section class="intro-video-section">
+        <div class="hat-decoration hat-left" [style.transform]="'translateY(-50%) rotate(' + hatRotation + 'deg)'">
+            <img src="assets/about-decor-rotate.png" alt="Trang trí" class="hat-img">
+        </div>
+        <video class="intro-fullscreen-video" autoplay muted loop playsinline preload="auto">
+            <source src="assets/intro-video.mp4" type="video/mp4">
+        </video>
+        <div class="hat-decoration hat-right" [style.transform]="'translateY(-50%) rotate(' + (-hatRotation) + 'deg)'">
+            <img src="assets/about-decor-rotate.png" alt="Trang trí" class="hat-img">
+        </div>
+    </section>
+
+    <!-- Bamboo Divider -->
+    <div class="about-divider">
+        <img src="assets/about-bamboo.png" alt="" class="about-bamboo-img">
+    </div>
+
+    <!-- Ảnh làng nghề đan tre mây + 3 ô thống kê -->
+    <section class="craft-heritage-section">
+        <div class="craft-heritage-container">
+            <img src="assets/craft-weaving-tre-may.png" alt="Nghề đan tre mây - Làng nghề truyền thống" class="craft-heritage-image">
+            <div class="craft-stats-overlay">
+                <div class="craft-stat-item">
+                    <span class="craft-stat-number">200K</span>
+                    <span class="craft-stat-text">đồ thủ công đã tới tay khách hàng</span>
+                </div>
+                <div class="craft-stat-item">
+                    <span class="craft-stat-number">2K</span>
+                    <span class="craft-stat-text">nghệ nhân hợp tác đến từ mọi miền trên tổ quốc</span>
+                </div>
+                <div class="craft-stat-item">
+                    <span class="craft-stat-number">7 năm</span>
+                    <span class="craft-stat-text">hoạt động gìn giữ giá trị truyền thống</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GIẤY CHỨNG NHẬN Section -->
+    <section class="about-certificates">
+        <div class="cert-container">
+            <h2 class="cert-title">GIẤY CHỨNG NHẬN</h2>
+            <div class="cert-gallery">
+                <div class="cert-left">
+                    <img src="assets/cert-3cards.png" alt="Chứng nhận" class="cert-main-img">
+                </div>
+                <div class="cert-right">
+                    <div class="cert-right-top">
+                        <img src="assets/cert-award1.png" alt="Lễ trao giải" class="cert-small-img">
+                        <img src="assets/cert-award2.png" alt="Trao bằng khen" class="cert-small-img">
+                    </div>
+                    <div class="cert-right-bottom">
+                        <img src="assets/cert-official.png" alt="Giấy chứng nhận chính thức" class="cert-bottom-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <app-slogan></app-slogan>
+    <app-slideshow></app-slideshow>
+</div>
+
+<button class="scroll-to-top" (click)="scrollToTop()" *ngIf="showScrollButton">↑</button>

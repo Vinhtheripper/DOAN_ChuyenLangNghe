@@ -1,0 +1,64 @@
+<div class="container-fluid banner position-relative p-0">
+  <div class="video-container">
+    <video 
+      #video1 
+      class="slide active" 
+      muted 
+      preload="auto" 
+      autoplay 
+      playsinline
+      webkit-playsinline>
+      <source src="assets/banner-video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <video 
+      #video2 
+      class="slide" 
+      muted 
+      preload="none"
+      playsinline
+      webkit-playsinline>
+      <source src="assets/video-banner.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <video 
+      #video3 
+      class="slide" 
+      muted 
+      preload="none"
+      playsinline
+      webkit-playsinline>
+      <source src="assets/banner-uhd.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <img 
+      #slide4 
+      class="slide" 
+      src="assets/banner-weaving.png" 
+      alt="Traditional weaving craftsmanship">
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar" 
+         [class.active]="currentIndex === 0"
+         [style.--progress-width.%]="progress[0]"
+         (click)="handleClick(0)">
+    </div>
+    <div class="progress-bar" 
+         [class.active]="currentIndex === 1"
+         [style.--progress-width.%]="progress[1]"
+         (click)="handleClick(1)">
+    </div>
+    <div class="progress-bar" 
+         [class.active]="currentIndex === 2"
+         [style.--progress-width.%]="progress[2]"
+         (click)="handleClick(2)">
+    </div>
+    <div class="progress-bar" 
+         [class.active]="currentIndex === 3"
+         [style.--progress-width.%]="progress[3]"
+         (click)="handleClick(3)">
+    </div>
+  </div>
+</div>
+

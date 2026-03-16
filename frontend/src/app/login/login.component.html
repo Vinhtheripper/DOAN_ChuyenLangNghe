@@ -1,0 +1,54 @@
+<div class="login-page">
+  <a routerLink="/" class="back-to-home" aria-label="Về trang chủ">
+    <i class="fas fa-arrow-left"></i>
+    <span>Trang chủ</span>
+  </a>
+  <div class="login-shell">
+    <div class="login-left">
+      <img src="assets/New web images/login-left-pot.png" alt="Bình gốm thủ công" />
+    </div>
+
+    <div class="login-right">
+      <div class="welcome">Chào mừng bạn đến với</div>
+      <img class="brand-logo" src="assets/New web images/logowebfinal.png" alt="Chuyện Làng Nghề" />
+      <h1>Đăng nhập</h1>
+      <p class="subtitle">Đăng nhập vào không gian bình yên của bạn</p>
+
+      <div class="social-icons">
+        <button type="button" aria-label="Apple login"><img src="assets/apple.png" alt="Apple" /></button>
+        <button type="button" aria-label="Google login"><img src="assets/google.png" alt="Google" /></button>
+        <button type="button" aria-label="Facebook login"><img src="assets/fb.png" alt="Facebook" /></button>
+      </div>
+
+      <div class="separator"><span>Hoặc</span></div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div *ngIf="loginError" class="error-box">{{ loginError }}</div>
+
+        <label>Email <span>*</span></label>
+        <input type="email" formControlName="email" placeholder="Nhập Email của bạn..." autocomplete="email" />
+
+        <label>Mật khẩu <span>*</span></label>
+        <div class="password-wrap">
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="************"
+            autocomplete="current-password" />
+          <button type="button" class="toggle-pass" (click)="togglePassword()" aria-label="Toggle password">
+            <i class="fa" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+
+        <div class="form-row">
+          <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Lưu thông tin đăng nhập</label>
+          <a href="#" class="forgot">Quên mật khẩu?</a>
+        </div>
+
+        <button type="submit" class="btn-login-main">Đăng nhập</button>
+      </form>
+
+      <p class="signup-line">
+        Bạn chưa có tài khoản?
+        <a routerLink="/signup" fragment="forms">Đăng kí ngay!!!</a>
+      </p>
+    </div>
+  </div>
+</div>

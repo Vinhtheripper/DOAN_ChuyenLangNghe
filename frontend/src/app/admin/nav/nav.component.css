@@ -1,0 +1,87 @@
+/* Admin nav - nút Menu mobile */
+.btn-primary {
+  background: #7A4726 !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover {
+  background: #5e3419 !important;
+  color: #fff !important;
+}
+
+/* Admin sidebar - màu sắc đồng bộ chủ đề */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background: linear-gradient(180deg, #7A4726 0%, #5e3419 100%);
+  padding: 0;
+}
+
+.sidebar-logo {
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-logo-img {
+  max-width: 140px;
+  max-height: 56px;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  cursor: pointer;
+  object-fit: contain;
+}
+
+.nav-link {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  padding: 12px 20px;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.collapse .nav-link {
+  padding-left: 2rem;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 14px;
+}
+
+.collapse .nav-link:hover {
+  color: #FFCF33;
+}
+
+.nav-item .nav-item {
+  margin-top: 0;
+}
+
+.dropdown-toggle::after {
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    transition: left 0.3s ease;
+    z-index: 1050;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .sidebar-logo-img {
+    max-width: 120px;
+  }
+}

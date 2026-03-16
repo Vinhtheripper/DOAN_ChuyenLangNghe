@@ -1,0 +1,34 @@
+.banner-image {
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: #6c757d;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+    background-color: #ffffff;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%;
+}
+
+@media (max-width: 768px) {
+    .banner-image {
+        max-height: 200px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .banner-image {
+        max-height: 100px !important;
+    }
+}

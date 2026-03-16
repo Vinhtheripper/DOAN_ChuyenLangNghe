@@ -1,0 +1,45 @@
+.slogan-container {
+    height: 60vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #630000;
+    padding: 10px;
+    text-align: center;
+}
+
+.slogan-image {
+    max-width: 66%;
+    height: auto;
+    border-radius: 15px;
+}
+
+.connect-button {
+    position: absolute;
+    bottom: 60px;
+    background-color: white;
+    color: #630000;
+    border: 2px solid #630000;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.connect-button:hover {
+    background-color: #630000;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .slogan-image {
+        max-width: 80%;
+    }
+
+    .connect-button {
+        display: none !important;
+    }
+}

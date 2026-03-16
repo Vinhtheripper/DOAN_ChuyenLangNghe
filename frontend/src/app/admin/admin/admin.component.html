@@ -1,0 +1,25 @@
+<div class="admin-container d-flex flex-wrap">
+    <app-nav class="app-nav"></app-nav>
+
+    <div class="content-wrapper d-flex flex-column flex-grow-1">
+        <div
+            class="topbar d-flex justify-content-between align-items-center px-4 py-2 bg-light border-bottom flex-wrap">
+            <h5 class="text-muted mb-2 mb-md-0 flex-grow-1" [attr.aria-label]="'Tiêu đề trang hiện tại'">{{ pageTitle }}
+            </h5>
+            <div class="user-info d-flex align-items-center flex-wrap justify-content-end">
+                <button class="btn btn-icon me-3 mb-2 mb-md-0" [attr.aria-label]="'Thông báo'">
+                    <i class="fa fa-bell"></i>
+                </button>
+                <span class="user-name me-3 mb-2 mb-md-0">{{ profileName || 'Admin' }}</span>
+                <button class="btn btn-logout mb-2 mb-md-0" (click)="confirmLogout()"
+                    [attr.aria-label]="'Đăng xuất'">
+                    Đăng xuất
+                </button>
+            </div>
+        </div>
+
+        <div class="content p-4">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+</div>

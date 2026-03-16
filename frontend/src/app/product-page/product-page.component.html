@@ -1,0 +1,39 @@
+<div class="product-page-wrapper">
+  <div class="product-page-hero">
+    <h1 class="product-page-title">Cửa hàng</h1>
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <a routerLink="/">Trang chủ</a>
+      <span class="separator">/</span>
+      <a routerLink="/catalog">Cửa hàng</a>
+      <span class="separator">/</span>
+      <span class="current">Chi tiết sản phẩm</span>
+    </nav>
+  </div>
+
+  <div class="product-page-container container">
+    <div *ngIf="errorMessage" class="alert alert-danger text-center">
+      {{ errorMessage }}
+    </div>
+
+    <ng-container *ngIf="product; else loading">
+      <div class="product-card">
+        <app-product-detail
+          [product]="product"
+          [reviewCount]="reviewCount"
+          [averageRating]="averageRating">
+        </app-product-detail>
+        <app-product-desc
+          [product]="product"
+          (reviewAdded)="onReviewAdded()">
+        </app-product-desc>
+      </div>
+      <app-related-product *ngIf="product._id && product.product_detail" [currentProductId]="product._id || ''"
+        [currentProductDescription]="product.product_detail || ''">
+      </app-related-product>
+    </ng-container>
+
+    <ng-template #loading>
+      <p class="text-center">Đang tải thông tin sản phẩm...</p>
+    </ng-template>
+  </div>
+</div>

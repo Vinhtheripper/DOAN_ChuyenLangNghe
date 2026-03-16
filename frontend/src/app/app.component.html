@@ -1,0 +1,14 @@
+<!-- Loading indicator -->
+<app-loading></app-loading>
+
+<ng-container *ngIf="!isAdminRoute && !isLoginRoute && !isSignupRoute">
+  <app-header></app-header>
+</ng-container>
+
+<div [ngClass]="{'content-with-padding': !isAdminRoute && !isLoginRoute && !isSignupRoute}">
+  <router-outlet></router-outlet>
+</div>
+
+<ng-container *ngIf="!isAdminRoute && !isLoginRoute && !isSignupRoute">
+  <app-footer></app-footer>
+</ng-container>

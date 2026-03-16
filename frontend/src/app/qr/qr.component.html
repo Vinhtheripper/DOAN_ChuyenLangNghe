@@ -1,0 +1,61 @@
+<div class="modal fade show d-block" *ngIf="isVisible" tabindex="-1" role="dialog"
+    style="background: rgba(0, 0, 0, 0.5)">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thanh toán</h5>
+                <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">X</button>
+            </div>
+
+            <div class="modal-body">
+                <ul class="nav nav-tabs justify-content-center">
+                    <li class="nav-item">
+                        <a class="nav-link" [class.active]="activeTab === 'momo'" (click)="switchTab('momo')"
+                            href="javascript:void(0)">
+                            Momo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [class.active]="activeTab === 'internet_banking'"
+                            (click)="switchTab('internet_banking')" href="javascript:void(0)">
+                            Internet Banking
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-4">
+                    <div *ngIf="activeTab === 'momo'" class="text-center">
+                        <img src="assets/momo.jpg" alt="QR Code Momo" class="img-fluid rounded shadow-sm" />
+                    </div>
+
+                    <div *ngIf="activeTab === 'internet_banking'">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="vietcombank" name="bank"
+                                value="vietcombank" [(ngModel)]="selectedBank" />
+                            <label class="form-check-label" for="vietcombank">Vietcombank</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="bidv" name="bank" value="bidv"
+                                [(ngModel)]="selectedBank" />
+                            <label class="form-check-label" for="bidv">BIDV</label>
+                        </div>
+                        <div class="text-center mt-3">
+                            <img *ngIf="selectedBank === 'vietcombank'" src="assets/Vietcombank.jpg"
+                                alt="Vietcombank QR" class="img-fluid rounded shadow-sm" />
+                            <img *ngIf="selectedBank === 'bidv'" src="assets/BIDV.jpg" alt="BIDV QR"
+                                class="img-fluid rounded shadow-sm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <span class="text-danger fw-bold">{{ countdown }} giây</span>
+                <div>
+                    <button class="btn btn-success me-2" (click)="confirmPayment()">Kiểm tra</button>
+                    <button class="btn btn-danger" (click)="closeModal()">Hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

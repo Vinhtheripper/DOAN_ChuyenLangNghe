@@ -1,0 +1,156 @@
+<div class="blog-management container mt-4">
+    <h2 class="text-center mb-4 fs-2">Quản lý Blog</h2>
+
+    <div class="blog-form card p-4 mb-4" *ngIf="canEdit">
+        <h4>{{ isEditing ? 'Chỉnh sửa blog' : 'Thêm blog mới' }}</h4>
+        <form [formGroup]="blogForm" (ngSubmit)="isEditing ? updateBlog() : createBlog()">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="title" class="form-label">Tiêu đề *</label>
+                    <input type="text" id="title" formControlName="title" class="form-control" 
+                           placeholder="Nhập tiêu đề blog..." />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="author" class="form-label">Tác giả</label>
+                    <input type="text" id="author" formControlName="author" class="form-control" />
+                </div>
+
+                <div class="col-12 mb-3">
+                    <label for="description" class="form-label">Mô tả ngắn</label>
+                    <textarea id="description" formControlName="description" class="form-control" rows="2"
+                        placeholder="Nhập mô tả ngắn về blog..."></textarea>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <label for="content" class="form-label">Nội dung *</label>
+                    <textarea id="content" formControlName="content" class="form-control" rows="8"
+                        placeholder="Nhập nội dung blog..."></textarea>
+                </div>
+
+                <div class="col-md-8 mb-3">
+                    <label for="image" class="form-label">Hình ảnh</label>
+                    <input type="file" id="image" class="form-control" accept="image/*"
+                        (change)="onImageChange($event)" />
+                    <div class="mt-2" *ngIf="blogImage">
+                        <img [src]="blogImage" alt="Blog image" class="img-thumbnail" style="max-height: 200px;" />
+                        <button type="button" class="btn btn-danger btn-sm mt-2 ms-2" (click)="clearImage()">
+                            Xóa hình ảnh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="published" class="form-label">Trạng thái</label>
+                    <select id="published" formControlName="published" class="form-control">
+                        <option [value]="true">Đã xuất bản</option>
+                        <option [value]="false">Nháp</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div *ngIf="isUploading" class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-primary fw-medium">
+                        <i class="fas fa-spinner fa-spin me-2"></i>
+                        Đang tải lên blog...
+                    </span>
+                    <span class="text-muted">{{ uploadProgress | number:'1.0-0' }}%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                         role="progressbar" 
+                         [style.width.%]="uploadProgress"
+                         [attr.aria-valuenow]="uploadProgress" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <button type="submit" 
+                        class="btn btn-primary me-2" 
+                        [disabled]="isUploading || loading || blogForm.invalid">
+                    <span *ngIf="!isUploading && !loading">{{ isEditing ? 'Cập nhật' : 'Thêm mới' }}</span>
+                    <span *ngIf="isUploading || loading">
+                        <i class="fas fa-spinner fa-spin me-2"></i>
+                        {{ isEditing ? 'Đang cập nhật...' : 'Đang thêm...' }}
+                    </span>
+                </button>
+                <button type="button" class="btn btn-secondary" *ngIf="isEditing" (click)="cancelEdit()">Hủy</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="blog-list card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Danh sách blog</h4>
+            <div class="d-flex gap-2">
+                <input type="text" class="form-control" placeholder="Tìm kiếm theo tiêu đề..." 
+                       [(ngModel)]="searchText" (keyup.enter)="onSearch()" style="width: 300px;">
+                <button class="btn btn-primary" (click)="onSearch()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div *ngIf="loading" class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+            <p class="mt-3">Đang tải...</p>
+        </div>
+
+        <table class="table table-bordered table-hover mt-3" *ngIf="!loading">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Tiêu đề</th>
+                    <th>Tác giả</th>
+                    <th>Mô tả</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let blog of blogs; let i = index">
+                    <td>{{ i + 1 + (currentPage - 1) * pageSize }}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img *ngIf="blog.image" [src]="blog.image" alt="Blog image" 
+                                 class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            <div>{{ blog.title }}</div>
+                        </div>
+                    </td>
+                    <td>{{ blog.author || 'Admin' }}</td>
+                    <td>
+                        {{ blog.description | slice:0:50 }}<span *ngIf="blog.description && blog.description.length > 50">...</span>
+                    </td>
+                    <td>
+                        <span class="badge" [ngClass]="blog.published ? 'bg-success' : 'bg-secondary'">
+                            {{ blog.published ? 'Đã xuất bản' : 'Nháp' }}
+                        </span>
+                    </td>
+                    <td>{{ formatDate(blog.createdAt) }}</td>
+                    <td>
+                        <button *ngIf="canEdit" class="btn btn-warning btn-sm me-2"
+                            (click)="editBlog(blog)">Sửa</button>
+                        <button *ngIf="canEdit" class="btn btn-danger btn-sm"
+                            (click)="deleteBlog(blog._id!)">Xóa</button>
+                    </td>
+                </tr>
+                <tr *ngIf="blogs.length === 0">
+                    <td colspan="7" class="text-center">Không có blog nào</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination-controls d-flex justify-content-between align-items-center mt-3" *ngIf="!loading && totalBlogs > 0">
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === 1"
+                (click)="previousPage()">Trước</button>
+            <span>Trang {{ currentPage }} / {{ totalPages }} (Tổng: {{ totalBlogs }} blog)</span>
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === totalPages"
+                (click)="nextPage()">Sau</button>
+        </div>
+    </div>
+</div>

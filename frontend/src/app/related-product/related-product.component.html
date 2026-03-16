@@ -1,0 +1,12 @@
+<div class="related-product-container container">
+  <h3 class="related-title">Sản phẩm liên quan</h3>
+  <div *ngIf="relatedProducts.length > 0" class="carousel-container d-flex overflow-auto">
+    <div *ngFor="let product of relatedProducts" class="product-card card m-2">
+      <app-product-item [product]="product" [isNew]="product.isNew" [isDiscounted]="product.discount > 0">
+      </app-product-item>
+    </div>
+  </div>
+  <p *ngIf="relatedProducts.length === 0" class="no-related-products text-muted mt-4">
+    No related products.
+  </p>
+</div>

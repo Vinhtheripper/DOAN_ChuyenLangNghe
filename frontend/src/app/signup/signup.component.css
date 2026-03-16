@@ -1,0 +1,356 @@
+/* Signup page - matches login, form left / image right */
+.signup-page {
+  position: relative;
+  min-height: 100vh;
+  background: url('../../assets/New web images/ss_2624665379.jpg') center/cover no-repeat;
+  font-family: 'Manrope', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 12px;
+}
+
+.back-to-home {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #310002;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.back-to-home:hover {
+  transform: translateX(-2px);
+  color: #BF2027;
+}
+
+.back-to-home i {
+  font-size: 14px;
+}
+
+.signup-shell {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 24px);
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* Left: form - balanced size, fits without scroll */
+.signup-left {
+  padding: 16px 26px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: rgba(255, 250, 241, 0.98);
+}
+
+.signup-form-wrap {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.welcome {
+  color: #2d2d2d;
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.brand-logo {
+  width: 88px;
+  max-width: 85%;
+  margin: 0 auto 8px;
+  display: block;
+}
+
+/* Top: title, social icons, separator */
+.signup-title {
+  margin: 0 0 14px;
+  color: #C54121;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.social-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.social-icons button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 0;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-icons button:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.social-icons img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.separator-text {
+  font-size: 14px;
+  color: #2d2d2d;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.signup-form {
+  width: 100%;
+}
+
+.error-box {
+  margin-bottom: 10px;
+  background: #fef5f4;
+  color: #DE725B;
+  border: 1px solid rgba(222, 114, 91, 0.35);
+  padding: 9px 13px;
+  border-radius: 11px;
+  font-size: 13px;
+}
+
+.field-group {
+  margin-bottom: 8px;
+}
+
+.field-group label {
+  display: block;
+  font-size: 13px;
+  color: #2d2d2d;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.field-group label span {
+  color: #DE725B;
+}
+
+/* Input text boxes */
+.signup-form input {
+  width: 100%;
+  height: 38px;
+  border-radius: 11px;
+  border: none;
+  background: #BA680F;
+  color: #fff;
+  font-size: 14px;
+  padding: 0 14px;
+  transition: background 0.2s;
+}
+
+.signup-form input::placeholder {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.field-group .hint {
+  display: block;
+  font-size: 11px;
+  color: #A19791;
+  margin-top: 3px;
+}
+
+.field-error {
+  font-size: 12px;
+  color: #DE725B;
+  margin-top: 4px;
+}
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.checkbox-group {
+  margin-top: 6px;
+}
+
+.checkbox-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7c93;
+  cursor: pointer;
+}
+
+.checkbox-opt input {
+  margin-top: 2px;
+  accent-color: #C54121;
+}
+
+.terms-checkbox {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.terms-checkbox .checkbox-opt {
+  font-size: 12px;
+  color: #2d2d2d;
+  line-height: 1.4;
+}
+
+.terms-checkbox .checkbox-opt input {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.terms-link {
+  color: #0066CC !important;
+  text-decoration: none;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-right: 42px;
+}
+
+.signup-form input[type="text"],
+.signup-form input[type="email"] {
+  margin-bottom: 0;
+}
+
+.toggle-pass {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Create account button - darker reddish-brown */
+.btn-signup-main {
+  width: 100%;
+  height: 40px;
+  border: none;
+  border-radius: 11px;
+  background: #7A3F0B;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: 'Manrope', sans-serif;
+}
+
+.btn-signup-main:hover:not(:disabled) {
+  background: #8d4a0d;
+}
+
+.btn-signup-main:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-line {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #2d2d2d;
+  text-align: center;
+}
+
+.login-line a {
+  color: #C54121;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-line a:hover {
+  text-decoration: underline;
+}
+
+/* Right: pottery image */
+.signup-right {
+  background: #422C1E;
+}
+
+.signup-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .signup-shell {
+    grid-template-columns: 1fr;
+    min-height: min(560px, calc(100vh - 32px));
+    max-height: calc(100vh - 32px);
+  }
+
+  .signup-left {
+    padding: 16px 20px 20px;
+  }
+
+  .signup-right {
+    min-height: 160px;
+  }
+
+  .brand-logo {
+    width: 72px;
+    margin-bottom: 8px;
+  }
+
+  .signup-title {
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+
+  .name-row {
+    grid-template-columns: 1fr;
+  }
+}

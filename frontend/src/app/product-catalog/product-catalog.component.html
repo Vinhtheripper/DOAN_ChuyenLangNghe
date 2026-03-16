@@ -1,0 +1,168 @@
+<div class="catalog-page">
+  <!-- Breadcrumb & title -->
+  <div class="catalog-breadcrumb">
+    <div class="container">
+      <h1 class="catalog-page-title">Cửa hàng</h1>
+      <nav class="breadcrumb-nav">
+        <a routerLink="/">Trang chủ</a>
+        <span class="sep">/</span>
+        <span>Cửa hàng</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container catalog-layout">
+    <!-- Left sidebar: Filter Options -->
+    <aside class="catalog-sidebar">
+      <h2 class="sidebar-title">Bộ lọc</h2>
+
+      <div class="filter-block">
+        <h3 class="filter-block-title">Theo danh mục</h3>
+        <ul class="filter-list">
+          <li *ngFor="let category of categories">
+            <button type="button" class="filter-option" [class.active]="selectedCategory === category.filterKey"
+              (click)="applyFilter(category.filterKey)">
+              {{ category.name }}
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="filter-block">
+        <h3 class="filter-block-title">Khoảng giá</h3>
+        <div class="price-range-display">{{ formatPrice(priceMinValue) }} – {{ formatPrice(priceMaxValue) }}</div>
+        <div class="price-range-sliders" *ngIf="priceMaxRange > priceMinRange">
+          <div class="price-range-row">
+            <label class="price-range-label">Từ</label>
+            <input type="range" class="price-range-input" [min]="priceMinRange" [max]="priceMaxRange" [step]="priceRangeStep" [(ngModel)]="priceMinValue" (ngModelChange)="onPriceRangeChange()">
+          </div>
+          <div class="price-range-row">
+            <label class="price-range-label">Đến</label>
+            <input type="range" class="price-range-input" [min]="priceMinRange" [max]="priceMaxRange" [step]="priceRangeStep" [(ngModel)]="priceMaxValue" (ngModelChange)="onPriceRangeChange()">
+          </div>
+        </div>
+        <p class="filter-block-title" style="margin-top: 0.75rem;">Sắp xếp giá</p>
+        <select [(ngModel)]="priceFilter" (ngModelChange)="filterByPrice($event)" class="filter-select">
+          <option value="">Mặc định</option>
+          <option value="lowToHigh">Thấp đến cao</option>
+          <option value="highToLow">Cao đến thấp</option>
+        </select>
+      </div>
+
+      <div class="filter-block">
+        <h3 class="filter-block-title">Đánh giá</h3>
+        <ul class="filter-list filter-rating">
+          <li *ngFor="let r of [5,4,3]">
+            <button type="button" class="filter-option filter-option-rating" [class.active]="ratingFilter === '' + r"
+              (click)="onRatingFilterChange(ratingFilter === '' + r ? '' : '' + r)">
+              <span class="star-icons" aria-hidden="true">
+                <svg *ngFor="let i of [1,2,3,4,5]" class="star-svg" [class.filled]="i <= r" viewBox="0 0 24 24" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/></svg>
+              </span>
+              {{ r }} sao trở lên
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="filter-block">
+        <h3 class="filter-block-title">Khuyến mãi</h3>
+        <label class="filter-checkbox"><input type="checkbox" [(ngModel)]="promoNew" (ngModelChange)="onPromoChange()"> Sản phẩm mới</label>
+        <label class="filter-checkbox"><input type="checkbox" [(ngModel)]="promoBestSeller" (ngModelChange)="onPromoChange()"> Đánh giá cao</label>
+        <label class="filter-checkbox"><input type="checkbox" [(ngModel)]="promoDiscount" (ngModelChange)="onPromoChange()"> Đang giảm giá</label>
+      </div>
+
+      <div class="filter-block">
+        <h3 class="filter-block-title">Tình trạng</h3>
+        <select [(ngModel)]="availabilityFilter" (ngModelChange)="onAvailabilityChange($event)" class="filter-select">
+          <option value="">Tất cả</option>
+          <option value="inStock">Còn hàng</option>
+          <option value="outOfStock">Hết hàng</option>
+        </select>
+      </div>
+
+      <div class="filter-block">
+        <h3 class="filter-block-title">Tỉnh thành</h3>
+        <div class="province-search-container">
+          <div class="province-input-wrapper">
+            <input type="text" class="province-search-input" placeholder="Tìm tỉnh thành..."
+              [(ngModel)]="provinceSearchQuery"
+              (input)="onProvinceSearch($event)"
+              (focus)="showProvinceSuggestions = true"
+              (blur)="onProvinceInputBlur()">
+            <button *ngIf="provinceFilter" type="button" class="clear-province-btn" (click)="clearProvinceFilter()" title="Xóa">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="province-suggestions" *ngIf="showProvinceSuggestions && filteredProvinces.length > 0">
+            <div *ngFor="let province of filteredProvinces" class="province-suggestion-item"
+              (click)="selectProvince(province)">
+              <i class="fas fa-map-marker-alt suggestion-icon"></i>
+              <span class="province-name">{{ province }}</span>
+              <span class="province-count" *ngIf="getProvinceProductCount(province) > 0">({{ getProvinceProductCount(province) }})</span>
+            </div>
+          </div>
+          <div class="province-suggestions" *ngIf="showProvinceSuggestions && filteredProvinces.length === 0 && provinceSearchQuery">
+            <div class="no-results">Không tìm thấy</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right: main content -->
+    <main class="catalog-main">
+      <!-- Top bar: results count + active filters + sort -->
+      <div class="catalog-topbar">
+        <p class="results-count">{{ totalItems === 0 ? 'Không có kết quả' : 'Hiển thị ' + ((currentPage - 1) * itemsPerPage + 1) + '-' + getEndRange() + ' trong tổng ' + totalItems + ' kết quả' }}</p>
+        <div class="topbar-right">
+          <div class="active-filters" *ngIf="getActiveFilters().length > 0">
+            <span class="active-label">Bộ lọc đang chọn:</span>
+            <span *ngFor="let f of getActiveFilters()" class="filter-pill">
+              {{ f.label }}
+              <button type="button" class="pill-remove" (click)="removeFilter(f.key)" aria-label="Xóa">×</button>
+            </span>
+            <button type="button" class="clear-all" (click)="clearAllFilters()">Xóa tất cả</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isLoading" class="loading-state">
+        Đang tải sản phẩm...
+      </div>
+
+      <div *ngIf="!isLoading && errMessage" class="error-state text-danger">
+        {{ errMessage }}
+      </div>
+
+      <div *ngIf="!isLoading && paginatedProducts.length > 0" class="product-grid three-col">
+        <div *ngFor="let product of paginatedProducts" class="product-grid-item">
+          <app-product-item [product]="product"></app-product-item>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && !paginatedProducts.length" class="empty-state">
+        <p>Không có sản phẩm nào phù hợp.</p>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="!isLoading && totalPages > 1" class="pagination-section">
+        <nav aria-label="Phân trang">
+          <ul class="pagination">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="#" (click)="goToPreviousPage(); $event.preventDefault()">
+                <span aria-hidden="true">‹</span> Trước
+              </a>
+            </li>
+            <li *ngFor="let page of getPageNumbers()" class="page-item" [class.active]="currentPage === page">
+              <a class="page-link" href="#" (click)="goToPage(page); $event.preventDefault()">{{ page }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" href="#" (click)="goToNextPage(); $event.preventDefault()">
+                Sau <span aria-hidden="true">›</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </main>
+  </div>
+</div>

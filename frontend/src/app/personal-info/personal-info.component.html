@@ -1,0 +1,166 @@
+<div class="container">
+  <div class="row g-4 align-items-start">
+    <div class="col-12">
+      <h1 class="title">
+        <span class="gray">THÔNG TIN</span>
+        <span class="blue">TÀI KHOẢN</span>
+      </h1>
+      <p class="description">
+        Quản lý thông tin cá nhân của bạn để đảm bảo tính bảo mật và cập nhật các ưu đãi mới nhất từ <b>Chuyện Làng Nghề</b>.
+        Chúng tôi cam kết bảo vệ thông tin của bạn và mang đến trải nghiệm mua sắm tốt nhất.
+      </p>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="avatar-card">
+        <div class="flip-card" [ngClass]="'tier-' + tierKey" tabindex="0" aria-label="Thẻ ảnh đại diện, di chuột để lật">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="shine"></div>
+              <div class="avatar-box">
+                <img *ngIf="avatarPreview; else avatarFallback" [src]="avatarPreview" alt="Ảnh đại diện" class="avatar" />
+                <ng-template #avatarFallback>
+                  <div class="avatar avatar-fallback">{{ (personalInfo.profileName || 'U') | slice:0:1 }}</div>
+                </ng-template>
+              </div>
+              <div class="avatar-front-meta">
+                <div class="name">{{ personalInfo.profileName || 'Chưa cập nhật' }}</div>
+                <div class="email">{{ personalInfo.email || 'no-email@example.com' }}</div>
+              </div>
+            </div>
+            <div class="flip-card-back">
+              <div class="back-content">
+                <div class="back-title">Ảnh đại diện</div>
+                <div class="avatar-box">
+                  <img *ngIf="avatarPreview; else avatarFallback2" [src]="avatarPreview" alt="Ảnh đại diện" class="avatar" />
+                  <ng-template #avatarFallback2>
+                    <div class="avatar avatar-fallback">{{ (personalInfo.profileName || 'U') | slice:0:1 }}</div>
+                  </ng-template>
+                </div>
+                <div class="name">{{ personalInfo.profileName || 'Chưa cập nhật' }}</div>
+                <div class="email mb-2">{{ personalInfo.email || 'no-email@example.com' }}</div>
+                <div class="action-row" *ngIf="isEditing">
+                  <label class="btn btn-primary upload-btn" title="Thay đổi ảnh">
+                    <input type="file" accept="image/*" (change)="onAvatarSelected($event)" />
+                    Thay đổi ảnh
+                  </label>
+                  <button *ngIf="avatarPreview" class="btn btn-secondary remove-btn" title="Gỡ ảnh" (click)="removeAvatar()">Gỡ ảnh</button>
+                </div>
+                <div class="hint" *ngIf="!isEditing">Bấm “Chỉnh sửa thông tin” để thay ảnh.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="member-card" [ngClass]="'tier-' + tierKey">
+          <div class="member-header">
+            <span class="tier">{{ tierName }}</span>
+            <span class="points">{{ points }} điểm</span>
+          </div>
+          <div class="member-progress">
+            <div class="bar" [style.width]="progressToNext + '%'">
+            </div>
+          </div>
+          <div class="member-foot">Còn {{ remainingToNext }} điểm lên hạng tiếp theo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="info-card p-4">
+        <div class="info-item">
+          <label class="info-label" for="profileName">Họ và tên</label>
+          <div class="info-value" *ngIf="!isEditing">{{ personalInfo.profileName || 'Chưa cập nhật' }}</div>
+          <input *ngIf="isEditing" id="profileName" [(ngModel)]="personalInfo.profileName" class="form-control" placeholder="Nhập họ và tên" title="Họ và tên" />
+        </div>
+
+        <div class="info-item">
+          <label class="info-label" for="email">Email</label>
+          <div class="info-value" *ngIf="!isEditing">{{ personalInfo.email || 'Chưa cập nhật' }}</div>
+          <input *ngIf="isEditing" id="email" [(ngModel)]="personalInfo.email" class="form-control" disabled placeholder="Email" title="Email" />
+        </div>
+
+        <div class="info-item">
+          <label class="info-label" for="phone">Số điện thoại</label>
+          <div class="info-value" *ngIf="!isEditing">{{ personalInfo.phone || 'Chưa cập nhật' }}</div>
+          <input *ngIf="isEditing" id="phone" [(ngModel)]="personalInfo.phone" class="form-control" placeholder="Nhập số điện thoại" title="Số điện thoại" autocomplete="tel" />
+        </div>
+
+        <div class="info-item">
+          <label class="info-label" for="address">Địa chỉ</label>
+          <div class="info-value" *ngIf="!isEditing">{{ personalInfo.address || 'Chưa cập nhật' }}</div>
+          <input *ngIf="isEditing" id="address" [(ngModel)]="personalInfo.address" class="form-control" placeholder="Nhập địa chỉ" title="Địa chỉ" autocomplete="street-address" />
+        </div>
+
+        <div class="info-item">
+          <label class="info-label">Ngày sinh</label>
+          <div class="info-value" *ngIf="!isEditing">
+            {{ personalInfo.birthDate?.day || 'DD' }}/
+            {{ personalInfo.birthDate?.month || 'MM' }}/
+            {{ personalInfo.birthDate?.year || 'YYYY' }}
+          </div>
+          <div *ngIf="isEditing" class="d-flex gap-2">
+            <label for="day" class="visually-hidden">Ngày</label>
+            <select id="day" class="form-select" [(ngModel)]="personalInfo.birthDate!.day" required title="Ngày sinh">
+              <option value="">Ngày</option>
+              <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+            </select>
+
+            <label for="month" class="visually-hidden">Tháng</label>
+            <select id="month" class="form-select" [(ngModel)]="personalInfo.birthDate!.month" required title="Tháng sinh">
+              <option value="">Tháng</option>
+              <option *ngFor="let month of months" [value]="month">{{ month }}</option>
+            </select>
+
+            <label for="year" class="visually-hidden">Năm</label>
+            <select id="year" class="form-select" [(ngModel)]="personalInfo.birthDate!.year" required title="Năm sinh">
+              <option value="">Năm</option>
+              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button *ngIf="!isEditing" class="btn btn-primary w-100 mt-3" (click)="editInfo()">Chỉnh sửa thông tin</button>
+      <div *ngIf="isEditing" class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary w-100" (click)="saveInfo()">Lưu</button>
+        <button class="btn btn-secondary w-100" (click)="cancelEdit()">Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lịch sử mua hàng -->
+  <div class="purchase-history-section">
+    <h2 class="purchase-history-title">
+      <i class="far fa-clock" aria-hidden="true"></i>
+      Lịch sử mua hàng
+    </h2>
+    <div class="purchase-history-card">
+      <div *ngIf="orderLoading" class="purchase-loading">Đang tải...</div>
+      <div *ngIf="!orderLoading && purchaseHistory.length === 0" class="purchase-empty">Chưa có đơn hàng nào.</div>
+      <div *ngIf="!orderLoading && purchaseHistory.length > 0" class="purchase-list">
+        <div *ngFor="let entry of purchaseHistory" class="purchase-item">
+          <div class="purchase-item-image">
+            <img [src]="entry.item.image_1 || '/assets/Mẫu.jpg'" [alt]="entry.item.product_name">
+            <span class="purchase-brand">Chuyện Làng Nghề</span>
+          </div>
+          <div class="purchase-item-info">
+            <h3 class="purchase-item-name">{{ entry.item.product_name || 'Sản phẩm' }}</h3>
+            <p class="purchase-item-category">Phân loại {{ entry.item.product_dept || 'Chung' }}</p>
+            <p class="purchase-item-qty">Số lượng: {{ entry.item.quantity }}</p>
+          </div>
+          <div class="purchase-item-price">{{ formatPrice(entry.item.unit_price) }}</div>
+          <div class="purchase-item-actions">
+            <button type="button" class="btn-purchase-action btn-buy-again" (click)="buyAgain(entry)">Mua lại</button>
+            <button type="button" class="btn-purchase-action btn-detail" (click)="goToProductDetail(entry)">Chi tiết</button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!orderLoading && orderPages > 1" class="purchase-pagination">
+        <span class="pagination-label">Trang</span>
+        <button *ngFor="let p of orderPageNumbers" type="button"
+          class="pagination-btn" [class.active]="orderPage === p"
+          (click)="goToOrderPage(p)">{{ p }}</button>
+      </div>
+    </div>
+  </div>
+</div>

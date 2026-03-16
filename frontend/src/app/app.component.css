@@ -1,0 +1,7 @@
+.content-with-padding {
+  padding-top: 0;
+  min-height: 100vh;
+  background-color: transparent;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+}

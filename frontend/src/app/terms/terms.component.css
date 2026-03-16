@@ -1,0 +1,241 @@
+.terms-page {
+  background-color: #f8f4ec;
+  min-height: 100vh;
+  padding-bottom: 60px;
+  color: #210b0b;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, rgba(58, 0, 0, 0.85), rgba(129, 0, 0, 0.92)), url('/assets/aboutanh6.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 90px 20px 70px;
+  text-align: center;
+  color: #fdf8f2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  max-width: 760px;
+  margin: 0 auto;
+  color: #fff5ea;
+}
+
+.terms-highlights {
+  max-width: 1100px;
+  margin: -60px auto 30px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.highlight-card {
+  background: linear-gradient(145deg, rgba(238, 235, 221, 0.9), rgba(248, 236, 224, 0.96));
+  border-radius: 20px;
+  padding: 26px 24px;
+  border: 1px solid rgba(129, 0, 0, 0.12);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.highlight-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(129, 0, 0, 0.18);
+}
+
+.highlight-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffb347, #ff5f6d);
+  box-shadow: 0 10px 18px rgba(255, 95, 109, 0.25);
+  margin-bottom: 14px;
+}
+
+.highlight-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #400000;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.highlight-card p {
+  font-size: 1.02rem;
+  color: #2c1c1c;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.terms-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.terms-content {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 48px 44px;
+  box-shadow: 0 22px 50px rgba(27, 23, 23, 0.14);
+  border: 1px solid rgba(255, 204, 170, 0.45);
+}
+
+.terms-block {
+  background: linear-gradient(145deg, rgba(238, 235, 221, 0.92), rgba(248, 236, 224, 0.99));
+  border-radius: 22px;
+  padding: 32px 30px;
+  border: 1px solid rgba(129, 0, 0, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.terms-block + .terms-block {
+  margin-top: 28px;
+}
+
+.terms-block:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(129, 0, 0, 0.18);
+}
+
+.block-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.block-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffb347, #ff5f6d);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  box-shadow: 0 10px 18px rgba(255, 95, 109, 0.25);
+}
+
+.block-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #400000;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.terms-block p,
+.terms-block li {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #2c1c1c;
+  text-align: justify;
+}
+
+.terms-block strong {
+  color: #810000;
+}
+
+.terms-block ul {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+}
+
+.terms-block li {
+  position: relative;
+  padding-left: 28px;
+  margin-bottom: 8px;
+}
+
+.terms-block li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb347, #ff5f6d);
+  box-shadow: 0 0 0 4px rgba(255, 181, 95, 0.25);
+}
+
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 2.4rem;
+  }
+
+  .terms-highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .terms-content {
+    padding: 40px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 70px 16px 60px;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.05rem;
+  }
+
+  .terms-highlights {
+    grid-template-columns: 1fr;
+    margin-top: -40px;
+  }
+
+  .terms-content {
+    padding: 32px 22px;
+  }
+
+  .terms-block {
+    padding: 28px 22px;
+  }
+
+  .block-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.98rem;
+  }
+
+  .terms-block p,
+  .terms-block li {
+    font-size: 0.98rem;
+  }
+}

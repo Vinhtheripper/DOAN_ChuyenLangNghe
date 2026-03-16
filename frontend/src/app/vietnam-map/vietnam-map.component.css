@@ -1,0 +1,196 @@
+.vietnam-map-container {
+  padding: 20px 20px 60px 20px;
+  background-color: #EEEBDD; /* requested background */
+  color: #630000; /* default text */
+  min-height: 600px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #630000;
+  margin-bottom: 10px;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: #630000;
+  opacity: .85;
+}
+
+.map-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background-image: url('/assets/ocean_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.map-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  z-index: 0;
+}
+
+.map-wrapper > * {
+  position: relative;
+  z-index: 1;
+}
+
+.map-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.map-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #495057; }
+.legend-dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+.legend-dot.north { background-color: #4A90E2; }
+.legend-dot.central { background-color: #F39C12; }
+.legend-dot.south { background-color: #E74C3C; }
+
+.svg-map { position: relative; width: 100%; max-width: 520px; height: auto; }
+.vietnam-svg { width: 100%; height: auto; pointer-events: all; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1)); transition: transform .25s ease; }
+.vietnam-svg svg { width: 100%; height: auto; display: block; }
+.vietnam-svg[usemap] { display: block; max-width: 520px; width: 100%; height: auto; }
+.svg-loading { text-align: center; padding: 24px; color: #666; }
+.vietnam-svg:hover { transform: scale(1.02); }
+
+.province-tooltip {
+  position: fixed;
+  background: #EEEBDD;
+  color: #630000;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #630000;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}
+
+.province-panel {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 24px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  transition: all .25s ease;
+}
+.province-panel.active { 
+  background: #fff; 
+  box-shadow: 
+    0 4px 20px rgba(0,0,0,0.08),
+    0 0 30px rgba(255, 0, 0, 0.3),
+    0 0 60px rgba(255, 0, 0, 0.2),
+    inset 0 0 20px rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  animation: redGlow 3s ease-in-out infinite alternate;
+}
+.panel-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #95a5a6; height: 100%; }
+.placeholder-icon { font-size: 40px; margin-bottom: 8px; opacity: .6; }
+
+.panel-content { position: relative; }
+.close-btn { position: absolute; top: -10px; right: -10px; width: 32px; height: 32px; border-radius: 50%; background: #e74c3c; color: #fff; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(231, 76, 60, .3); z-index: 10; transition: all .3s ease; }
+.close-btn:hover { background: #c0392b; transform: rotate(90deg); }
+
+.province-image-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
+.province-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.province-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(99, 0, 0, 0.9) 0%, rgba(99, 0, 0, 0.7) 50%, transparent 100%); padding: 25px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.province-name { font-size: 32px; font-weight: bold; color: #fff; margin: 0; text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5); letter-spacing: 0.5px; }
+.region-badge { padding: 6px 12px; border-radius: 20px; color: #fff; font-size: 12px; font-weight: 600; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+
+.province-description { padding: 16px 0; margin-bottom: 12px; }
+.province-description p { font-size: 15px; line-height: 1.6; color: #495057; margin: 0; text-align: justify; font-style: italic; }
+
+.explore-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: linear-gradient(135deg, #630000 0%, #9B0000 100%); color: #fff; text-align: center; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 16px; margin-bottom: 20px; transition: all .3s ease; box-shadow: 0 4px 12px rgba(99, 0, 0, 0.3); }
+.explore-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 0, 0, 0.4); background: linear-gradient(135deg, #9B0000 0%, #630000 100%); }
+.explore-icon { font-size: 20px; }
+
+.province-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e9ecef; }
+.province-header h3 { font-size: 22px; color: #630000; margin: 0; }
+
+.specialties-section { margin-bottom: 18px; }
+.specialties-section h4 { font-size: 16px; color: #630000; margin-bottom: 12px; font-weight: 600; }
+.specialties-list { list-style: none; padding: 0; display: grid; gap: 10px; }
+.specialties-list li { padding: 12px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 10px; font-weight: 500; font-size: 14px; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3); transition: all .2s ease; }
+.specialties-list li:hover { transform: translateX(5px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+
+.products-section h4 { font-size: 16px; color: #630000; margin-bottom: 12px; }
+.loading { display: flex; flex-direction: column; align-items: center; padding: 24px; }
+.spinner { width: 36px; height: 36px; border: 4px solid #f3f3f3; border-top: 4px solid #4A90E2; border-radius: 50%; animation: spin 1s linear infinite; }
+.no-products { text-align: center; padding: 24px 12px; color: #7f8c8d; }
+.no-products .note { font-size: 12px; color: #95a5a6; margin-top: 8px; }
+.products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
+.product-card-mini { background: #f8f9fa; border-radius: 12px; overflow: hidden; transition: all .2s ease; cursor: pointer; }
+.product-card-mini:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,0.08); }
+.product-image { width: 100%; height: 110px; overflow: hidden; background: #fff; }
+.product-image img { width: 100%; height: 100%; object-fit: cover; }
+.product-info { padding: 10px; }
+.product-info h5 { font-size: 14px; color: #630000; margin: 0 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.product-info .price { font-size: 14px; font-weight: 700; color: #e74c3c; margin: 0; }
+.view-all-btn { display: block; width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; text-align: center; border-radius: 10px; text-decoration: none; font-weight: 600; }
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@keyframes redGlow {
+  0% {
+    box-shadow: 
+      0 4px 20px rgba(0,0,0,0.08),
+      0 0 30px rgba(255, 0, 0, 0.3),
+      0 0 60px rgba(255, 0, 0, 0.2),
+      inset 0 0 20px rgba(255, 0, 0, 0.1);
+  }
+  100% {
+    box-shadow: 
+      0 4px 20px rgba(0,0,0,0.08),
+      0 0 40px rgba(255, 0, 0, 0.5),
+      0 0 80px rgba(255, 0, 0, 0.3),
+      inset 0 0 30px rgba(255, 0, 0, 0.2);
+  }
+}
+
+@media (max-width: 992px) { .map-wrapper { grid-template-columns: 1fr; gap: 20px; } .province-panel { min-height: auto; } }
+@media (max-width: 768px) { 
+  .vietnam-map-container { padding: 40px 15px; } 
+  .section-title { font-size: 1.8rem; } 
+  .map-wrapper { padding: 20px; } 
+  .products-grid { grid-template-columns: 1fr; } 
+  .province-image-container { height: 220px; }
+  .province-name { font-size: 24px; }
+  .explore-btn { font-size: 14px; padding: 14px; }
+}
+
+

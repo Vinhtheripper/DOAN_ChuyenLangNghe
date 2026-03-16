@@ -1,0 +1,73 @@
+.contact-management {
+    padding: 20px;
+}
+
+.contact-management h2 {
+    color: #8b0000;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+}
+
+.pagination-controls {
+    padding: 1rem 0;
+}
+
+.text-center.py-5 {
+    color: #6c757d;
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.modal.show {
+    display: block;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+.alert-light {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+

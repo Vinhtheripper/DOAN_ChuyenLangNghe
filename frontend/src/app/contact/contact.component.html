@@ -1,0 +1,63 @@
+<div class="contact-page">
+  <!-- Hero -->
+  <section class="contact-hero" id="contact-top">
+    <img src="assets/contact-hero.png" alt="Nghệ nhân làng nghề" class="contact-hero-img">
+  </section>
+
+  <!-- Main content: form + contact box -->
+  <section class="contact-main" id="contact-form">
+    <div class="contact-container">
+      <div class="contact-grid">
+        <!-- Left: Form -->
+        <div class="contact-form-section">
+          <h2 class="contact-form-title">Kể Làng nghe câu chuyện của bạn nhé!</h2>
+          <form (submit)="onSubmit($event)">
+            <div class="form-row">
+              <input type="text" name="fullName" placeholder="Họ tên" required class="form-input">
+              <input type="tel" name="phone" placeholder="Điện thoại" required class="form-input">
+            </div>
+            <input type="email" name="email" placeholder="Email" required class="form-input full-width">
+            <textarea name="message" rows="5" placeholder="Kể câu chuyện của bạn tại đây..." class="form-input form-textarea"></textarea>
+            <button type="submit" class="btn-submit">
+              Gửi cho Làng
+              <i class="fas fa-arrow-circle-right"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Right: Contact info box -->
+        <div class="contact-info-box">
+          <h3 class="contact-info-title">Liên hệ trực tiếp với Làng</h3>
+          <div class="contact-details">
+            <p><i class="fas fa-envelope"></i> contact&#64;chuyenlangnghe.vn</p>
+            <p><i class="fas fa-phone"></i> (+84) 702 006 518</p>
+            <p><i class="fas fa-clock"></i> 8:00 AM - 21:00 PM</p>
+            <p><i class="fas fa-globe"></i> chuyenlangnghe.vn</p>
+          </div>
+          <div class="contact-social">
+            <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map -->
+  <section class="contact-map-section">
+    <div class="contact-container">
+      <p class="contact-address">Địa chỉ: số 669 Đỗ Mười (trước đây là Quốc lộ 1A), Khu phố 5, Phường Linh Xuân, TP. Thủ Đức, TP. Hồ Chí Minh</p>
+      <div class="map-wrapper">
+        <iframe
+          src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=vi&amp;q=669%20%C4%90%E1%BB%97%20M%C6%B0%E1%BB%9Di%2C%20Khu%20ph%E1%BB%91%205%2C%20Ph%C6%B0%E1%BB%9Dng%20Linh%20Xu%C3%A2n%2C%20TP.%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c%2C%20TP.%20H%E1%BB%93%20Ch%C3%AD%20Minh&amp;t=&amp;z=17&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          class="map-iframe">
+        </iframe>
+      </div>
+    </div>
+  </section>
+</div>

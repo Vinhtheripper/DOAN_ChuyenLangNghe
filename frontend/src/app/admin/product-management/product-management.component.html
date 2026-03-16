@@ -1,0 +1,237 @@
+<div class="product-management container mt-4">
+    <h2 class="text-center mb-4 fs-2">Quản lý Sản phẩm</h2>
+
+    <div class="d-flex justify-content-end mb-3" *ngIf="canEdit">
+        <button class="btn btn-purple" [disabled]="selectedProducts.length === 0" (click)="deleteSelectedProducts()">
+            Xóa tất cả
+        </button>
+    </div>
+
+    <div class="product-form card p-4 mb-4" *ngIf="canView">
+        <h4>{{ isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h4>
+        <form [formGroup]="productForm" (ngSubmit)="isEditing ? updateProduct() : createProduct()">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="product_name" class="form-label">Tên sản phẩm</label>
+                    <input type="text" id="product_name" formControlName="product_name" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="product_dept" class="form-label">Danh mục</label>
+                    <input type="text" id="product_dept" formControlName="product_dept" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="type" class="form-label">Loại sản phẩm</label>
+                    <select id="type" formControlName="type" class="form-control">
+                        <option value="nen">Nến</option>
+                        <option value="tre_may">Tre mây</option>
+                        <option value="gom_su">Gốm sứ</option>
+                    </select>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <label for="product_detail" class="form-label">Mô tả sản phẩm</label>
+                    <textarea id="product_detail" formControlName="product_detail" class="form-control" rows="3"
+                        placeholder="Nhập mô tả sản phẩm..."></textarea>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="unit_price" class="form-label">Giá (VNĐ)</label>
+                    <input type="number" id="unit_price" formControlName="unit_price" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="stocked_quantity" class="form-label">Số lượng tồn kho</label>
+                    <input type="number" id="stocked_quantity" formControlName="stocked_quantity"
+                        class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="discount" class="form-label">Giảm giá (%)</label>
+                    <input type="number" id="discount" formControlName="discount" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="rating" class="form-label">Đánh giá</label>
+                    <input type="number" id="rating" formControlName="rating" class="form-control" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Tải lên hình ảnh (tối đa 5 hình)</label>
+                    <div class="row">
+                        <div class="col-md-4 mb-3" *ngFor="let image of [1, 2, 3, 4, 5]; let i = index">
+                            <label for="image_{{ i }}" class="form-label">Hình ảnh {{ i + 1 }}</label>
+                            <input type="file" id="image_{{ i }}" class="form-control" accept="image/*"
+                                (change)="onImageChange($event, i)" />
+                            <div class="mt-2" *ngIf="images[i]">
+                                <img [src]="images[i]" alt="Hình ảnh {{ i + 1 }}" class="img-thumbnail" />
+                                <button type="button" class="btn btn-danger btn-sm mt-2" (click)="clearImage(i)">
+                                    Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div *ngIf="isUploading" class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-primary fw-medium">
+                        <i class="fas fa-spinner fa-spin me-2"></i>
+                        Đang tải lên sản phẩm...
+                    </span>
+                    <span class="text-muted">{{ uploadProgress | number:'1.0-0' }}%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                         role="progressbar" 
+                         [style.width.%]="uploadProgress"
+                         [attr.aria-valuenow]="uploadProgress" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <button type="submit" 
+                        class="btn btn-primary me-2" 
+                        [disabled]="isUploading || loading">
+                    <span *ngIf="!isUploading && !loading">{{ isEditing ? 'Cập nhật' : 'Thêm mới' }}</span>
+                    <span *ngIf="isUploading || loading">
+                        <i class="fas fa-spinner fa-spin me-2"></i>
+                        {{ isEditing ? 'Đang cập nhật...' : 'Đang thêm...' }}
+                    </span>
+                </button>
+                <button type="button" class="btn btn-secondary" *ngIf="isEditing" (click)="cancelEdit()">Hủy</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="product-list card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Danh sách sản phẩm</h4>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" (click)="toggleFilters()">
+                    <i class="fas fa-filter me-1"></i>
+                    {{ showFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc' }}
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()" 
+                        *ngIf="filterDept || filterType || filterPriceRange || filterStock">
+                    <i class="fas fa-times me-1"></i>
+                    Xóa bộ lọc
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Panel with Animation -->
+        <div class="filter-panel" [class.show]="showFilters" [class.hide]="!showFilters">
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Lọc theo danh mục</label>
+                    <input type="text" class="form-control" placeholder="Nhập danh mục..." 
+                           [(ngModel)]="filterDept" (input)="applyDeptFilter(filterDept)">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lọc theo loại</label>
+                    <select class="form-control" [(ngModel)]="filterType" (change)="applyTypeFilter(filterType)">
+                        <option value="">Tất cả loại</option>
+                        <option value="nen">Nến</option>
+                        <option value="tre_may">Tre mây</option>
+                        <option value="gom_su">Gốm sứ</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lọc theo giá</label>
+                    <select class="form-control" [(ngModel)]="filterPriceRange" (change)="applyPriceFilter(filterPriceRange)">
+                        <option value="">Tất cả giá</option>
+                        <option value="0-50000">Dưới 50,000đ</option>
+                        <option value="50000-100000">50,000đ - 100,000đ</option>
+                        <option value="100000-200000">100,000đ - 200,000đ</option>
+                        <option value="200000-500000">200,000đ - 500,000đ</option>
+                        <option value="500000">Trên 500,000đ</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lọc theo tồn kho</label>
+                    <select class="form-control" [(ngModel)]="filterStock" (change)="applyStockFilter(filterStock)">
+                        <option value="">Tất cả</option>
+                        <option value="in-stock">Còn hàng</option>
+                        <option value="out-of-stock">Hết hàng</option>
+                        <option value="low-stock">Sắp hết hàng (≤10)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <table class="table table-bordered table-hover mt-3">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <input type="checkbox" (change)="toggleSelectAll($event)" />
+                    </th>
+                    <th>#</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Loại</th>
+                    <th>Mô tả</th>
+                    <th>Giá</th>
+                    <th>Số lượng tồn kho</th>
+                    <th>Giảm giá (%)</th>
+                    <th>Đánh giá</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let product of getFilteredProducts(); let i = index">
+                    <td>
+                        <input type="checkbox" [checked]="isSelected(product._id!)"
+                            (change)="toggleSelect(product._id!)" />
+                    </td>
+                    <td>{{ i + 1 + (currentPage - 1) * pageSize }}</td>
+                    <td>{{ product.product_name }}</td>
+                    <td>{{ product.product_dept }}</td>
+                    <td>
+                        <span class="badge" [ngClass]="{
+                            'bg-primary': product.type === 'nen',
+                            'bg-success': product.type === 'tre_may',
+                            'bg-info': product.type === 'gom_su'
+                        }">
+                            {{ getTypeLabel(product.type) }}
+                        </span>
+                    </td>
+                    <td>
+                        {{ product.product_detail | slice:0:30 }}<span
+                            *ngIf="product.product_detail.length > 30">...</span>
+                    </td>
+                    <td>{{ product.unit_price | currency }}</td>
+                    <td>
+                        <span [ngClass]="{
+                            'text-danger': product.stocked_quantity === 0,
+                            'text-warning': product.stocked_quantity > 0 && product.stocked_quantity <= 10,
+                            'text-success': product.stocked_quantity > 10
+                        }">
+                            {{ product.stocked_quantity }}
+                        </span>
+                    </td>
+                    <td>{{ product.discount * 100 }}%</td>
+                    <td>{{ product.rating }}</td>
+                    <td>
+                        <button *ngIf="canEdit" class="btn btn-warning btn-sm me-2"
+                            (click)="editProduct(product)">Sửa</button>
+                        <button *ngIf="canEdit" class="btn btn-danger btn-sm"
+                            (click)="deleteProduct(product._id!)">Xóa</button>
+                    </td>
+
+                </tr>
+                <tr *ngIf="products.length === 0">
+                    <td colspan="10" class="text-center">Không có sản phẩm nào</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination-controls d-flex justify-content-between align-items-center mt-3">
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === 1"
+                (click)="previousPage()">Trước</button>
+            <span>Trang {{ currentPage }} / {{ totalPages }}</span>
+            <button class="btn btn-secondary btn-sm" [disabled]="currentPage === totalPages"
+                (click)="nextPage()">Sau</button>
+        </div>
+    </div>
+</div>

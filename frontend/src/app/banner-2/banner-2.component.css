@@ -1,0 +1,36 @@
+.banner-2-container {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.banner-2-container:hover {
+  transform: scale(1.02);
+}
+
+.banner-2-container img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+@keyframes float {
+  0% { transform: translateX(-50px) translateY(-50px) rotate(0deg); }
+  100% { transform: translateX(-50px) translateY(-50px) rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .banner-title {
+    font-size: 2rem;
+  }
+  
+  .banner-description {
+    font-size: 1rem;
+  }
+}

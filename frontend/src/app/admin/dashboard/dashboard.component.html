@@ -1,0 +1,243 @@
+<div class="dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div>
+      <h1 class="welcome-title">Chào mừng trở lại, {{ profileName }}.</h1>
+      <div class="date-range">
+        <span class="date-text">{{ today | date: 'dd MMM, yyyy' }}</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="loadDashboardStats()" [disabled]="loading">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i> Làm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu thống kê...</p>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Main Stats Row -->
+    <div class="stats-grid">
+      <div class="stat-card stat-featured">
+        <div class="stat-card-inner">
+          <div class="stat-label">Tổng doanh thu</div>
+          <div class="stat-value">{{ formatCurrency(stats.totalRevenue) }}</div>
+          <div class="stat-meta">AOV: {{ formatCurrency(stats.avgOrderValue) }}</div>
+          <div class="stat-badge" [ngClass]="getGrowthClass(stats.revenueGrowth)">
+            <i class="fas" [ngClass]="getGrowthIcon(stats.revenueGrowth)"></i>
+            {{ formatGrowth(stats.revenueGrowth) }}
+          </div>
+          <i class="stat-icon fas fa-chart-line"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-inner">
+          <div class="stat-label">Tổng đơn hàng</div>
+          <div class="stat-value">{{ formatNumber(stats.totalOrders) }}</div>
+          <div class="stat-meta">{{ formatNumber(stats.completedOrders) }} hoàn thành</div>
+          <div class="stat-badge" [ngClass]="getGrowthClass(stats.ordersGrowth)">
+            <i class="fas" [ngClass]="getGrowthIcon(stats.ordersGrowth)"></i>
+            {{ formatGrowth(stats.ordersGrowth) }}
+          </div>
+          <i class="stat-icon fas fa-shopping-cart"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-inner">
+          <div class="stat-label">Tổng sản phẩm</div>
+          <div class="stat-value">{{ formatNumber(stats.totalProducts) }}</div>
+          <div class="stat-meta">Sản phẩm có sẵn</div>
+          <i class="stat-icon fas fa-box"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-inner">
+          <div class="stat-label">Tổng người dùng</div>
+          <div class="stat-value">{{ formatNumber(stats.totalUsers) }}</div>
+          <div class="stat-meta">Khách hàng đăng ký</div>
+          <i class="stat-icon fas fa-users"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Metrics -->
+    <div class="metrics-row">
+      <div class="metric-chip">
+        <i class="fas fa-clock metric-icon pending"></i>
+        <span class="metric-num">{{ formatNumber(stats.pendingOrders) }}</span>
+        <span class="metric-text">Đơn chờ</span>
+      </div>
+      <div class="metric-chip">
+        <i class="fas fa-check-circle metric-icon success"></i>
+        <span class="metric-num">{{ formatNumber(stats.completedOrders) }}</span>
+        <span class="metric-text">Hoàn thành</span>
+      </div>
+      <div class="metric-chip">
+        <i class="fas fa-times-circle metric-icon danger"></i>
+        <span class="metric-num">{{ formatNumber(stats.cancelledOrders) }}</span>
+        <span class="metric-text">Đã hủy</span>
+      </div>
+      <div class="metric-chip">
+        <i class="fas fa-envelope metric-icon primary"></i>
+        <span class="metric-num">{{ formatNumber(stats.newContacts) }}</span>
+        <span class="metric-text">Liên hệ mới</span>
+      </div>
+      <div class="metric-chip">
+        <i class="fas fa-blog metric-icon info"></i>
+        <span class="metric-num">{{ formatNumber(stats.totalBlogs) }}</span>
+        <span class="metric-text">Bài blog</span>
+      </div>
+      <div class="metric-chip">
+        <i class="fas fa-box-open metric-icon warning"></i>
+        <span class="metric-num">{{ formatNumber(lowStockProducts.length) }}</span>
+        <span class="metric-text">Sắp hết hàng</span>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card-chart">
+      <div class="card-chart-header">
+        <h3>Doanh thu 30 ngày qua</h3>
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="chart-container">
+        <canvas baseChart
+          [data]="salesChartData"
+          [type]="lineChartType"
+          [options]="salesChartOptions">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="tables-grid">
+      <div class="card-table">
+        <div class="card-table-header">
+          <div>
+            <h3>Đơn hàng gần đây</h3>
+            <p>Lịch sử đơn hàng mới nhất</p>
+          </div>
+          <span class="badge-count">{{ recentOrders.length }}</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of recentOrders">
+                <td><code>{{ order._id?.toString()?.slice(-8) || '-' }}</code></td>
+                <td class="fw-bold">{{ formatCurrency(order.totalPrice) }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="getOrderStatusClass(order.status)">
+                    {{ getOrderStatusLabel(order.status) }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ formatDate(order.createdAt) }}</td>
+              </tr>
+              <tr *ngIf="recentOrders.length === 0">
+                <td colspan="4" class="empty-cell">
+                  <i class="fas fa-inbox"></i>
+                  Chưa có đơn hàng nào
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card-table">
+        <div class="card-table-header">
+          <div>
+            <h3>Sản phẩm sắp hết hàng</h3>
+            <p>Cần bổ sung tồn kho</p>
+          </div>
+          <span class="badge-count">{{ lowStockProducts.length }}</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tên sản phẩm</th>
+                <th>Tồn kho</th>
+                <th>Giá</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of lowStockProducts">
+                <td class="fw-bold">{{ product.product_name }}</td>
+                <td><span class="stock-badge">{{ product.stocked_quantity }}</span></td>
+                <td class="text-accent">{{ formatCurrency(product.unit_price) }}</td>
+              </tr>
+              <tr *ngIf="lowStockProducts.length === 0">
+                <td colspan="3" class="empty-cell">
+                  <i class="fas fa-check-circle"></i>
+                  Tất cả đều đầy đủ
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="top-products" *ngIf="topProducts.length > 0">
+      <div class="card-table">
+        <div class="card-table-header">
+          <h3><i class="fas fa-trophy"></i> Top sản phẩm bán chạy</h3>
+        </div>
+        <div class="top-grid">
+          <div class="top-item" *ngFor="let product of topProducts; let i = index">
+            <div class="top-rank" [ngClass]="{'gold': i === 0, 'silver': i === 1}">#{{ i + 1 }}</div>
+            <div class="top-info">
+              <div class="top-name">{{ product.productName || 'ID: ' + product._id }}</div>
+              <div class="top-meta">{{ formatNumber(product.totalQuantity) }} đã bán · {{ formatCurrency(product.totalRevenue) }}</div>
+            </div>
+            <div class="top-bar">
+              <div class="top-bar-fill" [style.width.%]="topProducts[0] ? (product.totalQuantity / topProducts[0].totalQuantity * 100) : 0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a [routerLink]="'/admin/product-adm'" class="action-btn">
+        <i class="fas fa-plus-circle"></i>
+        <span>Thêm sản phẩm</span>
+        <small>Quản lý kho</small>
+      </a>
+      <a [routerLink]="'/admin/order-adm'" class="action-btn">
+        <i class="fas fa-list"></i>
+        <span>Xem đơn hàng</span>
+        <small>Quản lý đơn</small>
+      </a>
+      <a [routerLink]="'/admin/contact-adm'" class="action-btn" [class.has-badge]="stats.newContacts > 0">
+        <i class="fas fa-envelope-open"></i>
+        <span>Xem liên hệ</span>
+        <small>Tin nhắn khách</small>
+        <span *ngIf="stats.newContacts > 0" class="action-badge">{{ stats.newContacts }}</span>
+      </a>
+      <a [routerLink]="'/admin/blog-adm'" class="action-btn">
+        <i class="fas fa-pen"></i>
+        <span>Viết blog</span>
+        <small>Nội dung</small>
+      </a>
+    </div>
+  </div>
+</div>

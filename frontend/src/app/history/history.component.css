@@ -1,0 +1,243 @@
+.history-page {
+    padding: 0;
+    background-color: #EEEBDD;
+    min-height: 100vh;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(33, 0, 0, 0.65), rgba(33, 0, 0, 0.7)), url('/assets/aboutanh1.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    padding: 80px 0 60px;
+    text-align: center;
+    color: #EEEBDD;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #EEEBDD;
+    font-style: italic;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Main Content */
+.main-content {
+    padding: 60px 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Content Sections */
+.content-section {
+    margin-bottom: 60px;
+}
+
+.intro-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #1B1717;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+/* Milestones Section */
+.milestones-section {
+    margin-bottom: 80px;
+}
+
+.milestone-card {
+    background: linear-gradient(135deg, #630000 0%, #810000 100%);
+    border-radius: 20px;
+    padding: 40px 30px;
+    height: 100%;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.milestone-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 30px rgba(255, 104, 91, 0.35);
+}
+
+.milestone-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #EEEBDD;
+    margin-bottom: 15px;
+    line-height: 1;
+    text-align: center;
+}
+
+.milestone-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #EEEBDD;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.milestone-content {
+    flex: 1;
+}
+
+.milestone-content p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #EEEBDD;
+    text-align: justify;
+    margin-bottom: 15px;
+}
+
+/* Vision Section */
+.vision-section {
+    margin-bottom: 80px;
+    background-color: #EEEBDD;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #630000;
+    margin-bottom: 30px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.vision-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #1B1717;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+/* Mission Section */
+.mission-section {
+    margin-bottom: 60px;
+}
+
+.mission-items {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.mission-item {
+    background: linear-gradient(135deg, #630000 0%, #810000 100%);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.mission-item:hover {
+    transform: translateX(10px);
+    box-shadow: 0 8px 25px rgba(255, 104, 91, 0.3);
+}
+
+.mission-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #EEEBDD;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.mission-item p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #EEEBDD;
+    text-align: justify;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .main-content {
+        padding: 40px 0;
+    }
+
+    .milestone-card {
+        padding: 30px 20px;
+        margin-bottom: 20px;
+    }
+
+    .milestone-number {
+        font-size: 2.5rem;
+    }
+
+    .milestone-title {
+        font-size: 1.1rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .vision-section {
+        padding: 30px 20px;
+    }
+
+    .mission-item {
+        padding: 25px 20px;
+    }
+
+    .mission-title {
+        font-size: 1.2rem;
+    }
+
+    .intro-text,
+    .vision-content p,
+    .mission-item p {
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hero-title {
+        font-size: 3.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 3rem;
+    }
+}
+

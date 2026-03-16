@@ -1,0 +1,24 @@
+<div class="container">
+  <div class="text-center my-4">
+    <img src="assets/Banner Promotion.png" alt="Banner Promotion" class="banner-promotion img-fluid">
+  </div>
+
+  <div *ngIf="isLoading" class="text-center">
+    Loading products...
+  </div>
+
+  <div *ngIf="!isLoading && discountedProducts.length > 0" class="d-flex flex-wrap justify-content-center">
+    <div *ngFor="let product of discountedProducts" class="product-item-wrapper">
+      <app-product-item [product]="product">
+      </app-product-item>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && errMessage" class="text-danger text-center">
+    {{ errMessage }}
+  </div>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-primary shop-now-btn" routerLink="/cart">Mua sắm ngay</button>
+  </div>
+</div>

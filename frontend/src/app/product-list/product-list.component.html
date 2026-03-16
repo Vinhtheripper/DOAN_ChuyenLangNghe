@@ -1,0 +1,24 @@
+<div class="container">
+  <div class="product-list-header text-center my-4">
+    <h2 class="product-list-title text-primary" style="color: #630000;">SẢN PHẨM</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center">
+    Loading products...
+  </div>
+
+  <div *ngIf="!isLoading && displayedProducts.length > 0" class="row product-grid">
+    <div *ngFor="let product of displayedProducts" class="col-lg-3 col-md-6 col-sm-6 d-flex align-items-stretch">
+      <app-product-item [product]="product" [isNew]="product.isNew" [isDiscounted]="product.discount > 0">
+      </app-product-item>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && errMessage" class="text-danger text-center">
+    {{ errMessage }}
+  </div>
+
+  <div class="show-more-container text-center" *ngIf="!isLoading && displayedProducts.length < products.length">
+    <button class="btn show-more-btn" (click)="goToAllProducts()">Show More</button>
+  </div>
+</div>

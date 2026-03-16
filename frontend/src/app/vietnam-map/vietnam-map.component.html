@@ -1,0 +1,68 @@
+<div class="vietnam-map-container" id="vietnam-map">
+  <div class="section-header">
+    <h2 class="section-title">Khám Phá Đặc Sản 3 Miền</h2>
+    <p class="section-subtitle">Chọn tỉnh thành trên bản đồ để khám phá các đặc sản địa phương</p>
+  </div>
+
+  <div class="map-wrapper">
+    <div class="map-container">
+      <div class="svg-map">
+        <ng-container *ngIf="useImageMap; else inlineSvgTpl">
+          <img #mapImage class="vietnam-svg" src="assets/New VN Maps (4).svg" usemap="#vn-map">
+          <map name="vn-map">
+            <area *ngFor="let a of areasScaled"
+                  [attr.alt]="a.name"
+                  [attr.title]="a.name"
+                  href="#"
+                  shape="poly"
+                  [attr.coords]="a.coordsStr"
+                  (click)="$event.preventDefault(); onAreaClick(a)"
+                  (mouseenter)="onAreaEnter(a, $event)"
+                  (mousemove)="onAreaEnter(a, $event)"
+                  (mouseleave)="onAreaLeave()" />
+          </map>
+        </ng-container>
+        <ng-template #inlineSvgTpl>
+          <div *ngIf="svgSafeHtml; else loadingSvg" #svgHost class="vietnam-svg" [innerHTML]="svgSafeHtml" aria-label="Vietnam Map"></div>
+          <ng-template #loadingSvg>
+            <div class="svg-loading">Đang tải bản đồ...</div>
+          </ng-template>
+        </ng-template>
+
+        <div class="province-tooltip" *ngIf="hoveredProvinceId" [style.top.px]="tooltipY" [style.left.px]="tooltipX">
+          {{ hoveredProvinceName }}
+        </div>
+      </div>
+    </div>
+
+    <div class="province-panel" [class.active]="selectedProvince">
+      <div *ngIf="!selectedProvince" class="panel-placeholder">
+        <div class="placeholder-icon">📍</div>
+        <h3>Chọn một tỉnh thành</h3>
+        <p>Click vào bất kỳ tỉnh thành nào trên bản đồ để xem đặc sản địa phương</p>
+      </div>
+
+      <div *ngIf="selectedProvince" class="panel-content">
+        <button class="close-btn" (click)="clearSelection()" aria-label="Đóng">×</button>
+        
+        <div class="province-image-container">
+          <img [src]="selectedProvince.image || '/assets/provinces/HCM.jpg'" [alt]="selectedProvince.name" class="province-image" (error)="onImageError($event)">
+          <div class="province-overlay">
+            <h3 class="province-name">{{ selectedProvince.name }}</h3>
+          </div>
+        </div>
+
+        <div class="province-description" *ngIf="selectedProvince.description">
+          <p>{{ selectedProvince.description }}</p>
+        </div>
+
+        <a routerLink="/catalog" [queryParams]="{province: selectedProvince.name}" class="explore-btn">
+          <span class="explore-icon">🔍</span>
+          Khám Phá Đặc Sản {{ selectedProvince.name }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+

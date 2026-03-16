@@ -1,0 +1,522 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+/* Typography scale - professional, consistent */
+:root {
+  --font-body: 15px;
+  --font-small: 13px;
+  --font-caption: 12px;
+  --font-h3: 18px;
+  --font-h2: 22px;
+  --font-h1: 26px;
+  --font-display: 32px;
+  --line-body: 1.6;
+  --line-tight: 1.35;
+}
+
+html,
+body {
+  font-family: 'Manrope', sans-serif;
+  font-size: var(--font-body);
+  line-height: var(--line-body);
+  background-color: #FFFAF1 !important;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  color: #310002 !important;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+/* Remove Bootstrap default button styles */
+.btn {
+  font-family: 'Manrope', sans-serif !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+/* Override Bootstrap primary button - màu nâu đồng bộ trang */
+.btn-primary {
+  background: #7A4726 !important;
+  color: #FFFFFF !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background: #5e3419 !important;
+  color: #FFFFFF !important;
+}
+
+.btn-outline-primary {
+  background: #7A4726 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background: #5e3419 !important;
+  color: #FFFFFF !important;
+}
+
+/* Căn chỉnh mũi tên trong nút - tránh bị lệch */
+.btn i.fa-arrow-circle-right,
+.btn-submit i.fa-arrow-circle-right,
+.link-more i.fa-arrow-circle-right,
+a.btn i.fa-arrow-circle-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+  /* Căn mũi tên ngang hàng với chữ (FontAwesome có offset mặc định) */
+  transform: translateY(1px);
+}
+
+/* Global Product Image Consistency */
+.product-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+}
+
+.product-image {
+  width: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Global 4 Products Grid Layout */
+.product-grid {
+  margin: 0;
+}
+
+.product-grid .col-lg-3 {
+  margin-bottom: 30px;
+  padding: 0 15px;
+}
+
+.product-grid .col-md-6 {
+  margin-bottom: 30px;
+  padding: 0 15px;
+}
+
+.product-grid .col-sm-6 {
+  margin-bottom: 30px;
+  padding: 0 15px;
+}
+
+/* Ensure consistent spacing */
+.row .col-lg-3 {
+  margin-bottom: 30px;
+  padding: 0 15px;
+}
+
+
+/* Scroll Reveal base states */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 600ms ease, transform 600ms ease;
+  will-change: opacity, transform;
+}
+
+.reveal-show {
+  opacity: 1;
+  transform: none;
+}
+
+/* Variants */
+.reveal-fade-up { transform: translateY(16px); }
+.reveal-fade-down { transform: translateY(-16px); }
+.reveal-fade-left { transform: translateX(24px); }
+.reveal-fade-right { transform: translateX(-24px); }
+
+
+.snowflake {
+  position: absolute;
+  top: -50px;
+  color: #ffffff;
+  font-size: 20px;
+  opacity: 0.8;
+  animation: fall linear infinite;
+  pointer-events: none;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.admin-container {
+  min-height: 100vh;
+  display: flex;
+  background-color: #ffffff;
+  overflow-x: hidden;
+}
+
+.content-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 0 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+/* Professional Marquee Text Animation */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #810000, #a00000);
+  padding: 15px 0;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(129, 0, 0, 0.2);
+}
+
+.marquee-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 1px;
+  animation: marquee 20s linear infinite;
+  padding-right: 50px;
+  text-transform: uppercase;
+}
+
+.marquee-text:hover {
+  animation-play-state: paused;
+}
+
+/* Smooth pause on hover */
+.marquee-container:hover .marquee-text {
+  animation-play-state: paused;
+}
+
+/* Marquee animation keyframes */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Alternative: Bounce marquee */
+.marquee-bounce {
+  animation: marquee-bounce 15s ease-in-out infinite;
+}
+
+@keyframes marquee-bounce {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(calc(100vw - 100%));
+  }
+}
+
+/* Professional gradient text */
+.marquee-gradient {
+  background: linear-gradient(45deg, #fff, #f0f0f0, #fff);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Responsive marquee */
+@media (max-width: 768px) {
+  .marquee-text {
+    font-size: 16px;
+    animation-duration: 15s;
+  }
+}
+
+@media (max-width: 576px) {
+  .marquee-text {
+    font-size: 14px;
+    animation-duration: 12s;
+  }
+}
+
+/* ===== GLOBAL BUTTON HOVER EFFECTS ===== */
+/* Unified button styling for all pages */
+.btn, button, .btn-primary, .btn-secondary, .btn-outline-primary, .btn-outline-secondary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+}
+
+/* Primary buttons (red theme) */
+.btn-primary, .btn[class*="primary"] {
+  background: linear-gradient(135deg, #810000, #a00000);
+  color: white;
+  box-shadow: 0 4px 15px rgba(129, 0, 0, 0.2);
+}
+
+.btn-primary::before, .btn[class*="primary"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-primary::after, .btn[class*="primary"]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+}
+
+.btn-primary:hover, .btn[class*="primary"]:hover {
+  background: linear-gradient(135deg, #6b0000, #8b0000);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(129, 0, 0, 0.4), 0 0 20px rgba(129, 0, 0, 0.2);
+}
+
+.btn-primary:hover::before, .btn[class*="primary"]:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover::after, .btn[class*="primary"]:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-primary:active, .btn[class*="primary"]:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 6px 20px rgba(129, 0, 0, 0.3);
+}
+
+/* Outline buttons */
+.btn-outline-primary, .btn[class*="outline"] {
+  color: #810000;
+  border: 2px solid #810000;
+  background: linear-gradient(135deg, transparent, rgba(129, 0, 0, 0.05));
+  box-shadow: 0 4px 15px rgba(129, 0, 0, 0.1);
+}
+
+.btn-outline-primary::before, .btn[class*="outline"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-outline-primary::after, .btn[class*="outline"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(135deg, #810000, #a00000);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.btn-outline-primary:hover, .btn[class*="outline"]:hover {
+  color: white;
+  border-color: #6b0000;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(129, 0, 0, 0.3), 0 0 20px rgba(129, 0, 0, 0.15);
+}
+
+.btn-outline-primary:hover::before, .btn[class*="outline"]:hover::before {
+  left: 100%;
+}
+
+.btn-outline-primary:hover::after, .btn[class*="outline"]:hover::after {
+  width: 100%;
+}
+
+.btn-outline-primary:active, .btn[class*="outline"]:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 6px 20px rgba(129, 0, 0, 0.2);
+}
+
+/* Secondary buttons */
+.btn-secondary, .btn[class*="secondary"] {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: white;
+  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+}
+
+.btn-secondary:hover, .btn[class*="secondary"]:hover {
+  background: linear-gradient(135deg, #5a6268, #495057);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(108, 117, 125, 0.4);
+}
+
+/* Success buttons */
+.btn-success, .btn[class*="success"] {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.btn-success:hover, .btn[class*="success"]:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
+}
+
+/* Info buttons */
+.btn-info, .btn[class*="info"] {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2);
+}
+
+.btn-info:hover, .btn[class*="info"]:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(23, 162, 184, 0.4);
+}
+
+/* Warning buttons */
+.btn-warning, .btn[class*="warning"] {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  color: #212529;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.btn-warning:hover, .btn[class*="warning"]:hover {
+  background: linear-gradient(135deg, #e0a800, #d39e00);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(255, 193, 7, 0.4);
+}
+
+/* Danger buttons */
+.btn-danger, .btn[class*="danger"] {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+}
+
+.btn-danger:hover, .btn[class*="danger"]:hover {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(220, 53, 69, 0.4);
+}
+
+/* Link buttons */
+.btn-link, .btn[class*="link"] {
+  color: #810000;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-link:hover, .btn[class*="link"]:hover {
+  color: #6b0000;
+  text-decoration: underline;
+  transform: translateY(-2px);
+}
+
+/* Focus states for accessibility */
+.btn:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(129, 0, 0, 0.3);
+}
+
+/* Disabled state */
+.btn:disabled, button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn, button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn, button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
