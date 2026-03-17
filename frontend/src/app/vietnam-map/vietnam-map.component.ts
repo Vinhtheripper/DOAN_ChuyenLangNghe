@@ -238,7 +238,7 @@ export class VietnamMapComponent implements OnInit, AfterViewInit {
 
   private loadAllProducts(): void {
     this.isLoading = true;
-    this.productService.getProducts(1, 200).subscribe({
+    this.productService.getProducts(1, 120).subscribe({
       next: (data) => {
         this.products = data.products.map(p => new Product(
           p._id || '',
@@ -248,7 +248,7 @@ export class VietnamMapComponent implements OnInit, AfterViewInit {
           p.unit_price || 0,
           p.discount || 0,
           p.createdAt || '',
-          p.image_1 || '',
+          this.productService.resolveProductImageSrc(p.image_1, p._id || ''),
           p.image_2 || '',
           p.image_3 || '',
           p.image_4 || '',

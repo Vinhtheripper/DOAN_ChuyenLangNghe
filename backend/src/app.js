@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const morgan = require('morgan');
 const cors = require('cors');
 const session = require('express-session');
@@ -18,10 +19,14 @@ const couponsRoutes = require('./routes/coupons.routes');
 const app = express();
 const isProduction = NODE_ENV === 'production';
 const allowedOrigins = new Set(CORS_ORIGINS);
+const frontendAssetsPath = path.resolve(__dirname, '../../frontend/src/assets');
 
 app.set('trust proxy', 1);
 
 app.use(morgan('combined'));
+app.use('/assets', express.static(frontendAssetsPath, {
+  maxAge: '1d'
+}));
 app.use(cors({
   origin(origin, callback) {
     if (!origin || allowedOrigins.has(origin)) {

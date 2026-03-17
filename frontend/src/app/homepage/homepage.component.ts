@@ -66,28 +66,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.isProductsLoading = true;
     this.productService.getProducts(1, 8).subscribe({
       next: (data) => {
-        this.featuredProducts = data.products.map((productData) => {
-          const product = new Product(
-            productData._id || '',
-            productData.product_name || '',
-            productData.product_detail || '',
-            productData.stocked_quantity || 0,
-            productData.unit_price || 0,
-            productData.discount || 0,
-            productData.createdAt || '',
-            productData.image_1 || 'assets/Mẫu.jpg',
-            productData.image_2 || '',
-            productData.image_3 || '',
-            productData.image_4 || '',
-            productData.image_5 || '',
-            productData.product_dept || '',
-            productData.rating || 0,
-            productData.isNew || false,
-            productData.type || 'food'
-          );
-          product.checkIfNew();
-          return product;
-        });
+        this.featuredProducts = data.products.map((productData) => this.productService.mapToProduct(productData));
         this.isProductsLoading = false;
       },
       error: () => {
@@ -110,5 +89,17 @@ export class HomepageComponent implements OnInit, OnDestroy {
       return;
     }
     this.router.navigate(['/product', productId]);
+  }
+
+  getProductImage(product: Product): string {
+    return this.productService.resolveProductImageSrc(product?.image_1, product?._id || '');
+  }
+
+  trackByRowIndex(index: number): number {
+    return index;
+  }
+
+  trackByProductId(_index: number, product: Product): string {
+    return product._id;
   }
 }

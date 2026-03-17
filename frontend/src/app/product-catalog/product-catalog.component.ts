@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Product } from '../../interface/Product';
-import { ProductAPIService } from '../product-api.service';
 import { ActivatedRoute } from '@angular/router';
+import { Product } from '../../interface/Product';
+import { ProductAPIService, ProductQueryOptions } from '../product-api.service';
 
 @Component({
   selector: 'app-product-catalog',
@@ -10,27 +10,40 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ProductCatalogComponent implements OnInit {
   categories: { name: string; image: string; filterKey: string }[] = [];
-  selectedCategory: string = 'Tất cả';
+  selectedCategory = 'Tất cả';
   products: Product[] = [];
   filteredProducts: Product[] = [];
   paginatedProducts: Product[] = [];
-  productCount: number = 0;
-  isLoading: boolean = true;
-  errMessage: string = '';
-  priceFilter: string = '';
-  tagFilter: string = '';
-  provinceFilter: string = '';
-  searchQuery: string = '';
-  ratingFilter: string = '';
-  promoNew: boolean = false;
-  promoBestSeller: boolean = false;
-  promoDiscount: boolean = false;
-  availabilityFilter: string = '';
-  /** Khoảng giá (thanh kéo) - đơn vị VND, 0 đến 5 triệu */
-  priceMinRange: number = 0;
-  priceMaxRange: number = 5000000;
-  priceMinValue: number = 0;
-  priceMaxValue: number = 5000000;
+  productCount = 0;
+  isLoading = true;
+  errMessage = '';
+  priceFilter = '';
+  tagFilter = '';
+  provinceFilter = '';
+  searchQuery = '';
+  ratingFilter = '';
+  promoNew = false;
+  promoBestSeller = false;
+  promoDiscount = false;
+  availabilityFilter = '';
+  priceMinRange = 0;
+  priceMaxRange = 5000000;
+  priceMinValue = 0;
+  priceMaxValue = 5000000;
+
+  currentPage = 1;
+  itemsPerPage = 36;
+  totalPages = 0;
+  totalItems = 0;
+
+  provinces: string[] = [];
+  filteredProvinces: string[] = [];
+  provinceCounts: Record<string, number> = {};
+  provinceSearchQuery = '';
+  showProvinceSuggestions = false;
+
+  private hasAppliedRouteParams = false;
+
   get priceRangeStep(): number {
     const range = this.priceMaxRange - this.priceMinRange;
     if (range <= 0) return 1000;
@@ -38,51 +51,26 @@ export class ProductCatalogComponent implements OnInit {
     if (range <= 5000000) return 50000;
     return 100000;
   }
-  
-  // Pagination properties
-  currentPage: number = 1;
-  itemsPerPage: number = 36;
-  totalPages: number = 0;
-  totalItems: number = 0;
-  
-  // Province list
-  provinces: string[] = [];
-  filteredProvinces: string[] = [];
-  provinceSearchQuery: string = '';
-  showProvinceSuggestions: boolean = false;
 
   constructor(
     private productService: ProductAPIService,
     private route: ActivatedRoute
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initializeCategories();
-    this.loadProducts();
-    this.route.queryParams.subscribe(params => {
+    this.loadCatalogMeta();
+    this.route.queryParams.subscribe((params) => {
       this.searchQuery = params['search'] || '';
-      const provinceParam = params['province'] || '';
-      const categoryParam = params['category'] || '';
-      const discountParam = params['discount'] || '';
-      
-      if (this.searchQuery) {
-        this.applySearchFilter(this.searchQuery);
-      }
-      
-      if (provinceParam) {
-        this.provinceFilter = provinceParam;
-        console.log('🏛️ Auto-filtering by province:', this.provinceFilter);
-      }
-      
-      if (categoryParam) {
-        this.applyCategoryFilter(categoryParam);
-        console.log('🏷️ Auto-filtering by category:', categoryParam);
-      }
-      
-      if (discountParam === 'true') {
-        this.promoDiscount = true;
-        this.applyFilter(this.selectedCategory);
-        console.log('💰 Auto-filtering by discount products');
+      this.provinceFilter = params['province'] || '';
+      this.provinceSearchQuery = this.provinceFilter;
+      this.selectedCategory = this.mapCategoryTypeToName(params['category'] || '');
+      this.promoDiscount = params['discount'] === 'true';
+      this.currentPage = 1;
+      this.hasAppliedRouteParams = true;
+
+      if (this.provinces.length > 0) {
+        this.fetchProducts();
       }
     });
   }
@@ -96,204 +84,87 @@ export class ProductCatalogComponent implements OnInit {
     ];
   }
 
-  loadProducts(): void {
-    this.isLoading = true;
-    this.productService.getProducts(1, 100).subscribe({
-      next: (data) => {
-        console.log('🔍 API Response Debug:', {
-          totalProducts: data.products.length,
-          total: data.total,
-          page: data.page,
-          pages: data.pages
-        });
-        
-        this.products = data.products.map(productData => new Product(
-          productData._id,
-          productData.product_name,
-          productData.product_detail,
-          productData.stocked_quantity,
-          productData.unit_price,
-          productData.discount,
-          productData.createdAt,
-          productData.image_1,
-          productData.image_2,
-          productData.image_3,
-          productData.image_4,
-          productData.image_5,
-          productData.product_dept,
-          productData.rating,
-          productData.isNew,
-          productData.type || 'food'
-        ));
+  loadCatalogMeta(): void {
+    this.productService.getCatalogMeta().subscribe({
+      next: (meta) => {
+        this.provinces = meta.provinces;
+        this.filteredProvinces = [...meta.provinces];
+        this.provinceCounts = meta.provinceCounts || {};
+        this.priceMinRange = meta.minPrice ?? 0;
+        this.priceMaxRange = meta.maxPrice ?? 5000000;
+        this.priceMinValue = this.priceMinRange;
+        this.priceMaxValue = this.priceMaxRange;
 
-        console.log('📦 Products after mapping:', this.products.length);
-        this.products.forEach(product => product.checkIfNew());
-        
-        // Extract unique provinces
-        this.provinces = [...new Set(this.products.map(p => p.product_dept).filter(dept => dept && dept.trim()))].sort();
-        this.filteredProvinces = [...this.provinces];
-        console.log('🏛️ Available provinces:', this.provinces);
-        this.priceMinRange = 0;
-        this.priceMaxRange = 5000000;
-        if (this.priceMinValue === 0 && this.priceMaxValue === 0) {
-          this.priceMinValue = 0;
-          this.priceMaxValue = 5000000;
+        if (!this.hasAppliedRouteParams) {
+          this.fetchProducts();
+          return;
         }
-        this.applyFilter(this.selectedCategory);
-        if (this.searchQuery) {
-          this.applySearchFilter(this.searchQuery);
-        }
-        
-        // Apply province filter if set from query params
-        if (this.provinceFilter) {
-          this.applyProvinceFilter();
-        }
-        
-        this.isLoading = false;
+
+        this.fetchProducts();
       },
       error: () => {
-        this.errMessage = 'Failed to load products. Please try again later.';
+        this.errMessage = 'Failed to load catalog metadata. Please try again later.';
         this.isLoading = false;
       }
     });
   }
 
+  loadProducts(): void {
+    this.currentPage = 1;
+    this.fetchProducts();
+  }
+
   applyFilter(category: string): void {
     this.selectedCategory = category;
-    this.currentPage = 1; // Reset to first page when changing category
-    
-    if (category === 'Tất cả') {
-      this.filteredProducts = [...this.products];
-    } else {
-      // Map category names to type values
-      const categoryToTypeMap: { [key: string]: string } = {
-        'Nến': 'nen',
-        'Tre mây': 'tre_may',
-        'Gốm sứ': 'gom_su'
-      };
-      
-      const typeFilter = categoryToTypeMap[category];
-      this.filteredProducts = this.products.filter(product => 
-        product.type === typeFilter || product.product_dept === category
-      );
-    }
-
-    // Apply province filter if selected
-    if (this.provinceFilter) {
-      this.filteredProducts = this.filteredProducts.filter(product => 
-        product.product_dept === this.provinceFilter
-      );
-    }
-
-    this.applyAdditionalFilters();
-    this.updateProductCount();
+    this.currentPage = 1;
+    this.fetchProducts();
   }
 
   applySearchFilter(searchTerm: string): void {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    this.filteredProducts = this.products.filter(product =>
-      product.product_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      product.product_detail.toLowerCase().includes(lowerCaseSearchTerm)
-    );
-    this.currentPage = 1; // Reset to first page when searching
-    this.updateProductCount();
+    this.searchQuery = searchTerm;
+    this.currentPage = 1;
+    this.fetchProducts();
   }
 
   filterByPrice(value: string | Event): void {
     this.priceFilter = typeof value === 'string' ? value : (value.target as HTMLSelectElement).value;
     this.currentPage = 1;
-    this.applyAdditionalFilters();
-    this.updateProductCount();
+    this.fetchProducts();
   }
 
   filterByTag(value: string | Event): void {
     this.tagFilter = typeof value === 'string' ? value : (value.target as HTMLSelectElement).value;
     this.currentPage = 1;
-    if (this.tagFilter === '') {
-      this.provinceFilter = '';
-      this.provinceSearchQuery = '';
-    }
-    this.applyFilter(this.selectedCategory);
+    this.fetchProducts();
   }
 
   filterByProvince(event: Event): void {
     this.provinceFilter = (event.target as HTMLSelectElement).value;
-    this.currentPage = 1; // Reset to first page when filtering
-    this.applyFilter(this.selectedCategory);
-    
-    // Apply province filter after category filter
-    if (this.provinceFilter) {
-      this.applyProvinceFilter();
-    }
-  }
-
-  private applyAdditionalFilters(skipTag = false): void {
-    if (!skipTag) {
-      if (this.tagFilter) {
-        this.filteredProducts = this.filteredProducts.filter(product =>
-          this.tagFilter === 'new' ? product.isNew : this.tagFilter === 'discount' ? product.discount > 0 : true
-        );
-      }
-      const hasPromo = this.promoNew || this.promoBestSeller || this.promoDiscount;
-      if (hasPromo) {
-        this.filteredProducts = this.filteredProducts.filter(product => {
-          if (this.promoNew && product.isNew) return true;
-          if (this.promoBestSeller && product.rating >= 4) return true;
-          if (this.promoDiscount && product.discount > 0) return true;
-          return false;
-        });
-      }
-      if (this.ratingFilter) {
-        const min = parseFloat(this.ratingFilter);
-        this.filteredProducts = this.filteredProducts.filter(p => (p.rating || 0) >= min);
-      }
-      if (this.availabilityFilter === 'inStock') {
-        this.filteredProducts = this.filteredProducts.filter(p => (p.stocked_quantity || 0) > 0);
-      } else if (this.availabilityFilter === 'outOfStock') {
-        this.filteredProducts = this.filteredProducts.filter(p => (p.stocked_quantity || 0) <= 0);
-      }
-      const usePriceRange = this.priceMinRange < this.priceMaxRange &&
-        (this.priceMinValue > this.priceMinRange || this.priceMaxValue < this.priceMaxRange);
-      if (usePriceRange) {
-        this.filteredProducts = this.filteredProducts.filter(p => {
-          const price = p.unit_price ?? 0;
-          return price >= this.priceMinValue && price <= this.priceMaxValue;
-        });
-      }
-    }
-    if (this.priceFilter) {
-      this.filteredProducts.sort((a, b) =>
-        this.priceFilter === 'lowToHigh' ? a.unit_price - b.unit_price : b.unit_price - a.unit_price
-      );
-    }
+    this.provinceSearchQuery = this.provinceFilter;
+    this.currentPage = 1;
+    this.fetchProducts();
   }
 
   applyProvinceFilter(): void {
-    if (this.provinceFilter) {
-      this.filteredProducts = this.filteredProducts.filter(product => 
-        product.product_dept === this.provinceFilter
-      );
-      console.log('🏛️ Filtered by province:', this.provinceFilter, 'Products:', this.filteredProducts.length);
-    }
-    this.updateProductCount();
+    this.currentPage = 1;
+    this.fetchProducts();
   }
 
   onProvinceSearch(event: Event): void {
     const query = (event.target as HTMLInputElement).value.toLowerCase().trim();
     this.provinceSearchQuery = query;
-    
-    if (query.length === 0) {
+
+    if (!query) {
       this.filteredProvinces = [...this.provinces];
-      // Clear province filter when input is empty
       if (this.provinceFilter) {
         this.clearProvinceFilter();
       }
     } else {
-      this.filteredProvinces = this.provinces.filter(province => 
+      this.filteredProvinces = this.provinces.filter((province) =>
         province.toLowerCase().includes(query)
       );
     }
-    
+
     this.showProvinceSuggestions = true;
   }
 
@@ -302,30 +173,26 @@ export class ProductCatalogComponent implements OnInit {
     this.provinceSearchQuery = province;
     this.showProvinceSuggestions = false;
     this.currentPage = 1;
-    this.applyFilter(this.selectedCategory);
-    
-    if (this.provinceFilter) {
-      this.applyProvinceFilter();
-    }
+    this.fetchProducts();
   }
 
   clearProvinceFilter(): void {
     this.provinceFilter = '';
     this.provinceSearchQuery = '';
+    this.filteredProvinces = [...this.provinces];
     this.showProvinceSuggestions = false;
     this.currentPage = 1;
-    this.applyFilter(this.selectedCategory);
+    this.fetchProducts();
   }
 
   onProvinceInputBlur(): void {
-    // Delay hiding suggestions to allow click events
     setTimeout(() => {
       this.showProvinceSuggestions = false;
     }, 200);
   }
 
   getProvinceProductCount(province: string): number {
-    return this.products.filter(product => product.product_dept === province).length;
+    return this.provinceCounts[province] || 0;
   }
 
   clearAllFilters(): void {
@@ -343,7 +210,7 @@ export class ProductCatalogComponent implements OnInit {
     this.searchQuery = '';
     this.selectedCategory = 'Tất cả';
     this.currentPage = 1;
-    this.applyFilter('Tất cả');
+    this.fetchProducts();
   }
 
   getActiveFilters(): { key: string; label: string }[] {
@@ -353,8 +220,7 @@ export class ProductCatalogComponent implements OnInit {
     }
     if (this.priceFilter === 'lowToHigh') list.push({ key: 'price', label: 'Giá: Thấp → Cao' });
     if (this.priceFilter === 'highToLow') list.push({ key: 'price', label: 'Giá: Cao → Thấp' });
-    const hasPriceRange = this.priceMaxRange > this.priceMinRange &&
-      (this.priceMinValue > this.priceMinRange || this.priceMaxValue < this.priceMaxRange);
+    const hasPriceRange = this.hasCustomPriceRange();
     if (hasPriceRange) {
       list.push({ key: 'priceRange', label: this.formatPrice(this.priceMinValue) + ' - ' + this.formatPrice(this.priceMaxValue) });
     }
@@ -367,69 +233,57 @@ export class ProductCatalogComponent implements OnInit {
     if (this.availabilityFilter === 'inStock') list.push({ key: 'availability', label: 'Còn hàng' });
     if (this.availabilityFilter === 'outOfStock') list.push({ key: 'availability', label: 'Hết hàng' });
     if (this.provinceFilter) list.push({ key: 'province', label: this.provinceFilter });
+    if (this.searchQuery) list.push({ key: 'search', label: this.searchQuery });
     return list;
   }
 
   removeFilter(key: string): void {
     this.currentPage = 1;
-    if (key === 'category') {
-      this.selectedCategory = 'Tất cả';
-      this.applyFilter('Tất cả');
-    } else if (key === 'price') {
-      this.priceFilter = '';
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'priceRange') {
+    if (key === 'category') this.selectedCategory = 'Tất cả';
+    if (key === 'price') this.priceFilter = '';
+    if (key === 'priceRange') {
       this.priceMinValue = this.priceMinRange;
       this.priceMaxValue = this.priceMaxRange;
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'tag') {
-      this.tagFilter = '';
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'promoNew') {
-      this.promoNew = false;
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'promoBestSeller') {
-      this.promoBestSeller = false;
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'promoDiscount') {
-      this.promoDiscount = false;
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'rating') {
-      this.ratingFilter = '';
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'availability') {
-      this.availabilityFilter = '';
-      this.applyFilter(this.selectedCategory);
-    } else if (key === 'province') {
-      this.clearProvinceFilter();
     }
+    if (key === 'tag') this.tagFilter = '';
+    if (key === 'promoNew') this.promoNew = false;
+    if (key === 'promoBestSeller') this.promoBestSeller = false;
+    if (key === 'promoDiscount') this.promoDiscount = false;
+    if (key === 'rating') this.ratingFilter = '';
+    if (key === 'availability') this.availabilityFilter = '';
+    if (key === 'province') {
+      this.provinceFilter = '';
+      this.provinceSearchQuery = '';
+    }
+    if (key === 'search') this.searchQuery = '';
+    this.fetchProducts();
   }
 
   onPromoChange(): void {
     this.currentPage = 1;
-    this.applyFilter(this.selectedCategory);
+    this.fetchProducts();
   }
 
   onRatingFilterChange(value: string): void {
     this.ratingFilter = value;
     this.currentPage = 1;
-    this.applyFilter(this.selectedCategory);
+    this.fetchProducts();
   }
 
   onAvailabilityChange(value: string): void {
     this.availabilityFilter = value;
     this.currentPage = 1;
-    this.applyFilter(this.selectedCategory);
+    this.fetchProducts();
   }
 
   onPriceRangeChange(): void {
     if (this.priceMinValue > this.priceMaxValue) {
-      const t = this.priceMinValue;
+      const temp = this.priceMinValue;
       this.priceMinValue = this.priceMaxValue;
-      this.priceMaxValue = t;
+      this.priceMaxValue = temp;
     }
     this.currentPage = 1;
-    this.applyFilter(this.selectedCategory);
+    this.fetchProducts();
   }
 
   formatPrice(v: number): string {
@@ -439,93 +293,37 @@ export class ProductCatalogComponent implements OnInit {
   }
 
   applyCategoryFilter(categoryType: string): void {
-    // Map category types to category names
-    const categoryTypeMap: { [key: string]: string } = {
-      'nen': 'Nến',
-      'tre_may': 'Tre mây',
-      'gom_su': 'Gốm sứ'
-    };
-    
-    const categoryName = categoryTypeMap[categoryType] || 'Tất cả';
-    this.selectedCategory = categoryName;
+    this.selectedCategory = this.mapCategoryTypeToName(categoryType);
     this.currentPage = 1;
-    this.applyFilter(categoryName);
+    this.fetchProducts();
   }
 
   applyDiscountFilter(): void {
     this.selectedCategory = 'Tất cả';
+    this.promoDiscount = true;
     this.currentPage = 1;
-    
-    // Filter products with discount > 0
-    this.filteredProducts = this.products.filter(product => product.discount > 0);
-    
-    this.applyAdditionalFilters();
-    this.updateProductCount();
-  }
-
-  private updateProductCount(): void {
-    this.productCount = this.filteredProducts.length;
-    this.totalItems = this.filteredProducts.length;
-    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-    
-    // Only reset to first page if current page is beyond total pages
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = 1;
-    }
-    
-    this.updatePaginatedProducts();
-    this.errMessage = this.filteredProducts.length === 0
-      ? 'No products found in this category.'
-      : '';
-  }
-
-  private updatePaginatedProducts(): void {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedProducts = this.filteredProducts.slice(startIndex, endIndex);
-    
-    // Debug info
-    console.log('Pagination Debug:', {
-      currentPage: this.currentPage,
-      totalPages: this.totalPages,
-      totalItems: this.totalItems,
-      itemsPerPage: this.itemsPerPage,
-      filteredProductsLength: this.filteredProducts.length,
-      paginatedProductsLength: this.paginatedProducts.length,
-      startIndex,
-      endIndex
-    });
+    this.fetchProducts();
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.updatePaginatedProducts();
-      this.scrollToTop();
+      this.fetchProducts(true);
     }
   }
 
   goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updatePaginatedProducts();
-      this.scrollToTop();
+      this.fetchProducts(true);
     }
   }
 
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updatePaginatedProducts();
-      this.scrollToTop();
+      this.fetchProducts(true);
     }
-  }
-
-  private scrollToTop(): void {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
   }
 
   getPageNumbers(): number[] {
@@ -533,18 +331,152 @@ export class ProductCatalogComponent implements OnInit {
     const maxVisiblePages = 5;
     let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+
+    for (let page = startPage; page <= endPage; page += 1) {
+      pages.push(page);
     }
     return pages;
   }
 
   getEndRange(): number {
     return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+  }
+
+  trackByProductId(_index: number, product: Product): string {
+    return product._id;
+  }
+
+  trackByText(_index: number, value: string): string {
+    return value;
+  }
+
+  trackByCategory(_index: number, category: { name: string; image: string; filterKey: string }): string {
+    return category.filterKey;
+  }
+
+  trackByNumber(_index: number, value: number): number {
+    return value;
+  }
+
+  trackByFilter(_index: number, filter: { key: string; label: string }): string {
+    return `${filter.key}:${filter.label}`;
+  }
+
+  private fetchProducts(shouldScroll = false): void {
+    this.isLoading = true;
+    this.errMessage = '';
+
+    this.productService.getProducts(
+      this.currentPage,
+      this.itemsPerPage,
+      this.provinceFilter,
+      this.mapCategoryNameToType(this.selectedCategory),
+      'none',
+      this.buildQueryOptions()
+    ).subscribe({
+      next: (data) => {
+        const mappedProducts = data.products.map((product) => this.productService.mapToProduct(product));
+        this.products = mappedProducts;
+        this.filteredProducts = mappedProducts;
+        this.paginatedProducts = mappedProducts;
+        this.productCount = data.total;
+        this.totalItems = data.total;
+        this.totalPages = data.pages;
+        this.errMessage = mappedProducts.length === 0 ? 'No products found in this category.' : '';
+        this.isLoading = false;
+
+        if (shouldScroll) {
+          this.scrollToTop();
+        }
+      },
+      error: () => {
+        this.products = [];
+        this.filteredProducts = [];
+        this.paginatedProducts = [];
+        this.productCount = 0;
+        this.totalItems = 0;
+        this.totalPages = 0;
+        this.errMessage = 'Failed to load products. Please try again later.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private hasCustomPriceRange(): boolean {
+    return this.priceMaxRange > this.priceMinRange &&
+      (this.priceMinValue > this.priceMinRange || this.priceMaxValue < this.priceMaxRange);
+  }
+
+  private buildQueryOptions(): ProductQueryOptions {
+    const options: ProductQueryOptions = {};
+    const minRating = this.getEffectiveMinRating();
+
+    if (this.searchQuery.trim()) {
+      options.search = this.searchQuery.trim();
+    }
+    if (this.hasCustomPriceRange()) {
+      options.minPrice = this.priceMinValue;
+      options.maxPrice = this.priceMaxValue;
+    }
+    if (minRating !== undefined) {
+      options.minRating = minRating;
+    }
+    if (this.tagFilter === 'discount' || this.promoDiscount) {
+      options.discount = true;
+    }
+    if (this.tagFilter === 'new' || this.promoNew) {
+      options.isNew = true;
+    }
+    if (this.availabilityFilter === 'inStock') {
+      options.inStock = true;
+    }
+    if (this.availabilityFilter === 'outOfStock') {
+      options.inStock = false;
+    }
+    if (this.priceFilter === 'lowToHigh') {
+      options.sort = 'price_asc';
+    } else if (this.priceFilter === 'highToLow') {
+      options.sort = 'price_desc';
+    } else if (this.promoBestSeller) {
+      options.sort = 'rating_desc';
+    }
+
+    return options;
+  }
+
+  private getEffectiveMinRating(): number | undefined {
+    const ratingFromFilter = this.ratingFilter ? Number(this.ratingFilter) : 0;
+    const ratingFromPromo = this.promoBestSeller ? 4 : 0;
+    const minRating = Math.max(ratingFromFilter, ratingFromPromo);
+    return minRating > 0 ? minRating : undefined;
+  }
+
+  private mapCategoryNameToType(category: string): string {
+    const categoryToTypeMap: Record<string, string> = {
+      'Nến': 'nen',
+      'Tre mây': 'tre_may',
+      'Gốm sứ': 'gom_su'
+    };
+    return categoryToTypeMap[category] || '';
+  }
+
+  private mapCategoryTypeToName(categoryType: string): string {
+    const categoryTypeMap: Record<string, string> = {
+      'nen': 'Nến',
+      'tre_may': 'Tre mây',
+      'gom_su': 'Gốm sứ'
+    };
+    return categoryTypeMap[categoryType] || 'Tất cả';
+  }
+
+  private scrollToTop(): void {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 }

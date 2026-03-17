@@ -22,30 +22,9 @@ export class ProductListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this._service.getProducts(1, 100).subscribe({
+    this._service.getProducts(1, 24).subscribe({
       next: (data) => {
-        this.products = data.products.map(product => {
-          const newProduct = new Product(
-            product._id || '',
-            product.product_name || '',
-            product.product_detail || '',
-            product.stocked_quantity || 0,
-            product.unit_price || 0,
-            product.discount || 0,
-            product.createdAt || '',
-            product.image_1 || '',
-            product.image_2 || '',
-            product.image_3 || '',
-            product.image_4 || '',
-            product.image_5 || '',
-            product.product_dept || '',
-            product.rating || 0,
-            product.isNew || false,
-            product.type || 'food'
-          );
-          newProduct.checkIfNew();
-          return newProduct;
-        });
+        this.products = data.products.map(product => this._service.mapToProduct(product));
         this.displayedProducts = this.products.slice(0, this.initialDisplayCount);
         this.isLoading = false;
       },
@@ -64,5 +43,9 @@ export class ProductListComponent implements OnInit {
 
   goToAllProducts(): void {
     this.router.navigate(['/catalog']);
+  }
+
+  trackByProductId(_index: number, product: Product): string {
+    return product._id;
   }
 }

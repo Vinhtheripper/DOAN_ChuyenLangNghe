@@ -12,6 +12,13 @@ async function connectDatabase() {
   await client.connect();
   const database = client.db(DB_NAME);
 
+  await Promise.all([
+    database.collection('Product').createIndex({ updatedAt: -1, createdAt: -1, _id: -1 }),
+    database.collection('Product').createIndex({ product_dept: 1, updatedAt: -1, createdAt: -1, _id: -1 }),
+    database.collection('Product').createIndex({ type: 1, updatedAt: -1, createdAt: -1, _id: -1 }),
+    database.collection('Product').createIndex({ product_dept: 1, type: 1, updatedAt: -1, createdAt: -1, _id: -1 })
+  ]);
+
   collections = {
     productCollection: database.collection('Product'),
     userCollection: database.collection('User'),

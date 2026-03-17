@@ -18,7 +18,7 @@ export class RelatedProductComponent implements OnInit {
   constructor(private productService: ProductAPIService) { }
 
   ngOnInit(): void {
-    this.productService.getProducts(1, 100).subscribe((data: { products: Product[]; total: number; page: number; pages: number }) => {
+    this.productService.getProducts(1, 24, this.currentProductDept).subscribe((data: { products: Product[]; total: number; page: number; pages: number }) => {
       const otherProducts = data.products.filter(product => product._id && product._id !== this.currentProductId);
 
       const scoredProducts = otherProducts.map(product => ({
@@ -42,7 +42,7 @@ export class RelatedProductComponent implements OnInit {
           product.unit_price || 0,
           product.discount || 0,
           product.createdAt || '',
-          product.image_1 || '',
+          this.productService.resolveProductImageSrc(product.image_1, product._id || ''),
           product.image_2 || '',
           product.image_3 || '',
           product.image_4 || '',

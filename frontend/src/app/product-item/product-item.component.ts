@@ -1,33 +1,31 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product } from '../../interface/Product';
 import { CartService } from '../services/cart.service';
 import { AuthService } from '../services/auth.service';
+import { ProductAPIService } from '../product-api.service';
 
 @Component({
   selector: 'app-product-item',
   templateUrl: './product-item.component.html',
-  styleUrls: ['./product-item.component.css']
+  styleUrls: ['./product-item.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductItemComponent implements OnInit {
+export class ProductItemComponent implements OnChanges {
   @Input() product!: Product;
   isLiked: boolean = false;
-  isLoggedIn: boolean = false;
 
   constructor(
     private cartService: CartService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private productService: ProductAPIService
   ) { }
 
-  ngOnInit(): void {
-    this.authService.isLoggedIn$.subscribe(status => {
-      this.isLoggedIn = status;
-      if (this.isLoggedIn && this.product._id) {
-        const likedProducts = this.authService.getLikedProducts();
-        this.isLiked = likedProducts.includes(this.product._id);
-      }
-    });
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['product']) {
+      this.syncLikedState();
+    }
   }
 
   goToDetail(): void {
@@ -38,7 +36,7 @@ export class ProductItemComponent implements OnInit {
 
   toggleLike(event: Event): void {
     event.stopPropagation();
-    if (this.isLoggedIn) {
+    if (this.isLoggedIn()) {
       this.isLiked = !this.isLiked;
       this.updateLikedProducts();
     } else {
@@ -91,5 +89,22 @@ export class ProductItemComponent implements OnInit {
       return Math.round(originalPrice / 1000) * 1000;
     }
     return null;
+  }
+
+  getImageSrc(): string {
+    return this.productService.resolveProductImageSrc(this.product?.image_1, this.product?._id || '');
+  }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  private syncLikedState(): void {
+    if (!this.isLoggedIn() || !this.product?._id) {
+      this.isLiked = false;
+      return;
+    }
+
+    this.isLiked = this.authService.getLikedProducts().includes(this.product._id);
   }
 }

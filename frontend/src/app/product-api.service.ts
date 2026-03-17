@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, retry, throwError } from 'rxjs';
+import { catchError, Observable, of, retry, shareReplay, tap, throwError } from 'rxjs';
 import { Product } from '../interface/Product';
 import { buildUrl } from './utils/url.util';
 
@@ -10,6 +10,11 @@ import { buildUrl } from './utils/url.util';
 export class ProductAPIService {
   private apiUrl = buildUrl('/products');
   private token: string | null = null;
+  private readonly cacheTtlMs = 60 * 1000;
+  private productsCache = new Map<string, { expiresAt: number; request$: Observable<{ products: Product[]; total: number; page: number; pages: number }> }>();
+  private productByIdCache = new Map<string, { expiresAt: number; request$: Observable<Product> }>();
+  private productListSnapshots = new Map<string, { expiresAt: number; value: { products: Product[]; total: number; page: number; pages: number } }>();
+  private hasPreloadedInitialData = false;
 
   constructor(private _http: HttpClient) {
     this.token = this.getToken();
@@ -64,12 +69,151 @@ export class ProductAPIService {
     return throwError(() => new Error(errorMessage));
   }
 
+  private getCachedRequest<T>(
+    cache: Map<string, { expiresAt: number; request$: Observable<T> }>,
+    key: string
+  ): Observable<T> | null {
+    const cached = cache.get(key);
+    if (!cached) {
+      return null;
+    }
+    if (cached.expiresAt <= Date.now()) {
+      cache.delete(key);
+      return null;
+    }
+    return cached.request$;
+  }
+
+  private setCachedRequest<T>(
+    cache: Map<string, { expiresAt: number; request$: Observable<T> }>,
+    key: string,
+    request$: Observable<T>
+  ): Observable<T> {
+    cache.set(key, {
+      expiresAt: Date.now() + this.cacheTtlMs,
+      request$
+    });
+    return request$;
+  }
+
+  private getProductScopeKey(
+    dept: string,
+    type: string,
+    includeImages: 'none' | 'primary' | 'all'
+  ): string {
+    return JSON.stringify({ dept, type, includeImages });
+  }
+
+  private getSnapshotProductList(
+    scopeKey: string,
+    page: number,
+    limit: number
+  ): { products: Product[]; total: number; page: number; pages: number } | null {
+    if (page !== 1) {
+      return null;
+    }
+
+    const cached = this.productListSnapshots.get(scopeKey);
+    if (!cached) {
+      return null;
+    }
+    if (cached.expiresAt <= Date.now()) {
+      this.productListSnapshots.delete(scopeKey);
+      return null;
+    }
+    if (cached.value.page !== 1 || cached.value.products.length < limit) {
+      return null;
+    }
+
+    return {
+      products: cached.value.products.slice(0, limit),
+      total: cached.value.total,
+      page: 1,
+      pages: Math.ceil(cached.value.total / limit)
+    };
+  }
+
+  private setSnapshotProductList(
+    scopeKey: string,
+    value: { products: Product[]; total: number; page: number; pages: number }
+  ): void {
+    if (value.page !== 1) {
+      return;
+    }
+
+    const existing = this.productListSnapshots.get(scopeKey);
+    if (existing && existing.expiresAt > Date.now() && existing.value.products.length >= value.products.length) {
+      return;
+    }
+
+    this.productListSnapshots.set(scopeKey, {
+      expiresAt: Date.now() + this.cacheTtlMs,
+      value
+    });
+  }
+
+  private clearProductCaches(): void {
+    this.productsCache.clear();
+    this.productListSnapshots.clear();
+  }
+
+  mapToProduct(productData: Partial<Product> & { _id?: string }): Product {
+    const product = new Product(
+      productData._id || '',
+      productData.product_name || '',
+      productData.product_detail || '',
+      productData.stocked_quantity || 0,
+      productData.unit_price || 0,
+      productData.discount || 0,
+      productData.createdAt || '',
+      this.resolveProductImageSrc(productData.image_1, productData._id || ''),
+      productData.image_2 || '',
+      productData.image_3 || '',
+      productData.image_4 || '',
+      productData.image_5 || '',
+      productData.product_dept || '',
+      productData.rating || 0,
+      productData.isNew || false,
+      productData.type || 'food'
+    );
+    product.checkIfNew();
+    return product;
+  }
+
+  getProductImageUrl(productId: string, slot: number = 1): string {
+    return buildUrl(`/products/${productId}/image/${slot}`);
+  }
+
+  resolveProductImageSrc(imageValue: string | undefined | null, productId: string, slot: number = 1): string {
+    if (!imageValue) {
+      return this.getProductImageUrl(productId, slot);
+    }
+
+    if (
+      imageValue.startsWith('data:image/') ||
+      /^https?:\/\//i.test(imageValue)
+    ) {
+      return imageValue;
+    }
+
+    if (imageValue.startsWith('/')) {
+      return buildUrl(imageValue);
+    }
+
+    if (imageValue.startsWith('assets/')) {
+      return buildUrl(`/${imageValue}`);
+    }
+
+    return this.getProductImageUrl(productId, slot);
+  }
+
   getProducts(
     page: number = 1,
     limit: number = 10,
     dept: string = '',
     type: string = '',
-    includeImages: 'primary' | 'all' = 'primary'
+    includeImages: 'none' | 'primary' | 'all' = 'none',
+    options: ProductQueryOptions = {}
   ): Observable<{ products: Product[]; total: number; page: number; pages: number }> {
     const params: any = { page, limit, includeImages };
     if (dept) {
@@ -78,28 +222,102 @@ export class ProductAPIService {
     if (type) {
       params.type = type;
     }
-    return this._http
+    if (options.search) {
+      params.search = options.search.trim();
+    }
+    if (options.minPrice !== undefined) {
+      params.minPrice = options.minPrice;
+    }
+    if (options.maxPrice !== undefined) {
+      params.maxPrice = options.maxPrice;
+    }
+    if (options.minRating !== undefined) {
+      params.minRating = options.minRating;
+    }
+    if (options.discount !== undefined) {
+      params.discount = options.discount;
+    }
+    if (options.isNew !== undefined) {
+      params.isNew = options.isNew;
+    }
+    if (options.inStock !== undefined) {
+      params.inStock = options.inStock;
+    }
+    if (options.sort) {
+      params.sort = options.sort;
+    }
+
+    const hasAdvancedFilters = Object.keys(options).length > 0;
+    const scopeKey = this.getProductScopeKey(dept, type, includeImages);
+    const snapshot = this.getSnapshotProductList(scopeKey, page, limit);
+    if (!hasAdvancedFilters && snapshot) {
+      return of(snapshot);
+    }
+
+    const cacheKey = JSON.stringify(params);
+    const cached = this.getCachedRequest(this.productsCache, cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const request$ = this._http
       .get<{ products: Product[]; total: number; page: number; pages: number }>(this.apiUrl, {
         headers: this.getHeaders(),
         params,
       })
-      .pipe(retry(3), catchError(this.handleError));
+      .pipe(
+        tap((response) => this.setSnapshotProductList(scopeKey, response)),
+        retry(1),
+        catchError((error) => {
+          this.productsCache.delete(cacheKey);
+          return this.handleError(error);
+        }),
+        shareReplay(1)
+      );
+
+    return this.setCachedRequest(this.productsCache, cacheKey, request$);
+  }
+
+  getCatalogMeta(): Observable<{ provinces: string[]; provinceCounts: Record<string, number>; minPrice: number; maxPrice: number }> {
+    return this._http
+      .get<{ provinces: string[]; provinceCounts: Record<string, number>; minPrice: number; maxPrice: number }>(`${this.apiUrl}/meta/catalog`, {
+        headers: this.getHeaders()
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError),
+        shareReplay(1)
+      );
   }
 
   getProductById(id: string): Observable<Product> {
-    return this._http
+    const cached = this.getCachedRequest(this.productByIdCache, id);
+    if (cached) {
+      return cached;
+    }
+
+    const request$ = this._http
       .get<Product>(`${this.apiUrl}/${id}`, {
         headers: this.getHeaders()
       })
-      .pipe(retry(3), catchError(this.handleError));
+      .pipe(
+        retry(1),
+        catchError((error) => {
+          this.productByIdCache.delete(id);
+          return this.handleError(error);
+        }),
+        shareReplay(1)
+      );
+
+    return this.setCachedRequest(this.productByIdCache, id, request$);
   }
 
   getProductsByCategory(category: string): Observable<Product[]> {
     return this._http
-      .get<Product[]>(`${this.apiUrl}?dept=${category}&includeImages=primary`, {
+      .get<Product[]>(`${this.apiUrl}?dept=${category}`, {
         headers: this.getHeaders()
       })
-      .pipe(retry(3), catchError(this.handleError));
+      .pipe(retry(1), catchError(this.handleError));
   }
 
   updateProductStock(id: string, quantity: number): Observable<any> {
@@ -134,7 +352,10 @@ export class ProductAPIService {
       .post<Product>(this.apiUrl, sanitizedProduct, {
         headers: this.getHeaders()
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        tap(() => this.clearProductCaches()),
+        catchError(this.handleError)
+      );
   }
 
   updateProduct(id: string, product: Partial<Product>): Observable<any> {
@@ -175,7 +396,13 @@ export class ProductAPIService {
       .patch(`${this.apiUrl}/${id}`, sanitizedProduct, {
         headers: this.getHeaders()
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        tap(() => {
+          this.clearProductCaches();
+          this.productByIdCache.delete(id);
+        }),
+        catchError(this.handleError)
+      );
   }
 
   deleteProduct(id: string): Observable<any> {
@@ -183,7 +410,13 @@ export class ProductAPIService {
       .delete(`${this.apiUrl}/${id}`, {
         headers: this.getHeaders()
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        tap(() => {
+          this.clearProductCaches();
+          this.productByIdCache.delete(id);
+        }),
+        catchError(this.handleError)
+      );
   }
 
   deleteMultipleProducts(ids: string[]): Observable<any> {
@@ -192,7 +425,21 @@ export class ProductAPIService {
         headers: this.getHeaders(),
         body: { productIds: ids }
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        tap(() => this.clearProductCaches()),
+        catchError(this.handleError)
+      );
+  }
+
+  preloadInitialData(): void {
+    if (this.hasPreloadedInitialData) {
+      return;
+    }
+    this.hasPreloadedInitialData = true;
+
+    this.getProducts(1, 120).subscribe({ error: () => undefined });
+    this.getProducts(1, 12, '', 'tre_may').subscribe({ error: () => undefined });
+    this.getProducts(1, 12, '', 'gom_su').subscribe({ error: () => undefined });
   }
 
   /** Get reviews for a product (paginated). */
@@ -250,4 +497,15 @@ export interface ProductReview {
   images?: string[];
   createdAt: string | Date;
   verified?: boolean;
+}
+
+export interface ProductQueryOptions {
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  discount?: boolean;
+  isNew?: boolean;
+  inStock?: boolean;
+  sort?: 'price_asc' | 'price_desc' | 'rating_desc';
 }

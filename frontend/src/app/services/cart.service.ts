@@ -32,30 +32,71 @@ export class CartService {
       if (loggedIn) {
         this.loadCartFromDatabase();
       } else {
-        const items = this.getCartItemsFromSessionStorage();
+        const items = this.readGuestCartFromStorage();
         this.cartItems.next(items);
         this.updateCartCount(items);
       }
     });
   }
 
-  private getCartItemsFromSessionStorage(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
-    const compressedItems = sessionStorage.getItem(this.cartKey);
-    return compressedItems ? JSON.parse(decompressFromUTF16(compressedItems)) : [];
+  private readGuestCartFromStorage(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
+    const rawItems = sessionStorage.getItem(this.cartKey);
+    if (!rawItems) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(rawItems);
+    } catch {
+      try {
+        const decompressed = decompressFromUTF16(rawItems);
+        return decompressed ? JSON.parse(decompressed) : [];
+      } catch {
+        return [];
+      }
+    }
   }
 
-  private saveCartItemsToSessionStorage(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
+  private persistGuestCart(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
     try {
       const serializedData = JSON.stringify(cartItems);
-      const compressedData = compressToUTF16(serializedData);
-      if (compressedData.length > 5000000) {
+      if (serializedData.length > 5000000) {
         alert('Không thể lưu giỏ hàng vì dữ liệu quá lớn.');
         return;
       }
-      sessionStorage.setItem(this.cartKey, compressedData);
+      sessionStorage.setItem(this.cartKey, serializedData);
     } catch (error) {
       alert('Lỗi khi lưu dữ liệu vào sessionStorage. Vui lòng thử lại.');
     }
+  }
+
+  private getCurrentCartItems(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
+    return [...this.cartItems.getValue()];
+  }
+
+  private upsertCartItem(
+    cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[],
+    nextItem: CartItem & { product_name: string; image_1: string; stocked_quantity: number }
+  ): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
+    const cloned = cartItems.map((item) => ({ ...item }));
+    const existingItem = cloned.find((item) => item.productId === nextItem.productId);
+    if (existingItem) {
+      existingItem.quantity += nextItem.quantity;
+      existingItem.unit_price = nextItem.unit_price;
+      existingItem.product_name = nextItem.product_name;
+      existingItem.image_1 = nextItem.image_1;
+      existingItem.stocked_quantity = nextItem.stocked_quantity;
+      return cloned;
+    }
+
+    cloned.push({ ...nextItem });
+    return cloned;
+  }
+
+  private syncGuestCart(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
+    this.persistGuestCart(cartItems);
+    this.cartItems.next(cartItems);
+    this.updateCartCount(cartItems);
   }
 
   private freeUpStorageIfNecessary(): void {
@@ -95,31 +136,38 @@ export class CartService {
     stocked_quantity: number
   ): void {
     if (this.isUserLoggedIn) {
+      const previousCartItems = this.getCurrentCartItems();
+      const optimisticCartItems = this.upsertCartItem(previousCartItems, {
+        productId,
+        quantity,
+        unit_price,
+        product_name,
+        image_1,
+        stocked_quantity,
+      });
+      this.cartItems.next(optimisticCartItems);
+      this.updateCartCount(optimisticCartItems);
+
       this.cartAPIService
         .addToCart(productId, quantity, unit_price)
         .pipe(
-          tap(() => this.loadCartFromDatabase()),
-          catchError(this.handleError)
+          catchError((error) => {
+            this.cartItems.next(previousCartItems);
+            this.updateCartCount(previousCartItems);
+            return this.handleError(error);
+          })
         )
         .subscribe();
     } else {
-      const cartItems = this.getCartItemsFromSessionStorage();
-      const existingItem = cartItems.find((item) => item.productId === productId);
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        cartItems.push({
-          productId,
-          quantity,
-          unit_price,
-          product_name,
-          image_1,
-          stocked_quantity,
-        });
-      }
-      this.saveCartItemsToSessionStorage(cartItems);
-      this.cartItems.next(cartItems);
-      this.updateCartCount(cartItems);
+      const cartItems = this.upsertCartItem(this.getCurrentCartItems(), {
+        productId,
+        quantity,
+        unit_price,
+        product_name,
+        image_1,
+        stocked_quantity,
+      });
+      this.syncGuestCart(cartItems);
     }
   }
 
@@ -133,10 +181,8 @@ export class CartService {
         )
         .subscribe();
     } else {
-      const cartItems = this.getCartItemsFromSessionStorage().filter((item) => item.productId !== productId);
-      this.saveCartItemsToSessionStorage(cartItems);
-      this.cartItems.next(cartItems);
-      this.updateCartCount(cartItems);
+      const cartItems = this.getCurrentCartItems().filter((item) => item.productId !== productId);
+      this.syncGuestCart(cartItems);
     }
   }
 
@@ -150,12 +196,10 @@ export class CartService {
         )
         .subscribe();
     } else {
-      const remainingItems = this.getCartItemsFromSessionStorage().filter(
+      const remainingItems = this.getCurrentCartItems().filter(
         (item) => item.productId && !orderedItemIds.includes(item.productId)
       );
-      this.saveCartItemsToSessionStorage(remainingItems);
-      this.cartItems.next(remainingItems);
-      this.updateCartCount(remainingItems);
+      this.syncGuestCart(remainingItems);
     }
   }
 
@@ -166,14 +210,12 @@ export class CartService {
         catchError(this.handleError)
       );
     } else {
-      const cartItems = this.getCartItemsFromSessionStorage();
+      const cartItems = this.getCurrentCartItems();
       const item = cartItems.find((item) => item.productId === productId);
       if (item) {
         item.quantity = quantity;
       }
-      this.saveCartItemsToSessionStorage(cartItems);
-      this.cartItems.next(cartItems);
-      this.updateCartCount(cartItems);
+      this.syncGuestCart(cartItems);
       return of(null);
     }
   }
@@ -191,7 +233,7 @@ export class CartService {
         )
         .subscribe();
     } else {
-      localStorage.removeItem(this.cartKey);
+      sessionStorage.removeItem(this.cartKey);
       this.cartItems.next([]);
       this.updateCartCount([]);
     }
