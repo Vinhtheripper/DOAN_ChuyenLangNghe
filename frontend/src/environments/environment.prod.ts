@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: '',
+  apiUrl: 'https://doan-chuyenlangnghe-6.onrender.com',
   locationApiUrl: 'https://provinces.open-api.vn/api',
   support: {
     zalo: {
