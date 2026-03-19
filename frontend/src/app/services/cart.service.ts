@@ -4,7 +4,7 @@ import { CartAPIService } from '../cart-api.service';
 import { CartItem } from '../../interface/Cart';
 import { AuthService } from './auth.service';
 import { tap, catchError } from 'rxjs/operators';
-import { compressToUTF16, decompressFromUTF16 } from 'lz-string';
+import { decompressFromUTF16 } from 'lz-string';
 
 @Injectable({
   providedIn: 'root',
@@ -99,6 +99,11 @@ export class CartService {
     this.updateCartCount(cartItems);
   }
 
+  private syncRuntimeCart(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
+    this.cartItems.next(cartItems);
+    this.updateCartCount(cartItems);
+  }
+
   private freeUpStorageIfNecessary(): void {
     while (!this.isStorageAvailable() && localStorage.length > 0) {
       const keyToRemove = localStorage.key(0);
@@ -173,11 +178,16 @@ export class CartService {
 
   removeFromCart(productId: string): void {
     if (this.isUserLoggedIn) {
+      const previousCartItems = this.getCurrentCartItems();
+      const nextCartItems = previousCartItems.filter((item) => item.productId !== productId);
+      this.syncRuntimeCart(nextCartItems);
       this.cartAPIService
         .removeFromCart(productId)
         .pipe(
-          tap(() => this.loadCartFromDatabase()),
-          catchError(this.handleError)
+          catchError((error) => {
+            this.syncRuntimeCart(previousCartItems);
+            return this.handleError(error);
+          })
         )
         .subscribe();
     } else {
@@ -188,11 +198,18 @@ export class CartService {
 
   removeOrderedItems(orderedItemIds: string[]): void {
     if (this.isUserLoggedIn) {
+      const previousCartItems = this.getCurrentCartItems();
+      const nextCartItems = previousCartItems.filter(
+        (item) => item.productId && !orderedItemIds.includes(item.productId)
+      );
+      this.syncRuntimeCart(nextCartItems);
       this.cartAPIService
         .removeOrderedItems(orderedItemIds)
         .pipe(
-          tap(() => this.loadCartFromDatabase()),
-          catchError(this.handleError)
+          catchError((error) => {
+            this.syncRuntimeCart(previousCartItems);
+            return this.handleError(error);
+          })
         )
         .subscribe();
     } else {
@@ -205,9 +222,16 @@ export class CartService {
 
   updateQuantity(productId: string, quantity: number): Observable<any> {
     if (this.isUserLoggedIn) {
+      const previousCartItems = this.getCurrentCartItems();
+      const nextCartItems = previousCartItems.map((item) =>
+        item.productId === productId ? { ...item, quantity } : item
+      );
+      this.syncRuntimeCart(nextCartItems);
       return this.cartAPIService.updateQuantity(productId, quantity).pipe(
-        tap(() => this.loadCartFromDatabase()),
-        catchError(this.handleError)
+        catchError((error) => {
+          this.syncRuntimeCart(previousCartItems);
+          return this.handleError(error);
+        })
       );
     } else {
       const cartItems = this.getCurrentCartItems();
@@ -283,9 +307,7 @@ export class CartService {
 
   saveSelectedItems(selectedItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
     const serializedData = JSON.stringify(selectedItems);
-    const compressedData = compressToUTF16(serializedData);
-
-    if (compressedData.length > 5000000) {
+    if (serializedData.length > 5000000) {
       alert('Không thể lưu dữ liệu vì kích thước quá lớn. Vui lòng kiểm tra giỏ hàng.');
       return;
     }
@@ -295,13 +317,26 @@ export class CartService {
     if (this.isUserLoggedIn) {
       this.cartAPIService.saveSelectedItems(selectedItems).pipe(catchError(this.handleError)).subscribe();
     } else {
-      localStorage.setItem(this.selectedItemsKey, compressedData);
+      localStorage.setItem(this.selectedItemsKey, serializedData);
     }
   }
 
   loadSelectedItemsFromLocalStorage(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
-    const compressedItems = localStorage.getItem(this.selectedItemsKey);
-    return compressedItems ? JSON.parse(decompressFromUTF16(compressedItems)) : [];
+    const storedItems = localStorage.getItem(this.selectedItemsKey);
+    if (!storedItems) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(storedItems);
+    } catch {
+      try {
+        const decompressed = decompressFromUTF16(storedItems);
+        return decompressed ? JSON.parse(decompressed) : [];
+      } catch {
+        return [];
+      }
+    }
   }
 
   clearSelectedItems(): void {

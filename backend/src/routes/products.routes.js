@@ -140,6 +140,30 @@ const normalizeListImage = (product, apiBaseUrl) => {
   };
 };
 
+const normalizeDetailImages = (product, apiBaseUrl) => {
+  if (!product) {
+    return product;
+  }
+
+  const normalized = { ...product };
+
+  for (const slot of [1, 2, 3, 4, 5]) {
+    const field = `image_${slot}`;
+    const value = normalized[field];
+    if (!value || typeof value !== 'string') {
+      continue;
+    }
+
+    if (/^https?:\/\//i.test(value) || value.startsWith('/assets/') || value.startsWith('assets/')) {
+      continue;
+    }
+
+    normalized[field] = `${apiBaseUrl}/products/${product._id}/image/${slot}`;
+  }
+
+  return normalized;
+};
+
 const buildProductFilter = (query) => {
   const filter = {};
   const productDept = typeof query.dept === 'string' ? query.dept.trim() : '';
@@ -237,6 +261,7 @@ router.get('/meta/catalog', async (_req, res) => {
     };
 
     setCachedProductList(getCatalogMetaCacheKey(), response);
+    res.set('Cache-Control', 'public, max-age=60');
     return res.status(200).json(response);
   } catch (err) {
     logProductsError('catalog meta', err);
@@ -287,6 +312,7 @@ router.get('/', async (req, res) => {
     const cacheKey = JSON.stringify({ page, limit, filter, includeImages, sortSpec });
     const cached = getCachedProductList(cacheKey);
     if (cached) {
+      res.set('Cache-Control', 'public, max-age=60');
       return res.status(200).json(cached);
     }
 
@@ -310,6 +336,7 @@ router.get('/', async (req, res) => {
     };
 
     setCachedProductList(cacheKey, response);
+    res.set('Cache-Control', 'public, max-age=60');
     return res.status(200).json(response);
   } catch (err) {
     logProductsError('list products', err, { query: req.query });
@@ -376,7 +403,8 @@ router.get('/:id', async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    return res.status(200).json(product);
+    const apiBaseUrl = `${req.protocol}://${req.get('host')}`;
+    return res.status(200).json(normalizeDetailImages(product, apiBaseUrl));
   } catch (err) {
     logProductsError('get product by id', err, { productId: req.params.id });
     return res.status(500).json({ message: 'Internal Server Error' });

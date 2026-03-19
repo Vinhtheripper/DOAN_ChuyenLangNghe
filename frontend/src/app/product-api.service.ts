@@ -14,6 +14,10 @@ export class ProductAPIService {
   private productsCache = new Map<string, { expiresAt: number; request$: Observable<{ products: Product[]; total: number; page: number; pages: number }> }>();
   private productByIdCache = new Map<string, { expiresAt: number; request$: Observable<Product> }>();
   private productListSnapshots = new Map<string, { expiresAt: number; value: { products: Product[]; total: number; page: number; pages: number } }>();
+  private catalogMetaCache: {
+    expiresAt: number;
+    request$: Observable<{ provinces: string[]; provinceCounts: Record<string, number>; minPrice: number; maxPrice: number }>;
+  } | null = null;
   private hasPreloadedInitialData = false;
 
   constructor(private _http: HttpClient) {
@@ -152,6 +156,21 @@ export class ProductAPIService {
     });
   }
 
+  getWarmProductById(id: string): Product | null {
+    for (const snapshot of this.productListSnapshots.values()) {
+      if (snapshot.expiresAt <= Date.now()) {
+        continue;
+      }
+
+      const matchedProduct = snapshot.value.products.find((product) => product._id === id);
+      if (matchedProduct) {
+        return matchedProduct;
+      }
+    }
+
+    return null;
+  }
+
   private clearProductCaches(): void {
     this.productsCache.clear();
     this.productListSnapshots.clear();
@@ -279,7 +298,11 @@ export class ProductAPIService {
   }
 
   getCatalogMeta(): Observable<{ provinces: string[]; provinceCounts: Record<string, number>; minPrice: number; maxPrice: number }> {
-    return this._http
+    if (this.catalogMetaCache && this.catalogMetaCache.expiresAt > Date.now()) {
+      return this.catalogMetaCache.request$;
+    }
+
+    const request$ = this._http
       .get<{ provinces: string[]; provinceCounts: Record<string, number>; minPrice: number; maxPrice: number }>(`${this.apiUrl}/meta/catalog`, {
         headers: this.getHeaders()
       })
@@ -288,6 +311,13 @@ export class ProductAPIService {
         catchError(this.handleError),
         shareReplay(1)
       );
+
+    this.catalogMetaCache = {
+      expiresAt: Date.now() + this.cacheTtlMs,
+      request$
+    };
+
+    return request$;
   }
 
   getProductById(id: string): Observable<Product> {
@@ -437,7 +467,7 @@ export class ProductAPIService {
     }
     this.hasPreloadedInitialData = true;
 
-    this.getProducts(1, 120).subscribe({ error: () => undefined });
+    this.getProducts(1, 24).subscribe({ error: () => undefined });
     this.getProducts(1, 12, '', 'tre_may').subscribe({ error: () => undefined });
     this.getProducts(1, 12, '', 'gom_su').subscribe({ error: () => undefined });
   }

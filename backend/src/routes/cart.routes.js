@@ -5,6 +5,22 @@ const { requireAuth } = require('../middlewares/auth');
 
 const router = express.Router();
 
+const normalizeImageValue = (value, productId, req) => {
+  if (!value || typeof value !== 'string') {
+    return `${req.protocol}://${req.get('host')}/products/${productId}/image/1`;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  if (value.startsWith('/assets/') || value.startsWith('assets/')) {
+    return value;
+  }
+
+  return `${req.protocol}://${req.get('host')}/products/${productId}/image/1`;
+};
+
 router.get('/', requireAuth, async (req, res) => {
   const { cartCollection } = getCollections();
   try {
@@ -32,7 +48,12 @@ router.get('/', requireAuth, async (req, res) => {
       }
     ]).toArray();
 
-    return res.status(200).json(cartItems);
+    const normalizedCartItems = cartItems.map((item) => ({
+      ...item,
+      image_1: normalizeImageValue(item.image_1, item.productId, req)
+    }));
+
+    return res.status(200).json(normalizedCartItems);
   } catch {
     return res.status(500).json({ message: 'Failed to retrieve cart items' });
   }

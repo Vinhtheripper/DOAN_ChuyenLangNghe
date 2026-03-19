@@ -320,39 +320,27 @@ h1 {
   }
 
   .login-left {
-    max-height: 180px;
-    min-height: 160px;
+    display: none;
   }
 
   .login-right {
-    padding: 22px 24px 26px;
-    border-radius: 0 0 16px 16px;
+    border-radius: 16px;
+    padding: 22px 22px 28px;
   }
 
   .brand-logo {
     width: 120px;
   }
 
-  .welcome {
-    font-size: 12px;
-  }
-
-  h1 {
-    font-size: 20px;
-    margin-bottom: 4px;
-  }
-
   .login-right .subtitle {
-    font-size: 12px;
     margin-bottom: 16px;
   }
 
   .login-form input {
-    height: 40px;
+    height: 38px;
   }
 
   .btn-login-main {
-    height: 44px;
-    font-size: 14px;
+    height: 42px;
   }
 }

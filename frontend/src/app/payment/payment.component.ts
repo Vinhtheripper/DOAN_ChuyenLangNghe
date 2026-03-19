@@ -24,6 +24,7 @@ export class PaymentComponent implements OnInit {
   paymentForm: FormGroup;
   isModalVisible: boolean = false;
   modalPaymentMethod: 'momo' | 'internet_banking' = 'momo';
+  isSubmittingOrder: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -65,6 +66,10 @@ export class PaymentComponent implements OnInit {
   }
 
   placeOrder(): void {
+    if (this.isSubmittingOrder) {
+      return;
+    }
+
     if (this.paymentForm.invalid) {
       this.paymentForm.markAllAsTouched();
       alert('Vui lòng điền đầy đủ thông tin trước khi đặt hàng.');
@@ -100,6 +105,10 @@ export class PaymentComponent implements OnInit {
   }
 
   processOrder(): void {
+    if (this.isSubmittingOrder) {
+      return;
+    }
+
     const insufficientStockItems = this.selectedItems.filter(item =>
       item.stocked_quantity !== undefined && item.quantity > item.stocked_quantity
     );
@@ -141,6 +150,7 @@ export class PaymentComponent implements OnInit {
       }
     };
 
+    this.isSubmittingOrder = true;
     this.orderAPIService.placeOrder(orderData).subscribe({
       next: () => {
         alert('Đơn hàng của bạn đã được đặt thành công!\n\nĐể tránh mất tiền vào tay kẻ lừa đảo mạo danh Shipper, bạn tuyệt đối\nKHÔNG chuyển khoản cho Shipper khi chưa nhận hàng\nKHÔNG nhấn vào đường dẫn (Link) lạ của Shipper gửi');
@@ -148,8 +158,10 @@ export class PaymentComponent implements OnInit {
         this.cartService.clearSelectedItems();
         this.cartService.clearAppliedCoupon();
         this.router.navigate(['/']);
+        this.isSubmittingOrder = false;
       },
       error: (err) => {
+        this.isSubmittingOrder = false;
         if (err.message.includes('Insufficient stock')) {
           alert('Một số sản phẩm không còn đủ hàng trong kho. Vui lòng cập nhật lại giỏ hàng.');
         } else {
@@ -163,7 +175,6 @@ export class PaymentComponent implements OnInit {
     this.locationService.getProvinces().subscribe({
       next: data => {
         this.provinces = data;
-        console.log('Đã tải thành công danh sách tỉnh/thành phố:', data.length, 'tỉnh');
       },
       error: err => {
         console.error('Lỗi khi tải danh sách tỉnh/thành phố:', err);
@@ -180,7 +191,6 @@ export class PaymentComponent implements OnInit {
           this.districts = data.districts || [];
           this.wards = [];
           this.paymentForm.patchValue({ selectedDistrict: '', selectedWard: '' });
-          console.log('Đã tải danh sách quận/huyện:', this.districts.length, 'quận/huyện');
         },
         error: err => {
           console.error('Lỗi khi tải danh sách quận/huyện:', err);
@@ -201,7 +211,6 @@ export class PaymentComponent implements OnInit {
         next: data => {
           this.wards = data.wards || [];
           this.paymentForm.patchValue({ selectedWard: '' });
-          console.log('Đã tải danh sách phường/xã:', this.wards.length, 'phường/xã');
         },
         error: err => {
           console.error('Lỗi khi tải danh sách phường/xã:', err);

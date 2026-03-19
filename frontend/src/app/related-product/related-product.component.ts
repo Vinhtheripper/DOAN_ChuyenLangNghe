@@ -14,11 +14,12 @@ export class RelatedProductComponent implements OnInit {
   @Input() currentProductDept: string = '';
   relatedProducts: Product[] = [];
   maxRelatedProducts: number = 10;
+  isLoading: boolean = true;
 
   constructor(private productService: ProductAPIService) { }
 
   ngOnInit(): void {
-    this.productService.getProducts(1, 24, this.currentProductDept).subscribe((data: { products: Product[]; total: number; page: number; pages: number }) => {
+    this.productService.getProducts(1, 12, this.currentProductDept).subscribe((data: { products: Product[]; total: number; page: number; pages: number }) => {
       const otherProducts = data.products.filter(product => product._id && product._id !== this.currentProductId);
 
       const scoredProducts = otherProducts.map(product => ({
@@ -54,6 +55,7 @@ export class RelatedProductComponent implements OnInit {
         newProduct.checkIfNew();
         return newProduct;
       });
+      this.isLoading = false;
     });
   }
 

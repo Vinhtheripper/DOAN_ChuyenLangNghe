@@ -16,7 +16,12 @@ async function connectDatabase() {
     database.collection('Product').createIndex({ updatedAt: -1, createdAt: -1, _id: -1 }),
     database.collection('Product').createIndex({ product_dept: 1, updatedAt: -1, createdAt: -1, _id: -1 }),
     database.collection('Product').createIndex({ type: 1, updatedAt: -1, createdAt: -1, _id: -1 }),
-    database.collection('Product').createIndex({ product_dept: 1, type: 1, updatedAt: -1, createdAt: -1, _id: -1 })
+    database.collection('Product').createIndex({ product_dept: 1, type: 1, updatedAt: -1, createdAt: -1, _id: -1 }),
+    database.collection('User').createIndex({ email: 1 }, { unique: true }),
+    database.collection('Coupon').createIndex({ code: 1 }, { unique: true }),
+    database.collection('Blog').createIndex({ slug: 1 }, { sparse: true }),
+    database.collection('Order').createIndex({ createdAt: -1 }),
+    database.collection('Order').createIndex({ userId: 1, createdAt: -1 })
   ]);
 
   collections = {

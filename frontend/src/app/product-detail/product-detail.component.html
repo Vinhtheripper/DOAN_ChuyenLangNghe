@@ -4,13 +4,14 @@
       <button *ngIf="images.length > 1" class="nav-arrow nav-prev" (click)="prevImage()" aria-label="Ảnh trước">
         ‹
       </button>
-      <img [src]="images[selectedImageIndex]" alt="{{ product.product_name }}" class="main-image" />
+      <img [src]="images[selectedImageIndex]" alt="{{ product.product_name }}" class="main-image" fetchpriority="high" decoding="async" />
       <button *ngIf="images.length > 1" class="nav-arrow nav-next" (click)="nextImage()" aria-label="Ảnh sau">
         ›
       </button>
     </div>
     <div class="thumbnail-row">
       <img *ngFor="let image of images; let i = index" [src]="image" alt="Thumbnail" (click)="selectImage(i)"
+        loading="lazy" decoding="async"
         [class.selected]="i === selectedImageIndex" class="thumbnail" />
     </div>
   </div>

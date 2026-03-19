@@ -20,15 +20,19 @@
                         </span>
                         <div class="cart-item-controls">
                             <div class="quantity-selector">
-                                <button type="button" (click)="decreaseQuantity(item)" [disabled]="item.tempQuantity <= 1" aria-label="Giảm số lượng">−</button>
+                                <button type="button" (click)="decreaseQuantity(item)" [disabled]="item.tempQuantity <= 1 || isSavingItem(item.productId) || isRemovingItem(item.productId)" aria-label="Giảm số lượng">−</button>
                                 <input type="number" [(ngModel)]="item.tempQuantity" min="1" [max]="item.stocked_quantity"
-                                    (change)="updateTempQuantity(item.productId, item.tempQuantity)" />
+                                    (change)="updateTempQuantity(item.productId, item.tempQuantity)" [disabled]="isSavingItem(item.productId) || isRemovingItem(item.productId)" />
                                 <button type="button" (click)="increaseQuantity(item)"
-                                    [disabled]="item.tempQuantity >= (item.stocked_quantity || 0)" aria-label="Tăng số lượng">+</button>
+                                    [disabled]="item.tempQuantity >= (item.stocked_quantity || 0) || isSavingItem(item.productId) || isRemovingItem(item.productId)" aria-label="Tăng số lượng">+</button>
                             </div>
                             <div class="cart-item-actions">
-                                <button type="button" class="btn-link" (click)="saveChanges(item.productId)">Lưu</button>
-                                <button type="button" class="btn-link btn-remove" (click)="confirmRemoveFromCart(item.productId)">Xóa</button>
+                                <button type="button" class="btn-link" (click)="saveChanges(item.productId)" [disabled]="isSavingItem(item.productId) || isRemovingItem(item.productId)">
+                                    {{ isSavingItem(item.productId) ? 'Đang lưu...' : 'Lưu' }}
+                                </button>
+                                <button type="button" class="btn-link btn-remove" (click)="confirmRemoveFromCart(item.productId)" [disabled]="isRemovingItem(item.productId) || isSavingItem(item.productId)">
+                                    {{ isRemovingItem(item.productId) ? 'Đang xóa...' : 'Xóa' }}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -63,7 +67,9 @@
                         <span>Thành tiền</span>
                         <span>{{ finalTotal | currency: 'VND' }}</span>
                     </div>
-                    <button type="button" class="btn-checkout" (click)="proceedToCheckout()">Thanh toán</button>
+                    <button type="button" class="btn-checkout" (click)="proceedToCheckout()" [disabled]="checkingOut">
+                        {{ checkingOut ? 'Đang chuyển...' : 'Thanh toán' }}
+                    </button>
                 </div>
                 <div class="coupon-card">
                     <h4 class="coupon-title">Mã ưu đãi</h4>

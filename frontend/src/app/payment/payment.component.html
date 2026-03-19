@@ -155,7 +155,9 @@
                             value="momo">
                         <label class="form-check-label" for="momo">Momo</label>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-4 rounded-pill">Đặt hàng</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-4 rounded-pill" [disabled]="isSubmittingOrder">
+                        {{ isSubmittingOrder ? 'Đang xử lý...' : 'Đặt hàng' }}
+                    </button>
                 </div>
             </div>
         </div>

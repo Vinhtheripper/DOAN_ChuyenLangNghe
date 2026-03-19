@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserAPIService } from '../user-api.service';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-signup',
@@ -13,6 +14,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   showPassword = false;
   showConfirmPassword = false;
   signupError: string | null = null;
+  isSubmitting: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -62,9 +64,12 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
     this.signupError = null;
     if (this.signupForm.valid) {
-      sessionStorage.removeItem('signupForm');
       const { lastName, firstName, termsAccepted, ...rest } = this.signupForm.value;
       const profileName = `${(lastName || '').trim()} ${(firstName || '').trim()}`.trim() || 'User';
       const payload = {
@@ -76,8 +81,14 @@ export class SignupComponent implements OnInit, OnDestroy {
         birthYear: '',
         marketing: false
       };
-      this.userAPIService.registerUser(payload).subscribe({
+      this.isSubmitting = true;
+      this.userAPIService.registerUser(payload).pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+        })
+      ).subscribe({
         next: () => {
+          sessionStorage.removeItem('signupForm');
           this.router.navigate(['/login']);
         },
         error: (err) => {

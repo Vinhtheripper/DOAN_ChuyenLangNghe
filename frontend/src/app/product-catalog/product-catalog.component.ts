@@ -1,14 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Product } from '../../interface/Product';
 import { ProductAPIService, ProductQueryOptions } from '../product-api.service';
+import { Subject, of } from 'rxjs';
+import { catchError, distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-catalog',
   templateUrl: './product-catalog.component.html',
   styleUrls: ['./product-catalog.component.css']
 })
-export class ProductCatalogComponent implements OnInit {
+export class ProductCatalogComponent implements OnInit, OnDestroy {
   categories: { name: string; image: string; filterKey: string }[] = [];
   selectedCategory = 'Tất cả';
   products: Product[] = [];
@@ -43,6 +45,8 @@ export class ProductCatalogComponent implements OnInit {
   showProvinceSuggestions = false;
 
   private hasAppliedRouteParams = false;
+  private destroy$ = new Subject<void>();
+  private fetchTrigger$ = new Subject<boolean>();
 
   get priceRangeStep(): number {
     const range = this.priceMaxRange - this.priceMinRange;
@@ -59,8 +63,9 @@ export class ProductCatalogComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeCategories();
+    this.bindFetchPipeline();
     this.loadCatalogMeta();
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.searchQuery = params['search'] || '';
       this.provinceFilter = params['province'] || '';
       this.provinceSearchQuery = this.provinceFilter;
@@ -70,9 +75,14 @@ export class ProductCatalogComponent implements OnInit {
       this.hasAppliedRouteParams = true;
 
       if (this.provinces.length > 0) {
-        this.fetchProducts();
+        this.scheduleFetch();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   initializeCategories(): void {
@@ -96,11 +106,11 @@ export class ProductCatalogComponent implements OnInit {
         this.priceMaxValue = this.priceMaxRange;
 
         if (!this.hasAppliedRouteParams) {
-          this.fetchProducts();
+          this.scheduleFetch();
           return;
         }
 
-        this.fetchProducts();
+        this.scheduleFetch();
       },
       error: () => {
         this.errMessage = 'Failed to load catalog metadata. Please try again later.';
@@ -111,43 +121,43 @@ export class ProductCatalogComponent implements OnInit {
 
   loadProducts(): void {
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   applyFilter(category: string): void {
     this.selectedCategory = category;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   applySearchFilter(searchTerm: string): void {
     this.searchQuery = searchTerm;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   filterByPrice(value: string | Event): void {
     this.priceFilter = typeof value === 'string' ? value : (value.target as HTMLSelectElement).value;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   filterByTag(value: string | Event): void {
     this.tagFilter = typeof value === 'string' ? value : (value.target as HTMLSelectElement).value;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   filterByProvince(event: Event): void {
     this.provinceFilter = (event.target as HTMLSelectElement).value;
     this.provinceSearchQuery = this.provinceFilter;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   applyProvinceFilter(): void {
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   onProvinceSearch(event: Event): void {
@@ -173,7 +183,7 @@ export class ProductCatalogComponent implements OnInit {
     this.provinceSearchQuery = province;
     this.showProvinceSuggestions = false;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   clearProvinceFilter(): void {
@@ -182,7 +192,7 @@ export class ProductCatalogComponent implements OnInit {
     this.filteredProvinces = [...this.provinces];
     this.showProvinceSuggestions = false;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   onProvinceInputBlur(): void {
@@ -210,7 +220,7 @@ export class ProductCatalogComponent implements OnInit {
     this.searchQuery = '';
     this.selectedCategory = 'Tất cả';
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   getActiveFilters(): { key: string; label: string }[] {
@@ -256,24 +266,24 @@ export class ProductCatalogComponent implements OnInit {
       this.provinceSearchQuery = '';
     }
     if (key === 'search') this.searchQuery = '';
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   onPromoChange(): void {
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   onRatingFilterChange(value: string): void {
     this.ratingFilter = value;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   onAvailabilityChange(value: string): void {
     this.availabilityFilter = value;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   onPriceRangeChange(): void {
@@ -283,7 +293,7 @@ export class ProductCatalogComponent implements OnInit {
       this.priceMaxValue = temp;
     }
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   formatPrice(v: number): string {
@@ -295,34 +305,34 @@ export class ProductCatalogComponent implements OnInit {
   applyCategoryFilter(categoryType: string): void {
     this.selectedCategory = this.mapCategoryTypeToName(categoryType);
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   applyDiscountFilter(): void {
     this.selectedCategory = 'Tất cả';
     this.promoDiscount = true;
     this.currentPage = 1;
-    this.fetchProducts();
+    this.scheduleFetch();
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.fetchProducts(true);
+      this.scheduleFetch(true);
     }
   }
 
   goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.fetchProducts(true);
+      this.scheduleFetch(true);
     }
   }
 
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.fetchProducts(true);
+      this.scheduleFetch(true);
     }
   }
 
@@ -366,34 +376,43 @@ export class ProductCatalogComponent implements OnInit {
     return `${filter.key}:${filter.label}`;
   }
 
-  private fetchProducts(shouldScroll = false): void {
-    this.isLoading = true;
-    this.errMessage = '';
+  private scheduleFetch(shouldScroll = false): void {
+    this.fetchTrigger$.next(shouldScroll);
+  }
 
-    this.productService.getProducts(
-      this.currentPage,
-      this.itemsPerPage,
-      this.provinceFilter,
-      this.mapCategoryNameToType(this.selectedCategory),
-      'none',
-      this.buildQueryOptions()
-    ).subscribe({
-      next: (data) => {
-        const mappedProducts = data.products.map((product) => this.productService.mapToProduct(product));
-        this.products = mappedProducts;
-        this.filteredProducts = mappedProducts;
-        this.paginatedProducts = mappedProducts;
-        this.productCount = data.total;
-        this.totalItems = data.total;
-        this.totalPages = data.pages;
-        this.errMessage = mappedProducts.length === 0 ? 'No products found in this category.' : '';
-        this.isLoading = false;
-
-        if (shouldScroll) {
-          this.scrollToTop();
-        }
-      },
-      error: () => {
+  private bindFetchPipeline(): void {
+    this.fetchTrigger$.pipe(
+      map((shouldScroll) => ({
+        shouldScroll,
+        requestKey: JSON.stringify({
+          page: this.currentPage,
+          limit: this.itemsPerPage,
+          province: this.provinceFilter,
+          category: this.selectedCategory,
+          options: this.buildQueryOptions()
+        })
+      })),
+      distinctUntilChanged((prev, curr) => prev.requestKey === curr.requestKey && prev.shouldScroll === curr.shouldScroll),
+      tap(() => {
+        this.isLoading = true;
+        this.errMessage = '';
+      }),
+      switchMap(({ shouldScroll }) =>
+        this.productService.getProducts(
+          this.currentPage,
+          this.itemsPerPage,
+          this.provinceFilter,
+          this.mapCategoryNameToType(this.selectedCategory),
+          'none',
+          this.buildQueryOptions()
+        ).pipe(
+          map((data) => ({ data, shouldScroll })),
+          catchError(() => of({ data: null, shouldScroll, error: true }))
+        )
+      ),
+      takeUntil(this.destroy$)
+    ).subscribe((result) => {
+      if (!result.data) {
         this.products = [];
         this.filteredProducts = [];
         this.paginatedProducts = [];
@@ -402,6 +421,21 @@ export class ProductCatalogComponent implements OnInit {
         this.totalPages = 0;
         this.errMessage = 'Failed to load products. Please try again later.';
         this.isLoading = false;
+        return;
+      }
+
+      const mappedProducts = result.data.products.map((product) => this.productService.mapToProduct(product));
+      this.products = mappedProducts;
+      this.filteredProducts = mappedProducts;
+      this.paginatedProducts = mappedProducts;
+      this.productCount = result.data.total;
+      this.totalItems = result.data.total;
+      this.totalPages = result.data.pages;
+      this.errMessage = mappedProducts.length === 0 ? 'No products found in this category.' : '';
+      this.isLoading = false;
+
+      if (result.shouldScroll) {
+        this.scrollToTop();
       }
     });
   }

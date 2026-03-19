@@ -14,6 +14,7 @@ import { ProductAPIService } from '../product-api.service';
 export class ProductItemComponent implements OnChanges {
   @Input() product!: Product;
   isLiked: boolean = false;
+  isAddingToCart: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -59,7 +60,8 @@ export class ProductItemComponent implements OnChanges {
 
   addToCart(event: Event): void {
     event.stopPropagation();
-    if (this.product) {
+    if (this.product && !this.isAddingToCart) {
+      this.isAddingToCart = true;
       this.cartService.addToCart(
         this.product._id,
         1,
@@ -68,6 +70,9 @@ export class ProductItemComponent implements OnChanges {
         this.product.image_1,
         this.product.stocked_quantity
       );
+      setTimeout(() => {
+        this.isAddingToCart = false;
+      }, 400);
     }
   }
 

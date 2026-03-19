@@ -9,6 +9,22 @@ const { checkCouponAvailability, evaluateCouponDiscount, computeItemsSummary } =
 
 const router = express.Router();
 
+const normalizeImageValue = (value, productId, req) => {
+  if (!value || typeof value !== 'string') {
+    return productId ? `${req.protocol}://${req.get('host')}/products/${productId}/image/1` : '';
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  if (value.startsWith('/assets/') || value.startsWith('assets/')) {
+    return value;
+  }
+
+  return productId ? `${req.protocol}://${req.get('host')}/products/${productId}/image/1` : '';
+};
+
 router.get('/me', requireAuth, async (req, res) => {
   const { orderCollection } = getCollections();
   const page = parseInt(req.query.page, 10) || 1;
@@ -81,9 +97,17 @@ router.get('/me', requireAuth, async (req, res) => {
       { $project: { products: 0 } }
     ]).toArray();
 
+    const normalizedOrders = orders.map((order) => ({
+      ...order,
+      selectedItems: (order.selectedItems || []).map((item) => ({
+        ...item,
+        image_1: normalizeImageValue(item.image_1, item._id, req)
+      }))
+    }));
+
     const total = await orderCollection.countDocuments(filter);
     return res.status(200).json({
-      orders,
+      orders: normalizedOrders,
       total,
       page,
       pages: Math.ceil(total / limit)

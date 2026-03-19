@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
+const compression = require('compression');
 const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -24,6 +25,7 @@ const frontendAssetsPath = path.resolve(__dirname, '../../frontend/src/assets');
 app.set('trust proxy', 1);
 
 app.use(morgan('combined'));
+app.use(compression());
 app.use('/assets', express.static(frontendAssetsPath, {
   maxAge: '1d'
 }));

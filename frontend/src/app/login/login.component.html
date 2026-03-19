@@ -42,7 +42,9 @@
           <a href="#" class="forgot">Quên mật khẩu?</a>
         </div>
 
-        <button type="submit" class="btn-login-main">Đăng nhập</button>
+        <button type="submit" class="btn-login-main" [disabled]="loginForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+        </button>
       </form>
 
       <p class="signup-line">
