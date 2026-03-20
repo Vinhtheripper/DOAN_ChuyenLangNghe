@@ -253,6 +253,23 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ message: 'Invalid totalPrice.' });
     }
 
+    const productObjectIds = selectedItems.map((item) => new ObjectId(item._id));
+    const products = await productCollection.find(
+      { _id: { $in: productObjectIds } },
+      { projection: { stocked_quantity: 1 } }
+    ).toArray();
+    const productMap = new Map(products.map((product) => [product._id.toString(), product]));
+
+    for (const item of selectedItems) {
+      const product = productMap.get(String(item._id));
+      if (!product) {
+        return res.status(404).json({ message: `Product not found: ${item._id}` });
+      }
+      if (product.stocked_quantity < item.quantity) {
+        return res.status(400).json({ message: `Insufficient stock for product ID: ${item._id}` });
+      }
+    }
+
     const result = await orderCollection.insertOne({
       userId,
       selectedItems,
@@ -267,17 +284,14 @@ router.post('/', requireAuth, async (req, res) => {
       status: 'in_progress'
     });
 
-    for (const item of selectedItems) {
-      const productId = new ObjectId(item._id);
-      const product = await productCollection.findOne({ _id: productId });
-      if (!product) {
-        return res.status(404).json({ message: `Product not found: ${item._id}` });
-      }
-      if (product.stocked_quantity < item.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for product ID: ${item._id}` });
-      }
-      await productCollection.updateOne({ _id: productId }, { $inc: { stocked_quantity: -item.quantity } });
-    }
+    await productCollection.bulkWrite(
+      selectedItems.map((item) => ({
+        updateOne: {
+          filter: { _id: new ObjectId(item._id) },
+          update: { $inc: { stocked_quantity: -item.quantity } }
+        }
+      }))
+    );
 
     if (appliedCoupon) {
       await couponCollection.updateOne(

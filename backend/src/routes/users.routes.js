@@ -94,7 +94,25 @@ router.get('/logout', (req, res) => {
 
 router.get('/profile', requireAuth, async (req, res) => {
   const { userCollection } = getCollections();
-  const user = await userCollection.findOne({ _id: new ObjectId(req.session.userId) });
+  const user = await userCollection.findOne(
+    { _id: new ObjectId(req.session.userId) },
+    {
+      projection: {
+        email: 1,
+        profileName: 1,
+        gender: 1,
+        birthDate: 1,
+        phone: 1,
+        address: 1,
+        marketing: 1,
+        role: 1,
+        action: 1,
+        avatar: 1,
+        memberPoints: 1,
+        memberTier: 1
+      }
+    }
+  );
 
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
@@ -214,7 +232,11 @@ router.get('/user-management', requireRoleAction('admin', ['edit all', 'account 
 
   try {
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const users = await userCollection.find(filter).skip(skip).limit(parseInt(limit, 10)).toArray();
+    const users = await userCollection.find(filter, {
+      projection: {
+        password: 0
+      }
+    }).skip(skip).limit(parseInt(limit, 10)).toArray();
     const total = await userCollection.countDocuments(filter);
 
     return res.status(200).json({

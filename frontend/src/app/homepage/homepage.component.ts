@@ -67,6 +67,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.productService.getProducts(1, 8).subscribe({
       next: (data) => {
         this.featuredProducts = data.products.map((productData) => this.productService.mapToProduct(productData));
+        this.productService.prefetchImageUrls(
+          this.featuredProducts.map((product) => this.getProductImage(product)),
+          { highPriority: true, limit: 4 }
+        );
         this.isProductsLoading = false;
       },
       error: () => {

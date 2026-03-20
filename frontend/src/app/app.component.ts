@@ -3,6 +3,7 @@ import { AuthService } from './services/auth.service';
 import { Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { LoadingService } from './services/loading.service';
+import { ProductAPIService } from './product-api.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private productService: ProductAPIService
   ) { }
 
   ngOnInit(): void {
@@ -46,6 +48,7 @@ export class AppComponent implements OnInit {
       this.isAdminRoute = url.startsWith('/admin');
       this.isLoginRoute = url.startsWith('/login');
       this.isSignupRoute = url.startsWith('/signup');
+      this.productService.warmRouteData(url);
     };
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {

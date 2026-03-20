@@ -3,6 +3,24 @@ const { getCollections } = require('../config/database');
 const { requireRoleAction } = require('../middlewares/auth');
 
 const router = express.Router();
+const DASHBOARD_CACHE_TTL_MS = 30 * 1000;
+let dashboardStatsCache = null;
+
+function getCachedDashboardStats() {
+  if (!dashboardStatsCache) return null;
+  if (dashboardStatsCache.expiresAt <= Date.now()) {
+    dashboardStatsCache = null;
+    return null;
+  }
+  return dashboardStatsCache.value;
+}
+
+function setCachedDashboardStats(value) {
+  dashboardStatsCache = {
+    value,
+    expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS
+  };
+}
 
 function formatDateKey(date) {
   return date.toISOString().split('T')[0];
@@ -46,95 +64,119 @@ router.get('/stats', requireRoleAction('admin', ['edit all', 'sales ctrl', 'view
   const { productCollection, orderCollection, userCollection, blogCollection, feedbackCollection } = getCollections();
 
   try {
-    const totalProducts = await productCollection.countDocuments();
-    const totalOrders = await orderCollection.countDocuments();
-    const totalUsers = await userCollection.countDocuments();
-    const totalBlogs = await blogCollection.countDocuments();
-    const totalContacts = await feedbackCollection.countDocuments();
-    const newContacts = await feedbackCollection.countDocuments({ status: 'new' });
+    const cached = getCachedDashboardStats();
+    if (cached) {
+      return res.status(200).json(cached);
+    }
 
-    const pendingOrders = await orderCollection.countDocuments({ status: 'in_progress' });
-    const completedOrders = await orderCollection.countDocuments({ status: 'completed' });
-    const cancelledOrders = await orderCollection.countDocuments({ status: 'cancelled' });
+    const [
+      totalProducts,
+      totalOrders,
+      totalUsers,
+      totalBlogs,
+      totalContacts,
+      newContacts,
+      pendingOrders,
+      completedOrders,
+      cancelledOrders,
+      revenueResult,
+      recentOrders,
+      lowStockProducts,
+      topProducts,
+      dailyAgg,
+      monthlyAgg
+    ] = await Promise.all([
+      productCollection.countDocuments(),
+      orderCollection.countDocuments(),
+      userCollection.countDocuments(),
+      blogCollection.countDocuments(),
+      feedbackCollection.countDocuments(),
+      feedbackCollection.countDocuments({ status: 'new' }),
+      orderCollection.countDocuments({ status: 'in_progress' }),
+      orderCollection.countDocuments({ status: 'completed' }),
+      orderCollection.countDocuments({ status: 'cancelled' }),
+      orderCollection.aggregate([
+        { $match: { status: 'completed' } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+      ]).toArray(),
+      orderCollection.find({}, {
+        projection: { status: 1, totalPrice: 1, createdAt: 1, shippingAddress: 1 }
+      }).sort({ createdAt: -1 }).limit(5).toArray(),
+      productCollection.find(
+        { stocked_quantity: { $lte: 10 } },
+        { projection: { product_name: 1, stocked_quantity: 1, image_1: 1, unit_price: 1 } }
+      ).sort({ stocked_quantity: 1 }).limit(5).toArray(),
+      orderCollection.aggregate([
+        { $unwind: '$selectedItems' },
+        {
+          $group: {
+            _id: '$selectedItems._id',
+            productName: { $first: '$selectedItems.product_name' },
+            totalQuantity: { $sum: '$selectedItems.quantity' },
+            totalRevenue: { $sum: { $multiply: ['$selectedItems.quantity', '$selectedItems.unit_price'] } }
+          }
+        },
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 5 }
+      ]).toArray(),
+      orderCollection.aggregate([
+        {
+          $project: {
+            status: 1,
+            totalPrice: 1,
+            createdDate: {
+              $dateToString: {
+                format: '%Y-%m-%d',
+                date: '$createdAt',
+                timezone: 'Asia/Ho_Chi_Minh'
+              }
+            }
+          }
+        },
+        {
+          $group: {
+            _id: '$createdDate',
+            dailyOrders: { $sum: 1 },
+            dailyRevenue: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
+              }
+            }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]).toArray(),
+      orderCollection.aggregate([
+        {
+          $project: {
+            status: 1,
+            totalPrice: 1,
+            createdMonth: {
+              $dateToString: {
+                format: '%Y-%m',
+                date: '$createdAt',
+                timezone: 'Asia/Ho_Chi_Minh'
+              }
+            }
+          }
+        },
+        {
+          $group: {
+            _id: '$createdMonth',
+            monthlyOrders: { $sum: 1 },
+            monthlyRevenue: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
+              }
+            }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]).toArray()
+    ]);
 
-    const revenueResult = await orderCollection.aggregate([
-      { $match: { status: 'completed' } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]).toArray();
     const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
     const avgOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0;
-
-    const recentOrders = await orderCollection.find().sort({ createdAt: -1 }).limit(5).toArray();
-    const lowStockProducts = await productCollection.find({ stocked_quantity: { $lte: 10 } }).sort({ stocked_quantity: 1 }).limit(5).toArray();
-    const topProducts = await orderCollection.aggregate([
-      { $unwind: '$selectedItems' },
-      {
-        $group: {
-          _id: '$selectedItems._id',
-          productName: { $first: '$selectedItems.product_name' },
-          totalQuantity: { $sum: '$selectedItems.quantity' },
-          totalRevenue: { $sum: { $multiply: ['$selectedItems.quantity', '$selectedItems.unit_price'] } }
-        }
-      },
-      { $sort: { totalQuantity: -1 } },
-      { $limit: 5 }
-    ]).toArray();
-
-    const dailyAgg = await orderCollection.aggregate([
-      {
-        $project: {
-          status: 1,
-          totalPrice: 1,
-          createdDate: {
-            $dateToString: {
-              format: '%Y-%m-%d',
-              date: '$createdAt',
-              timezone: 'Asia/Ho_Chi_Minh'
-            }
-          }
-        }
-      },
-      {
-        $group: {
-          _id: '$createdDate',
-          dailyOrders: { $sum: 1 },
-          dailyRevenue: {
-            $sum: {
-              $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
-            }
-          }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]).toArray();
-
-    const monthlyAgg = await orderCollection.aggregate([
-      {
-        $project: {
-          status: 1,
-          totalPrice: 1,
-          createdMonth: {
-            $dateToString: {
-              format: '%Y-%m',
-              date: '$createdAt',
-              timezone: 'Asia/Ho_Chi_Minh'
-            }
-          }
-        }
-      },
-      {
-        $group: {
-          _id: '$createdMonth',
-          monthlyOrders: { $sum: 1 },
-          monthlyRevenue: {
-            $sum: {
-              $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
-            }
-          }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]).toArray();
 
     const dailyMap = new Map(dailyAgg.map((d) => [d._id, d]));
     const monthlyMap = new Map(monthlyAgg.map((m) => [m._id, m]));
@@ -179,7 +221,7 @@ router.get('/stats', requireRoleAction('admin', ['edit all', 'sales ctrl', 'view
     const revenueGrowth = Number(calcGrowth(current7DaysRevenue, previous7DaysRevenue).toFixed(1));
     const ordersGrowth = Number(calcGrowth(current7DaysOrders, previous7DaysOrders).toFixed(1));
 
-    return res.status(200).json({
+    const response = {
       overview: {
         totalProducts,
         totalOrders,
@@ -201,7 +243,10 @@ router.get('/stats', requireRoleAction('admin', ['edit all', 'sales ctrl', 'view
       salesData,
       weeklySalesData,
       monthlySalesData
-    });
+    };
+
+    setCachedDashboardStats(response);
+    return res.status(200).json(response);
   } catch (err) {
     console.error('Error fetching dashboard stats:', err);
     return res.status(500).json({ message: 'Internal Server Error' });

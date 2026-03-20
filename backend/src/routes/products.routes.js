@@ -346,7 +346,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id/image/:slot', async (req, res) => {
   try {
-    const { productCollection } = getCollections();
+    const { productCollection, productImageCollection } = getCollections();
     const slot = Number(req.params.slot);
     const imageField = getImageFieldName(slot);
 
@@ -366,6 +366,20 @@ router.get('/:id/image/:slot', async (req, res) => {
       res.set('Content-Type', cachedImage.contentType);
       res.set('Cache-Control', 'public, max-age=86400');
       return res.send(cachedImage.buffer);
+    }
+
+    const externalImage = await productImageCollection.findOne(
+      { productId: new ObjectId(req.params.id), slot },
+      { projection: { url: 1 } }
+    );
+
+    if (externalImage?.url) {
+      const externalPayload = {
+        kind: 'redirect',
+        location: externalImage.url
+      };
+      setCachedProductImage(cacheKey, externalPayload);
+      return res.redirect(externalImage.url);
     }
 
     const product = await productCollection.findOne(

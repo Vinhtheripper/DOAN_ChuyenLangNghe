@@ -19,6 +19,8 @@ export class ProductAPIService {
     request$: Observable<{ provinces: string[]; provinceCounts: Record<string, number>; minPrice: number; maxPrice: number }>;
   } | null = null;
   private hasPreloadedInitialData = false;
+  private warmedRoutes = new Set<string>();
+  private prefetchedImageUrls = new Set<string>();
 
   constructor(private _http: HttpClient) {
     this.token = this.getToken();
@@ -174,6 +176,109 @@ export class ProductAPIService {
   private clearProductCaches(): void {
     this.productsCache.clear();
     this.productListSnapshots.clear();
+    this.catalogMetaCache = null;
+    this.warmedRoutes.clear();
+  }
+
+  private scheduleWarmRequest(task: () => void): void {
+    const win = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback) => number;
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+      win.requestIdleCallback(() => task());
+      return;
+    }
+
+    setTimeout(task, 150);
+  }
+
+  prefetchImageUrls(urls: string[], options: { highPriority?: boolean; limit?: number } = {}): void {
+    const filteredUrls = urls
+      .filter((url) => !!url && !this.prefetchedImageUrls.has(url))
+      .slice(0, options.limit ?? urls.length);
+
+    if (filteredUrls.length === 0) {
+      return;
+    }
+
+    const preload = () => {
+      filteredUrls.forEach((url) => {
+        this.prefetchedImageUrls.add(url);
+
+        if (options.highPriority) {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = url;
+          document.head.appendChild(link);
+          setTimeout(() => link.remove(), 5000);
+          return;
+        }
+
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = url;
+      });
+    };
+
+    this.scheduleWarmRequest(preload);
+  }
+
+  warmRouteData(routeUrl: string): void {
+    const routeKey = routeUrl.split('?')[0];
+    if (this.warmedRoutes.has(routeKey)) {
+      return;
+    }
+
+    this.warmedRoutes.add(routeKey);
+
+    this.scheduleWarmRequest(() => {
+      if (routeKey === '/' || routeKey === '') {
+        this.getProducts(1, 8).subscribe({
+          next: (response) => {
+            this.prefetchImageUrls(
+              response.products.map((product) => this.resolveProductImageSrc(product.image_1, product._id || '')),
+              { highPriority: true, limit: 4 }
+            );
+          },
+          error: () => undefined
+        });
+        return;
+      }
+
+      if (routeKey.startsWith('/catalog')) {
+        this.getCatalogMeta().subscribe({ error: () => undefined });
+        this.getProducts(1, 24).subscribe({
+          next: (response) => {
+            this.prefetchImageUrls(
+              response.products.map((product) => this.resolveProductImageSrc(product.image_1, product._id || '')),
+              { limit: 8 }
+            );
+          },
+          error: () => undefined
+        });
+        return;
+      }
+
+      if (routeKey.startsWith('/product/')) {
+        const productId = routeKey.split('/').filter(Boolean)[1];
+        if (productId) {
+          this.getProductById(productId).subscribe({
+            next: (product) => {
+              this.prefetchImageUrls([
+                this.resolveProductImageSrc(product.image_1, product._id || '', 1),
+                this.resolveProductImageSrc(product.image_2, product._id || '', 2),
+                this.resolveProductImageSrc(product.image_3, product._id || '', 3),
+                this.resolveProductImageSrc(product.image_4, product._id || '', 4),
+                this.resolveProductImageSrc(product.image_5, product._id || '', 5)
+              ], { highPriority: true, limit: 3 });
+            },
+            error: () => undefined
+          });
+        }
+      }
+    });
   }
 
   mapToProduct(productData: Partial<Product> & { _id?: string }): Product {
@@ -186,10 +291,10 @@ export class ProductAPIService {
       productData.discount || 0,
       productData.createdAt || '',
       this.resolveProductImageSrc(productData.image_1, productData._id || ''),
-      productData.image_2 || '',
-      productData.image_3 || '',
-      productData.image_4 || '',
-      productData.image_5 || '',
+      this.resolveProductImageSrc(productData.image_2, productData._id || '', 2),
+      this.resolveProductImageSrc(productData.image_3, productData._id || '', 3),
+      this.resolveProductImageSrc(productData.image_4, productData._id || '', 4),
+      this.resolveProductImageSrc(productData.image_5, productData._id || '', 5),
       productData.product_dept || '',
       productData.rating || 0,
       productData.isNew || false,

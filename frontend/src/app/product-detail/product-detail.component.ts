@@ -1,14 +1,15 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CartService } from '../services/cart.service';
 import { Product } from '../../interface/Product';
 import { Router } from '@angular/router';
+import { ProductAPIService } from '../product-api.service';
 
 @Component({
   selector: 'app-product-detail',
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit, OnChanges {
   @Input() product!: Product;
   @Input() reviewCount: number = 0;
   @Input() averageRating: number = 0;
@@ -24,25 +25,19 @@ export class ProductDetailComponent implements OnInit {
   ];
   selectedSizeIndex: number = 0;
 
-  constructor(private cartService: CartService, private router: Router) { }
+  constructor(
+    private cartService: CartService,
+    private router: Router,
+    private productService: ProductAPIService
+  ) { }
 
   ngOnInit(): void {
-    if (this.product) {
-      this.images = [
-        this.product.image_1,
-        this.product.image_2,
-        this.product.image_3,
-        this.product.image_4,
-        this.product.image_5
-      ].filter(image => !!image);
-      if (this.images.length === 0 && this.product.image_1) {
-        this.images = [this.product.image_1];
-      }
+    this.syncProductState();
+  }
 
-      this.isOutOfStock = (this.product.stocked_quantity || 0) === 0;
-      if (this.isOutOfStock) {
-        this.quantity = 0;
-      }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['product']) {
+      this.syncProductState();
     }
   }
 
@@ -136,5 +131,32 @@ export class ProductDetailComponent implements OnInit {
       this.product.image_1,
       this.product.stocked_quantity
     );
+  }
+
+  private syncProductState(): void {
+    if (!this.product) {
+      this.images = [];
+      return;
+    }
+
+    this.images = [
+      this.productService.resolveProductImageSrc(this.product.image_1, this.product._id || '', 1),
+      this.productService.resolveProductImageSrc(this.product.image_2, this.product._id || '', 2),
+      this.productService.resolveProductImageSrc(this.product.image_3, this.product._id || '', 3),
+      this.productService.resolveProductImageSrc(this.product.image_4, this.product._id || '', 4),
+      this.productService.resolveProductImageSrc(this.product.image_5, this.product._id || '', 5)
+    ].filter((image, index, arr) => !!image && arr.indexOf(image) === index);
+
+    if (this.images.length === 0 && this.product._id) {
+      this.images = [this.productService.getProductImageUrl(this.product._id, 1)];
+    }
+
+    this.selectedImageIndex = 0;
+    this.isOutOfStock = (this.product.stocked_quantity || 0) === 0;
+    if (this.isOutOfStock) {
+      this.quantity = 0;
+    } else if (this.quantity < 1) {
+      this.quantity = 1;
+    }
   }
 }
