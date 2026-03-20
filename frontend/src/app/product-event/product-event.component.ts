@@ -29,7 +29,7 @@ export class ProductEventComponent implements OnInit {
               product.unit_price || 0,
               product.discount || 0,
               product.createdAt || '',
-              this._service.resolveProductImageSrc(product.image_1, product._id || ''),
+              this._service.getProductThumbnailSrc(product.image_1, product._id || '', { width: 480, height: 480 }),
               product.image_2 || '',
               product.image_3 || '',
               product.image_4 || '',

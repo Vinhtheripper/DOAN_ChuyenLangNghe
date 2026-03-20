@@ -97,7 +97,10 @@ export class ProductItemComponent implements OnChanges {
   }
 
   getImageSrc(): string {
-    return this.productService.resolveProductImageSrc(this.product?.image_1, this.product?._id || '');
+    return this.productService.getProductThumbnailSrc(this.product?.image_1, this.product?._id || '', {
+      width: 480,
+      height: 480
+    });
   }
 
   isLoggedIn(): boolean {

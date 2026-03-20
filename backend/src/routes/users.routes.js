@@ -6,6 +6,16 @@ const { requireAuth, requireRoleAction } = require('../middlewares/auth');
 
 const router = express.Router();
 
+const isAcceptedImageValue = (value) => (
+  typeof value === 'string' &&
+  (
+    value.startsWith('data:image/') ||
+    /^https?:\/\//i.test(value) ||
+    value.startsWith('/assets/') ||
+    value.startsWith('assets/')
+  )
+);
+
 router.post('/signup', async (req, res) => {
   const { userCollection } = getCollections();
   const { profileName, email, password, gender, birthMonth, birthDay, birthYear, marketing, role = 'user' } = req.body;
@@ -171,8 +181,8 @@ router.patch('/profile', requireAuth, async (req, res) => {
     }
 
     if (updateData.avatar) {
-      if (typeof updateData.avatar !== 'string' || !updateData.avatar.startsWith('data:image/')) {
-        return res.status(400).json({ message: 'Invalid avatar format. Must be Base64 data URL.' });
+      if (!isAcceptedImageValue(updateData.avatar)) {
+        return res.status(400).json({ message: 'Invalid avatar format. Must be a valid image URL or Base64 data URL.' });
       }
       if (updateData.avatar.length > 2_000_000) {
         return res.status(413).json({ message: 'Avatar image too large.' });

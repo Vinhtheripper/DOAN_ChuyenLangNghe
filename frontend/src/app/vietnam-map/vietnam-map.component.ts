@@ -248,7 +248,7 @@ export class VietnamMapComponent implements OnInit, AfterViewInit {
           p.unit_price || 0,
           p.discount || 0,
           p.createdAt || '',
-          this.productService.resolveProductImageSrc(p.image_1, p._id || ''),
+          this.productService.getProductThumbnailSrc(p.image_1, p._id || '', { width: 480, height: 480 }),
           p.image_2 || '',
           p.image_3 || '',
           p.image_4 || '',

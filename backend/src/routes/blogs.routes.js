@@ -5,6 +5,16 @@ const { requireRoleAction } = require('../middlewares/auth');
 
 const router = express.Router();
 
+const isAcceptedImageValue = (value) => (
+  typeof value === 'string' &&
+  (
+    value.startsWith('data:image/') ||
+    /^https?:\/\//i.test(value) ||
+    value.startsWith('/assets/') ||
+    value.startsWith('assets/')
+  )
+);
+
 router.get('/', async (req, res) => {
   const { blogCollection } = getCollections();
   const page = parseInt(req.query.page, 10) || 1;
@@ -71,8 +81,8 @@ router.post('/', requireRoleAction('admin', ['edit all', 'sales ctrl']), async (
   if (!title || !content) {
     return res.status(400).json({ message: 'Title and content are required.' });
   }
-  if (image && (typeof image !== 'string' || !image.startsWith('data:image/'))) {
-    return res.status(400).json({ message: 'Invalid image format. Must be Base64.' });
+  if (image && !isAcceptedImageValue(image)) {
+    return res.status(400).json({ message: 'Invalid image format. Must be a valid image URL or Base64 data URL.' });
   }
 
   try {
@@ -97,8 +107,8 @@ router.patch('/:id', requireRoleAction('admin', ['edit all', 'sales ctrl']), asy
   const { blogCollection } = getCollections();
   const { image, ...updateData } = req.body;
 
-  if (image && (typeof image !== 'string' || !image.startsWith('data:image/'))) {
-    return res.status(400).json({ message: 'Invalid image format. Must be Base64.' });
+  if (image && !isAcceptedImageValue(image)) {
+    return res.status(400).json({ message: 'Invalid image format. Must be a valid image URL or Base64 data URL.' });
   }
 
   try {

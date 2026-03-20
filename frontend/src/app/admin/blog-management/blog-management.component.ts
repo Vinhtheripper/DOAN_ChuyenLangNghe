@@ -3,6 +3,7 @@ import { Blog } from '../../../interface/Blog';
 import { BlogAPIService } from '../../blog-api.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { MediaUploadService } from '../../services/media-upload.service';
 
 @Component({
   selector: 'app-blog-management',
@@ -23,12 +24,14 @@ export class BlogManagementComponent implements OnInit {
   canEdit: boolean = false;
   canView: boolean = false;
   blogImage: string = '';
+  selectedImageFile: File | null = null;
   searchText: string = '';
 
   constructor(
     private blogService: BlogAPIService,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private mediaUploadService: MediaUploadService
   ) {
     this.blogForm = this.fb.group({
       title: ['', Validators.required],
@@ -79,19 +82,13 @@ export class BlogManagementComponent implements OnInit {
   onImageChange(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64String = reader.result as string;
-      this.blogImage = base64String;
-      this.blogForm.patchValue({ image: base64String });
-    };
-
-    reader.readAsDataURL(file);
+    this.selectedImageFile = file;
+    this.blogImage = URL.createObjectURL(file);
   }
 
   clearImage(): void {
     this.blogImage = '';
+    this.selectedImageFile = null;
     this.blogForm.patchValue({ image: '' });
     this.blogForm.updateValueAndValidity();
   }
@@ -113,7 +110,11 @@ export class BlogManagementComponent implements OnInit {
       }
     }, 200);
 
-    this.blogService.createBlog(this.blogForm.value).subscribe({
+    const createBlogWithImage = (imageUrl: string) => {
+      this.blogService.createBlog({
+        ...this.blogForm.value,
+        image: imageUrl
+      }).subscribe({
       next: () => {
         clearInterval(progressInterval);
         this.uploadProgress = 100;
@@ -125,6 +126,7 @@ export class BlogManagementComponent implements OnInit {
             published: true
           });
           this.blogImage = '';
+          this.selectedImageFile = null;
           const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
           if (fileInput) fileInput.value = '';
           this.isUploading = false;
@@ -140,7 +142,24 @@ export class BlogManagementComponent implements OnInit {
         this.uploadProgress = 0;
         alert('Lỗi khi tạo blog: ' + (err.error?.message || 'Lỗi không xác định'));
       },
-    });
+      });
+    };
+
+    if (this.selectedImageFile) {
+      this.mediaUploadService.uploadImage(this.selectedImageFile, 'blogs').subscribe({
+        next: (result) => createBlogWithImage(result.url),
+        error: (err) => {
+          clearInterval(progressInterval);
+          this.isUploading = false;
+          this.loading = false;
+          this.uploadProgress = 0;
+          alert(err.message || 'Lỗi upload ảnh blog');
+        }
+      });
+      return;
+    }
+
+    createBlogWithImage(this.blogForm.value.image || '');
   }
 
   editBlog(blog: Blog): void {
@@ -151,6 +170,7 @@ export class BlogManagementComponent implements OnInit {
     this.selectedBlog = blog;
     this.blogForm.patchValue(blog);
     this.blogImage = blog.image || '';
+    this.selectedImageFile = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -161,7 +181,11 @@ export class BlogManagementComponent implements OnInit {
     }
 
     this.loading = true;
-    this.blogService.updateBlog(this.selectedBlog._id!, this.blogForm.value).subscribe({
+    const updateBlogWithImage = (imageUrl: string) => {
+      this.blogService.updateBlog(this.selectedBlog!._id!, {
+        ...this.blogForm.value,
+        image: imageUrl
+      }).subscribe({
       next: () => {
         this.loadBlogs();
         this.cancelEdit();
@@ -172,7 +196,21 @@ export class BlogManagementComponent implements OnInit {
         this.loading = false;
         alert('Lỗi khi cập nhật blog: ' + (err.error?.message || 'Lỗi không xác định'));
       },
-    });
+      });
+    };
+
+    if (this.selectedImageFile) {
+      this.mediaUploadService.uploadImage(this.selectedImageFile, 'blogs').subscribe({
+        next: (result) => updateBlogWithImage(result.url),
+        error: (err) => {
+          this.loading = false;
+          alert(err.message || 'Lỗi upload ảnh blog');
+        }
+      });
+      return;
+    }
+
+    updateBlogWithImage(this.blogForm.value.image || '');
   }
 
   deleteBlog(blogId: string): void {
@@ -198,6 +236,7 @@ export class BlogManagementComponent implements OnInit {
       published: true
     });
     this.blogImage = '';
+    this.selectedImageFile = null;
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   }

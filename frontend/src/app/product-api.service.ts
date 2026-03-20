@@ -238,7 +238,7 @@ export class ProductAPIService {
         this.getProducts(1, 8).subscribe({
           next: (response) => {
             this.prefetchImageUrls(
-              response.products.map((product) => this.resolveProductImageSrc(product.image_1, product._id || '')),
+              response.products.map((product) => this.getProductThumbnailSrc(product.image_1, product._id || '', { width: 480, height: 480 })),
               { highPriority: true, limit: 4 }
             );
           },
@@ -252,7 +252,7 @@ export class ProductAPIService {
         this.getProducts(1, 24).subscribe({
           next: (response) => {
             this.prefetchImageUrls(
-              response.products.map((product) => this.resolveProductImageSrc(product.image_1, product._id || '')),
+              response.products.map((product) => this.getProductThumbnailSrc(product.image_1, product._id || '', { width: 480, height: 480 })),
               { limit: 8 }
             );
           },
@@ -306,6 +306,43 @@ export class ProductAPIService {
 
   getProductImageUrl(productId: string, slot: number = 1): string {
     return buildUrl(`/products/${productId}/image/${slot}`);
+  }
+
+  getProductThumbnailSrc(
+    imageValue: string | undefined | null,
+    productId: string,
+    options: { width?: number; height?: number; fit?: 'crop' | 'clip' | 'max' } = {}
+  ): string {
+    const originalSrc = this.resolveProductImageSrc(imageValue, productId);
+    const handle = this.extractFilestackHandle(originalSrc);
+
+    if (!handle) {
+      return originalSrc;
+    }
+
+    const width = options.width ?? 480;
+    const height = options.height ?? width;
+    const fit = options.fit ?? 'crop';
+
+    return `https://cdn.filestackcontent.com/resize=width:${width},height:${height},fit:${fit}/${handle}`;
+  }
+
+  private extractFilestackHandle(urlValue: string): string | null {
+    try {
+      const parsed = new URL(urlValue);
+      if (!parsed.hostname.includes('filestackcontent.com')) {
+        return null;
+      }
+
+      const segments = parsed.pathname.split('/').filter(Boolean);
+      if (segments.length === 0) {
+        return null;
+      }
+
+      return segments[segments.length - 1];
+    } catch {
+      return null;
+    }
   }
 
   resolveProductImageSrc(imageValue: string | undefined | null, productId: string, slot: number = 1): string {

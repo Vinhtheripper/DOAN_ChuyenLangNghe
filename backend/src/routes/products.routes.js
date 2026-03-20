@@ -114,6 +114,16 @@ const parseImagePayload = (value) => {
   return null;
 };
 
+const isAcceptedImageValue = (value) => (
+  typeof value === 'string' &&
+  (
+    value.startsWith('data:image/') ||
+    /^https?:\/\//i.test(value) ||
+    value.startsWith('/assets/') ||
+    value.startsWith('assets/')
+  )
+);
+
 const normalizeListImage = (product, apiBaseUrl) => {
   if (!product?.image_1 || typeof product.image_1 !== 'string') {
     return product;
@@ -458,8 +468,8 @@ router.post('/', requireRoleAction('admin', ['edit all', 'sales ctrl', 'account 
 
   const images = [image_1, image_2, image_3, image_4, image_5].filter(Boolean);
   for (const img of images) {
-    if (typeof img !== 'string' || !img.startsWith('data:image/')) {
-      return res.status(400).json({ message: 'Invalid image format. Must be Base64.' });
+    if (!isAcceptedImageValue(img)) {
+      return res.status(400).json({ message: 'Invalid image format. Must be a valid image URL or Base64 data URL.' });
     }
   }
 
@@ -496,8 +506,8 @@ router.patch('/:id', requireRoleAction('admin', ['edit all', 'sales ctrl', 'acco
 
   const images = [image_1, image_2, image_3, image_4, image_5];
   for (const img of images) {
-    if (img && (typeof img !== 'string' || !img.startsWith('data:image/'))) {
-      return res.status(400).json({ message: 'Invalid image format. Must be Base64.' });
+    if (img && !isAcceptedImageValue(img)) {
+      return res.status(400).json({ message: 'Invalid image format. Must be a valid image URL or Base64 data URL.' });
     }
   }
 
@@ -632,7 +642,7 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
 
   const commentStr = typeof comment === 'string' ? comment.trim() : '';
   const imagesArr = Array.isArray(images)
-    ? images.filter((img) => typeof img === 'string' && img.startsWith('data:image/')).slice(0, 5)
+    ? images.filter((img) => isAcceptedImageValue(img)).slice(0, 5)
     : [];
 
   try {

@@ -8,7 +8,7 @@
     <div class="map-container">
       <div class="svg-map">
         <ng-container *ngIf="useImageMap; else inlineSvgTpl">
-          <img #mapImage class="vietnam-svg" src="assets/New VN Maps (4).svg" usemap="#vn-map">
+          <img #mapImage class="vietnam-svg" src="assets/New VN Maps (4).svg" usemap="#vn-map" fetchpriority="high" loading="eager">
           <map name="vn-map">
             <area *ngFor="let a of areasScaled"
                   [attr.alt]="a.name"
@@ -64,5 +64,4 @@
     </div>
   </div>
 </div>
-
 

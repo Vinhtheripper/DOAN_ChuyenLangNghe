@@ -101,7 +101,10 @@ export class ProductSection2Component implements OnInit {
   }
 
   getImageSrc(product: Product): string {
-    return this._service.resolveProductImageSrc(product?.image_1, product?._id || '');
+    return this._service.getProductThumbnailSrc(product?.image_1, product?._id || '', {
+      width: 480,
+      height: 480
+    });
   }
 
   trackByProductId(_index: number, product: Product): string {

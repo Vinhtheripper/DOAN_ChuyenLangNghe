@@ -96,7 +96,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   getProductImage(product: Product): string {
-    return this.productService.resolveProductImageSrc(product?.image_1, product?._id || '');
+    return this.productService.getProductThumbnailSrc(product?.image_1, product?._id || '', {
+      width: 480,
+      height: 480
+    });
   }
 
   trackByRowIndex(index: number): number {
