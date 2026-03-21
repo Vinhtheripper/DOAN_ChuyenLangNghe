@@ -1,0 +1,366 @@
+.flip-book-section {
+  padding: 3rem 1rem;
+  background-color: #f8f5f0;
+  background-image: url('/assets/about-bg-texture.png');
+  background-repeat: repeat;
+}
+
+.flip-book-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.flip-book-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #7a4726;
+  margin-bottom: 0.5rem;
+}
+
+.flip-book-sub {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.flip-book-container {
+  margin: 0 auto 1.5rem;
+  position: relative;
+  display: inline-block;
+  cursor: grab;
+  user-select: none;
+}
+
+.flip-book-container.dragging {
+  cursor: grabbing;
+}
+
+.flip-book-container {
+  transition: width 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.flip-book-container.flip-book-closed .flip-book-spread {
+  justify-content: flex-end;
+}
+
+.flip-book-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  perspective-origin: 50% 50%;
+  /* Perspective ngắn hơn = cảm giác 3D mạnh hơn khi lật */
+  -webkit-perspective-origin: 50% 50%;
+}
+
+/* Spread: khối sách có chiều sâu */
+.flip-book-spread {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  overflow: visible;
+  position: relative;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  -webkit-box-shadow: 0 6px 32px rgba(0, 0, 0, 0.14), 0 0 60px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.14), 0 0 60px rgba(0, 0, 0, 0.06);
+}
+
+/* Lớp lật 3D – tối ưu GPU, bóng đổ rõ hơn */
+.flip-layer {
+  position: absolute;
+  top: 0;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  pointer-events: none;
+  z-index: 10;
+  transition: none;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: layout style paint;
+  /* Bóng đổ theo chiều trang nâng lên – cảm giác 3D */
+  -webkit-box-shadow:
+    -4px 4px 16px rgba(0, 0, 0, 0.1),
+    -12px 12px 36px rgba(0, 0, 0, 0.14),
+    0 0 50px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    -4px 4px 16px rgba(0, 0, 0, 0.1),
+    -12px 12px 36px rgba(0, 0, 0, 0.14),
+    0 0 50px rgba(0, 0, 0, 0.05);
+}
+
+.flip-layer.flip-layer-animating {
+  /* Đảm bảo layer không bị cắt khi đang animation */
+  will-change: transform;
+}
+
+/* Cạnh gáy giả (gradient) cho cảm giác 3D khi lật */
+.flip-layer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.flip-next-layer {
+  left: 50%;
+  transform-origin: left center;
+}
+
+.flip-next-layer::after {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.08) 40%,
+    transparent 100%
+  );
+}
+
+.flip-prev-layer {
+  left: 0;
+  transform-origin: right center;
+}
+
+.flip-prev-layer::after {
+  right: 0;
+  left: auto;
+  width: 12px;
+  background: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.08) 40%,
+    transparent 100%
+  );
+}
+
+.flip-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border-radius: 0 4px 4px 0;
+}
+
+.flip-next-layer .flip-face {
+  border-radius: 0 4px 4px 0;
+}
+
+.flip-prev-layer .flip-face {
+  border-radius: 4px 0 0 4px;
+}
+
+.flip-front {
+  z-index: 2;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+/* Xen kẽ texture: trang trái = nâu, trang phải = sáng */
+.flip-prev-layer .page-inner {
+  width: 100%;
+  height: 100%;
+  background-color: #b8956e;
+  background-image: url('/assets/book-paper-texture.png');
+  background-repeat: repeat;
+}
+
+.flip-next-layer .page-inner {
+  width: 100%;
+  height: 100%;
+  background-color: #e8e2d9;
+  background-image: url('/assets/book-paper-texture-light.png');
+  background-repeat: repeat;
+}
+
+/* Trang sách: trái nâu, phải sáng */
+.book-page {
+  flex-shrink: 0;
+  position: relative;
+  background-size: auto;
+  -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.book-page.page-left {
+  background-color: #b8956e;
+  background-image: url('/assets/book-paper-texture.png');
+  background-repeat: repeat;
+}
+
+.book-page.page-right {
+  background-color: #e8e2d9;
+  background-image: url('/assets/book-paper-texture-light.png');
+  background-repeat: repeat;
+}
+
+.book-page.page-right.cover-only {
+  background-color: #8b6914;
+  background-image: url('/assets/book-paper-texture.png');
+  background-repeat: repeat;
+  background-blend-mode: multiply;
+}
+
+.page-left {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.page-inner {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-page.page-left .page-inner {
+  background-color: #b8956e;
+  background-image: url('/assets/book-paper-texture.png');
+  background-repeat: repeat;
+}
+
+.book-page.page-right .page-inner {
+  background-color: #e8e2d9;
+  background-image: url('/assets/book-paper-texture-light.png');
+  background-repeat: repeat;
+}
+
+/* Turn.js: ảnh trong trang không chọn được */
+.page-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.page-placeholder {
+  padding: 1.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.book-page.page-left .page-placeholder {
+  color: #4a3c28;
+}
+
+.book-page.page-right .page-placeholder,
+.flip-next-layer .page-placeholder {
+  color: #5c5248;
+}
+
+.flip-prev-layer .page-placeholder {
+  color: #4a3c28;
+}
+
+/* Trang bìa dùng ảnh nghệ thuật */
+.page-cover-image {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: block;
+}
+
+.page-cover-image .page-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.page-cover-left,
+.page-cover-right {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #8b6914;
+  background-image: url('/assets/book-paper-texture.png');
+  background-repeat: repeat;
+  background-blend-mode: multiply;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.cover-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.flip-book-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.flip-btn {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #7a4726;
+  background: #fff;
+  border: 1px solid rgba(122, 71, 38, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.flip-btn:hover:not(:disabled) {
+  background: #7a4726;
+  color: #fff;
+}
+
+.flip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.flip-page-num {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Animation lật khi bấm nút – mượt và tự nhiên */
+.flip-book-spread.flipping .flip-layer,
+.flip-book-spread.flipping .book-page {
+  transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.flip-book-spread.flipping.flip-next .flip-next-layer,
+.flip-book-spread.flipping.flip-prev .flip-prev-layer {
+  transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (max-width: 768px) {
+  .flip-book-section {
+    padding: 2rem 0.5rem;
+  }
+
+  .flip-book-heading {
+    font-size: 1.25rem;
+  }
+}

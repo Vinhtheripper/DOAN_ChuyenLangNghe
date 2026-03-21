@@ -3,13 +3,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { User } from '../interface/User';
-import { buildUrl } from './utils/url.util';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserAPIService {
-  private apiUrl = buildUrl('/user');
+  private apiUrl = '/user';
   private token: string | null = null;
 
   constructor(private http: HttpClient) { }

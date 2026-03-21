@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProductAPIService } from '../product-api.service';
 import { Product } from '../../interface/Product';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-page',
@@ -14,7 +13,6 @@ export class ProductPageComponent implements OnInit {
   errorMessage: string = '';
   reviewCount: number = 0;
   averageRating: number = 0;
-  showRelatedProducts: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -22,33 +20,22 @@ export class ProductPageComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(
-      map((params) => params.get('id')),
-      distinctUntilChanged()
-    ).subscribe(productId => {
+    this.route.paramMap.subscribe(params => {
+      const productId = params.get('id');
       if (productId) {
         this.loadProduct(productId);
+        this.loadReviewStats(productId);
       }
     });
   }
 
   loadProduct(productId: string): void {
-    this.product = this.productService.getWarmProductById(productId) || undefined;
+    this.product = undefined;
     this.errorMessage = '';
-    this.reviewCount = 0;
-    this.averageRating = 0;
-    this.showRelatedProducts = false;
 
-    this.productService.getProductById(productId).subscribe({
-      next: (data) => {
-        this.product = data;
-        setTimeout(() => {
-          this.loadReviewStats(productId);
-        }, 100);
-        setTimeout(() => {
-          this.showRelatedProducts = true;
-        }, 250);
-      },
+    // Use cached detail so revisiting the same product is instant
+    this.productService.getProductByIdCached(productId).subscribe({
+      next: (data) => this.product = data,
       error: (err) => {
         this.errorMessage = "Không thể tải chi tiết sản phẩm. Vui lòng thử lại sau.";
       }

@@ -3,13 +3,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CartItem } from '../interface/Cart';
-import { buildUrl } from './utils/url.util';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartAPIService {
-  private apiUrl = buildUrl('/cart');
+  private apiUrl = '/cart';
   private token: string | null = null;
 
   constructor(private http: HttpClient) { }

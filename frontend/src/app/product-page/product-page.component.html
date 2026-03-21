@@ -27,10 +27,8 @@
           (reviewAdded)="onReviewAdded()">
         </app-product-desc>
       </div>
-      <app-related-product *ngIf="showRelatedProducts && product._id && product.product_detail"
-        [currentProductId]="product._id || ''"
-        [currentProductDescription]="product.product_detail || ''"
-        [currentProductDept]="product.product_dept || ''">
+      <app-related-product *ngIf="product._id && product.product_detail" [currentProductId]="product._id || ''"
+        [currentProductDescription]="product.product_detail || ''">
       </app-related-product>
     </ng-container>
 

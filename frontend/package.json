@@ -4,43 +4,53 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:proxy": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
+    "build:production": "ng build --configuration production",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^18.2.0",
-    "@angular/cdk": "^18.2.14",
-    "@angular/common": "^18.2.10",
-    "@angular/compiler": "^18.2.0",
-    "@angular/core": "^18.2.10",
-    "@angular/forms": "^18.2.0",
-    "@angular/platform-browser": "^18.2.10",
-    "@angular/platform-browser-dynamic": "^18.2.0",
-    "@angular/pwa": "^0.5.3",
-    "@angular/router": "^18.2.0",
-    "@fortawesome/fontawesome-free": "^6.6.0",
-    "bootstrap": "^5.3.3",
-    "chart.js": "^4.5.1",
-    "lz-string": "^1.5.0",
-    "ng2-charts": "^6.0.1",
-    "ngx-cookie-service": "^18.0.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.14.10"
+    "@angular/animations": "18.2.14",
+    "@angular/common": "18.2.14",
+    "@angular/compiler": "18.2.14",
+    "@angular/core": "18.2.14",
+    "@angular/forms": "18.2.14",
+    "@angular/platform-browser": "18.2.14",
+    "@angular/platform-browser-dynamic": "18.2.14",
+    "@angular/router": "18.2.14",
+    "@angular/cdk": "18.2.14",
+
+    "@angular/pwa": "18.2.7",
+
+    "@abacritt/angularx-social-login": "2.3.0",
+    "ng2-charts": "7.0.0",
+    "chart.js": "4.4.1",
+
+    "@fortawesome/fontawesome-free": "6.6.0",
+    "bootstrap": "5.3.3",
+    "lz-string": "1.5.0",
+    "ngx-cookie-service": "18.0.0",
+
+    "rxjs": "7.8.1",
+    "tslib": "2.6.2",
+    "zone.js": "0.14.10"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.7",
-    "@angular/cli": "^18.2.7",
-    "@angular/compiler-cli": "^18.2.0",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.2.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "^5.5.2"
+    "@angular-devkit/build-angular": "18.2.7",
+    "@angular/cli": "18.2.7",
+    "@angular/compiler-cli": "18.2.14",
+
+    "@types/jasmine": "5.1.0",
+    "jasmine-core": "5.2.0",
+    "karma": "6.4.0",
+    "karma-chrome-launcher": "3.2.0",
+    "karma-coverage": "2.2.0",
+    "karma-jasmine": "5.1.0",
+    "karma-jasmine-html-reporter": "2.1.0",
+
+    "typescript": "5.5.4"
   }
 }

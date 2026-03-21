@@ -1,9 +1,6 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { ProductAPIService, ProductReview } from '../product-api.service';
-import { MediaUploadService } from '../services/media-upload.service';
-import { forkJoin, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-desc',
@@ -27,14 +24,12 @@ export class ProductDescComponent implements OnInit {
   newComment: string = '';
   newReviewRating: number = 0;
   newReviewImages: string[] = [];
-  newReviewImageFiles: File[] = [];
   submitLoading: boolean = false;
   reviewLoadError: string = '';
 
   constructor(
     private authService: AuthService,
-    private productApi: ProductAPIService,
-    private mediaUploadService: MediaUploadService
+    private productApi: ProductAPIService
   ) { }
 
   ngOnInit(): void {
@@ -89,17 +84,20 @@ export class ProductDescComponent implements OnInit {
     for (let i = 0; i < Math.min(files.length, remaining); i++) {
       const file = files[i];
       if (!file.type.startsWith('image/')) continue;
-      if (this.newReviewImages.length < 5) {
-        this.newReviewImageFiles = [...this.newReviewImageFiles, file];
-        this.newReviewImages = [...this.newReviewImages, URL.createObjectURL(file)];
-      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const data = reader.result as string;
+        if (data && this.newReviewImages.length < 5) {
+          this.newReviewImages = [...this.newReviewImages, data];
+        }
+      };
+      reader.readAsDataURL(file);
     }
     input.value = '';
   }
 
   removeReviewImage(index: number): void {
     this.newReviewImages = this.newReviewImages.filter((_, i) => i !== index);
-    this.newReviewImageFiles = this.newReviewImageFiles.filter((_, i) => i !== index);
   }
 
   addReview(): void {
@@ -114,16 +112,15 @@ export class ProductDescComponent implements OnInit {
     if (!this.product?._id) return;
 
     this.submitLoading = true;
-    const submitReviewWithImages = (images: string[] | undefined) => this.productApi.submitReview(this.product._id, {
+    this.productApi.submitReview(this.product._id, {
       rating: this.newReviewRating,
       comment: this.newComment.trim() || 'Đánh giá từ người dùng.',
-      images
+      images: this.newReviewImages.length ? this.newReviewImages : undefined
     }).subscribe({
       next: () => {
         this.newComment = '';
         this.newReviewRating = 0;
         this.newReviewImages = [];
-        this.newReviewImageFiles = [];
         this.reviewAdded.emit();
         this.loadReviews();
         this.submitLoading = false;
@@ -131,23 +128,6 @@ export class ProductDescComponent implements OnInit {
       error: (err) => {
         this.submitLoading = false;
         alert(err.message || 'Gửi đánh giá thất bại. Vui lòng thử lại.');
-      }
-    });
-
-    if (this.newReviewImageFiles.length === 0) {
-      submitReviewWithImages(undefined);
-      return;
-    }
-
-    forkJoin(
-      this.newReviewImageFiles.map((file) => this.mediaUploadService.uploadImage(file, 'reviews').pipe(
-        map((result) => result.url)
-      ))
-    ).subscribe({
-      next: (imageUrls) => submitReviewWithImages(imageUrls),
-      error: (err) => {
-        this.submitLoading = false;
-        alert(err.message || 'Upload ảnh đánh giá thất bại.');
       }
     });
   }

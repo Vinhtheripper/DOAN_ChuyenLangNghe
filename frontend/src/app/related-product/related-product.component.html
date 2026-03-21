@@ -1,10 +1,20 @@
 <div class="related-product-container container">
   <h3 class="related-title">Sản phẩm liên quan</h3>
-  <div *ngIf="relatedProducts.length > 0" class="carousel-container d-flex overflow-auto">
-    <div *ngFor="let product of relatedProducts" class="product-card card m-2">
-      <app-product-item [product]="product" [isNew]="product.isNew" [isDiscounted]="product.discount > 0">
-      </app-product-item>
+  <div *ngIf="relatedProducts.length > 0" class="related-carousel-wrap">
+    <button type="button" class="related-arrow related-arrow-left" aria-label="Xem trước"
+      (click)="scrollRelated('left')" [class.disabled]="!canScrollLeft">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <div #carouselEl class="carousel-container d-flex overflow-auto" (scroll)="onCarouselScroll()">
+      <div *ngFor="let product of relatedProducts" class="product-card card m-2">
+        <app-product-item [product]="product" [isNew]="product.isNew" [isDiscounted]="product.discount > 0">
+        </app-product-item>
+      </div>
     </div>
+    <button type="button" class="related-arrow related-arrow-right" aria-label="Xem tiếp"
+      (click)="scrollRelated('right')" [class.disabled]="!canScrollRight">
+      <i class="fas fa-chevron-right"></i>
+    </button>
   </div>
   <p *ngIf="relatedProducts.length === 0" class="no-related-products text-muted mt-4">
     No related products.

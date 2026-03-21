@@ -350,6 +350,34 @@
     z-index: 3;
 }
 
+/* Scroll-in rotation animation for Series Tre Đan */
+.series-basket-left,
+.series-artisan {
+    transition: transform 0.75s ease-out, opacity 0.75s ease-out;
+    opacity: 0;
+}
+
+/* trạng thái ban đầu: hơi xoay lệch và trôi xuống nhẹ */
+.series-basket-left {
+    transform: scaleX(-1) translateY(24px) rotate(-6deg);
+}
+
+.series-artisan {
+    transform: translateY(24px) rotate(6deg);
+}
+
+/* khi người dùng scroll đến section, thêm class series-animate để đưa hình về vị trí hiện tại */
+.series-animate .series-basket-left {
+    transform: scaleX(-1) translateY(0) rotate(0deg);
+    opacity: 1;
+}
+
+.series-animate .series-artisan {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    transition-delay: 0.12s;
+}
+
 .series-grid {
     display: flex;
     align-items: center;
@@ -1037,4 +1065,125 @@
         height: 280px;
         border-radius: 10px;
     }
+}
+
+/* ========== REVEAL ON SCROLL – hiệu ứng hiện ra khi lướt ========== */
+.reveal-el {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.65s ease-out, transform 0.65s ease-out;
+}
+
+.reveal .reveal-el {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.12s; }
+.reveal-delay-2 { transition-delay: 0.24s; }
+.reveal-delay-3 { transition-delay: 0.36s; }
+
+/* Intro: chữ trồi lên, ảnh trượt từ phải vào */
+.intro .intro-decor.reveal-el {
+    transform: translateX(40px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.intro.reveal .intro-decor.reveal-el {
+    transform: translateX(0);
+}
+
+/* Products: tiêu đề trồi lên, thẻ sản phẩm lần lượt (fade-up + scale nhẹ) */
+.products .product-card.reveal-el {
+    transform: translateY(24px) scale(0.98);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.products.reveal .product-card.reveal-el {
+    transform: translateY(0) scale(1);
+}
+.products.reveal .product-row:nth-child(1) .product-card:nth-child(1) { transition-delay: 0.08s; }
+.products.reveal .product-row:nth-child(1) .product-card:nth-child(2) { transition-delay: 0.16s; }
+.products.reveal .product-row:nth-child(1) .product-card:nth-child(3) { transition-delay: 0.24s; }
+.products.reveal .product-row:nth-child(1) .product-card:nth-child(4) { transition-delay: 0.32s; }
+.products.reveal .product-row:nth-child(2) .product-card:nth-child(1) { transition-delay: 0.40s; }
+.products.reveal .product-row:nth-child(2) .product-card:nth-child(2) { transition-delay: 0.48s; }
+.products.reveal .product-row:nth-child(2) .product-card:nth-child(3) { transition-delay: 0.56s; }
+.products.reveal .product-row:nth-child(2) .product-card:nth-child(4) { transition-delay: 0.64s; }
+
+/* Series: nội dung giữa trồi lên từng dòng */
+.series .series-content-center .reveal-el {
+    transform: translateY(20px);
+}
+.series.reveal .series-content-center .reveal-el {
+    transform: translateY(0);
+}
+
+/* Stats: banner mờ vào + phóng nhẹ */
+.stats .stats-banner.reveal-el {
+    transform: scale(0.96);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.stats.reveal .stats-banner.reveal-el {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* News: tiêu đề trồi lên, thẻ tin lần lượt trồi từ dưới */
+.news .news-card.reveal-el {
+    transform: translateY(36px);
+    transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+.news.reveal .news-card.reveal-el {
+    transform: translateY(0);
+}
+.news.reveal .news-card[data-stagger="0"] { transition-delay: 0.08s; }
+.news.reveal .news-card[data-stagger="1"] { transition-delay: 0.18s; }
+.news.reveal .news-card[data-stagger="2"] { transition-delay: 0.28s; }
+
+/* Video: thumbnail zoom nhẹ vào, chữ trồi từ trái */
+.video-section .video-thumbnail.reveal-el {
+    transform: scale(0.94);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.video-section.reveal .video-thumbnail.reveal-el {
+    transform: scale(1);
+    opacity: 1;
+}
+.video-section .video-content .reveal-el {
+    transform: translateX(-24px);
+}
+.video-section.reveal .video-content .reveal-el {
+    transform: translateX(0);
+}
+
+/* Keepers: tiêu đề + mô tả + nút trồi lên */
+.keepers .reveal-el {
+    transform: translateY(28px);
+}
+
+/* Artisans: banner mờ vào */
+.artisans .artisan-banner.reveal-el {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.artisans.reveal .artisan-banner.reveal-el {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Connect: nội dung trượt từ trái, video từ phải */
+.connect .connect-content .reveal-el {
+    transform: translateX(-28px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.connect.reveal .connect-content .reveal-el {
+    transform: translateX(0);
+}
+.connect .connect-image.reveal-el {
+    transform: translateX(28px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.connect.reveal .connect-image.reveal-el {
+    transform: translateX(0);
+    opacity: 1;
 }

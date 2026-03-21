@@ -6,6 +6,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AuthInterceptor } from './services/auth.interceptor';
+import { ApiBaseUrlInterceptor } from './interceptors/api-base-url.interceptor';
 import { LoadingInterceptor } from './interceptors/loading.interceptor';
 import { AuthGuard } from './guards/auth.guard';
 
@@ -59,6 +60,7 @@ import { HistoryComponent } from './history/history.component';
 import { DeliveryComponent } from './delivery/delivery.component';
 import { DeliveryMethodsComponent } from './delivery-methods/delivery-methods.component';
 import { HowToBuyComponent } from './how-to-buy/how-to-buy.component';
+import { FlipBookComponent } from './flip-book/flip-book.component';
 
 @NgModule({
   declarations: [
@@ -111,7 +113,8 @@ import { HowToBuyComponent } from './how-to-buy/how-to-buy.component';
     HistoryComponent,
     DeliveryComponent,
     DeliveryMethodsComponent,
-    HowToBuyComponent
+    HowToBuyComponent,
+    FlipBookComponent
   ],
   imports: [
     BrowserModule,
@@ -122,6 +125,11 @@ import { HowToBuyComponent } from './how-to-buy/how-to-buy.component';
     HttpClientModule
   ],
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ApiBaseUrlInterceptor,
+      multi: true
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

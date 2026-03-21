@@ -3,7 +3,9 @@ import { CartService } from '../services/cart.service';
 import { CartItem } from '../../interface/Cart';
 import { Router } from '@angular/router';
 import { CouponAPIService } from '../coupon-api.service';
-import { finalize } from 'rxjs/operators';
+
+/** Placeholder khi không có ảnh (data URL, không phụ thuộc file assets). */
+const CART_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"%3E%3Crect fill="%23f0f0f0" width="120" height="120"/%3E%3Ctext x="60" y="65" text-anchor="middle" fill="%23999" font-size="11" font-family="sans-serif"%3ENo image%3C/text%3E%3C/svg%3E';
 
 @Component({
   selector: 'app-cart',
@@ -11,6 +13,7 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./cart.component.css'],
 })
 export class CartComponent implements OnInit {
+  readonly placeholderImage = CART_PLACEHOLDER_IMAGE;
   cartItems: (CartItem & {
     isSelected: boolean;
     tempQuantity: number;
@@ -25,9 +28,6 @@ export class CartComponent implements OnInit {
   couponMessage: string = '';
   appliedCouponCode: string = '';
   applyingCoupon: boolean = false;
-  checkingOut: boolean = false;
-  private savingItemIds = new Set<string>();
-  private removingItemIds = new Set<string>();
 
   constructor(
     private cartService: CartService,
@@ -44,7 +44,7 @@ export class CartComponent implements OnInit {
       this.cartItems = items.map((item) => ({
         ...item,
         product_name: item.product_name || 'Queentin',
-        image_1: item.image_1 || 'assets/default-image.png',
+        image_1: item.image_1 || CART_PLACEHOLDER_IMAGE,
         isSelected: true,
         tempQuantity: Math.min(item.quantity, item.stocked_quantity || item.quantity),
       }));
@@ -71,11 +71,9 @@ export class CartComponent implements OnInit {
 
   private removeFromCart(productId: string | null): void {
     if (!productId) return;
-    this.removingItemIds.add(productId);
     this.cartService.removeFromCart(productId);
     this.cartItems = this.cartItems.filter((item) => item.productId !== productId);
     this.updateTotalSelectedPrice();
-    queueMicrotask(() => this.removingItemIds.delete(productId));
   }
 
   increaseQuantity(item: CartItem & { isSelected: boolean; tempQuantity: number }): void {
@@ -107,11 +105,11 @@ export class CartComponent implements OnInit {
   saveChanges(productId: string | null): void {
     if (!productId) return;
     const item = this.cartItems.find((item) => item.productId === productId);
-    if (item && !this.savingItemIds.has(productId)) {
-      this.savingItemIds.add(productId);
-      this.cartService.updateQuantity(productId, item.tempQuantity).pipe(
-        finalize(() => this.savingItemIds.delete(productId))
-      ).subscribe();
+    if (item) {
+      this.cartService.updateQuantity(productId, item.tempQuantity).subscribe(() => {
+        alert('Sản phẩm đã được lưu thành công.');
+        this.loadCartItems();
+      });
     }
   }
 
@@ -123,10 +121,6 @@ export class CartComponent implements OnInit {
   }
 
   proceedToCheckout(): void {
-    if (this.checkingOut) {
-      return;
-    }
-
     const selectedItemsList = this.cartItems
       .filter((item) => item.isSelected)
       .map((item) => ({
@@ -135,8 +129,11 @@ export class CartComponent implements OnInit {
       }));
 
     if (selectedItemsList.length > 0) {
-      this.checkingOut = true;
-      this.cartService.saveSelectedItems(selectedItemsList);
+      const itemsWithQuantity = selectedItemsList.map((item) => ({
+        ...item,
+        quantity: item.tempQuantity ?? item.quantity ?? 1
+      }));
+      this.cartService.saveSelectedItems(itemsWithQuantity);
       if (this.appliedCouponCode && this.discountAmount > 0) {
         this.cartService.setAppliedCoupon({
           code: this.appliedCouponCode,
@@ -146,9 +143,6 @@ export class CartComponent implements OnInit {
         this.cartService.clearAppliedCoupon();
       }
       this.router.navigate(['/payment']);
-      setTimeout(() => {
-        this.checkingOut = false;
-      }, 300);
     } else {
       alert('Vui lòng tick chọn ít nhất một sản phẩm để thanh toán.');
     }
@@ -196,13 +190,5 @@ export class CartComponent implements OnInit {
       this.couponMessage = 'Giỏ hàng đã thay đổi, vui lòng áp lại mã ưu đãi.';
       this.cartService.clearAppliedCoupon();
     }
-  }
-
-  isSavingItem(productId: string | null): boolean {
-    return !!productId && this.savingItemIds.has(productId);
-  }
-
-  isRemovingItem(productId: string | null): boolean {
-    return !!productId && this.removingItemIds.has(productId);
   }
 }

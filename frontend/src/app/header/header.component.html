@@ -26,7 +26,7 @@
         <i class="fas fa-search"></i>
       </form>
 
-      <a routerLink="/cart" class="icon-button">
+      <a routerLink="/cart" class="icon-button" data-cart-icon>
         <i class="fas fa-shopping-cart"></i>
         <span *ngIf="cartItemCount > 0" class="cart-badge">{{ cartItemCount }}</span>
       </a>

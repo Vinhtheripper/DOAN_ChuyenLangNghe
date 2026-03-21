@@ -49,8 +49,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   performSearch(searchInput: HTMLInputElement): void {
     if (this.searchTerm.trim()) {
-      this.router.navigate(['/catalog'], { queryParams: { search: this.searchTerm.trim() } });
-      searchInput.blur();
+      const searchValue = this.searchTerm;
+      this.router.navigate(['/catalog']).then(() => {
+        this.router.navigate(['/catalog'], { queryParams: { search: searchValue } });
+        searchInput.blur();
+      });
     }
   }
 

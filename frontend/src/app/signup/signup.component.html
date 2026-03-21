@@ -69,9 +69,7 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-signup-main" [disabled]="signupForm.invalid || isSubmitting">
-            {{ isSubmitting ? 'Đang tạo...' : 'Tạo tài khoản' }}
-          </button>
+          <button type="submit" class="btn-signup-main" [disabled]="signupForm.invalid">Tạo tài khoản</button>
         </form>
 
         <p class="login-line">

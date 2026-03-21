@@ -9,8 +9,8 @@
                 <span class="metric-label">{{ stat.label }}</span>
                 <span class="metric-value">{{ stat.value }}</span>
                 <span class="metric-trend" [ngClass]="{
-                    'positive': stat.trend.startsWith('+'),
-                    'negative': stat.trend.startsWith('-')
+                    'positive': stat.trend && stat.trend.startsWith('+'),
+                    'negative': stat.trend && stat.trend.startsWith('-')
                 }">{{ stat.trend }}</span>
             </div>
         </div>

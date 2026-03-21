@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Blog } from '../interface/Blog';
-import { buildUrl } from './utils/url.util';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BlogAPIService {
-  private baseURL = buildUrl('/blogs');
+  private baseURL = '/blogs';
 
   constructor(private http: HttpClient) { }
 

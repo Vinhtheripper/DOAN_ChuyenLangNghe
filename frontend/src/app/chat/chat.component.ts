@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { OpenAiService } from '../services/openai.service';
 import { debounceTime, Subject } from 'rxjs';
 
 @Component({
@@ -26,7 +25,7 @@ export class ChatComponent {
     'Xin chào, tôi là Trợ lý của ĐẶC SẢN 3 MIỀN. Rất hân hạnh được phục vụ bạn.',
   ];
 
-  constructor(private openAiService: OpenAiService) {
+  constructor() {
     this.messageSubject.pipe(debounceTime(1000)).subscribe((message) => {
       this.sendMessageToOpenAi(message);
     });

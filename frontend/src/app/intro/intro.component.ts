@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { FlipBookPage } from '../flip-book/flip-book.component';
 
 @Component({
   selector: 'app-intro',
@@ -8,6 +9,13 @@ import { Component, HostListener, OnInit, AfterViewInit, ChangeDetectorRef } fro
 export class IntroComponent implements OnInit, AfterViewInit {
   showScrollButton: boolean = false;
   hatRotation: number = -45;
+
+  /** Trang sách lật - thêm/đổi ảnh trong imageLeft, imageRight sau */
+  flipBookPages: FlipBookPage[] = [
+    { title: 'Làng nghề truyền thống', imageLeft: undefined, imageRight: undefined },
+    { title: 'Nghệ nhân và sản phẩm', imageLeft: undefined, imageRight: undefined },
+    { title: 'Giá trị văn hóa', imageLeft: undefined, imageRight: undefined },
+  ];
 
   constructor(private cdr: ChangeDetectorRef) {}
 

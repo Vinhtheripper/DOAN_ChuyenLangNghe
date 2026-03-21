@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { buildUrl } from './utils/url.util';
 
 export interface Coupon {
   _id?: string;
@@ -22,7 +21,7 @@ export interface Coupon {
   providedIn: 'root'
 })
 export class CouponAPIService {
-  private readonly baseUrl = buildUrl('/coupons');
+  private readonly baseUrl = '/coupons';
 
   constructor(private http: HttpClient) { }
 

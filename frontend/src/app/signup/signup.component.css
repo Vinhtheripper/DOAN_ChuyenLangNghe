@@ -262,27 +262,28 @@
 .toggle-pass {
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 13px;
   transform: translateY(-50%);
   border: none;
   background: transparent;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
 }
 
+/* Create account button - darker reddish-brown */
 .btn-signup-main {
   width: 100%;
-  height: 42px;
-  margin-top: 8px;
+  height: 40px;
   border: none;
   border-radius: 11px;
   background: #7A3F0B;
-  color: #fff;
-  font-size: 14px;
+  color: #ffffff;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
+  font-family: 'Manrope', sans-serif;
 }
 
 .btn-signup-main:hover:not(:disabled) {
@@ -295,7 +296,7 @@
 }
 
 .login-line {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   font-size: 13px;
   color: #2d2d2d;
   text-align: center;
@@ -311,37 +312,45 @@
   text-decoration: underline;
 }
 
+/* Right: pottery image */
 .signup-right {
-  background: #ffffff;
+  background: #422C1E;
 }
 
 .signup-right img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
 @media (max-width: 768px) {
   .signup-shell {
     grid-template-columns: 1fr;
-    max-height: none;
+    min-height: min(560px, calc(100vh - 32px));
+    max-height: calc(100vh - 32px);
   }
 
   .signup-left {
-    padding: 20px 18px 24px;
+    padding: 16px 20px 20px;
   }
 
   .signup-right {
-    display: none;
+    min-height: 160px;
+  }
+
+  .brand-logo {
+    width: 72px;
+    margin-bottom: 8px;
   }
 
   .signup-title {
-    font-size: 22px;
+    font-size: 20px;
+    margin-bottom: 14px;
   }
 
   .name-row {
     grid-template-columns: 1fr;
-    gap: 8px;
   }
 }

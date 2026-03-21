@@ -1,17 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, shareReplay } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationService {
-  private baseUrl = environment.locationApiUrl;
-  private provincesCache$?: Observable<any[]>;
-  private districtsCache = new Map<string, Observable<any>>();
-  private wardsCache = new Map<string, Observable<any>>();
+  private baseUrl = 'https://provinces.open-api.vn/api';
 
   // Fallback data for provinces
   private fallbackProvinces = [
@@ -84,43 +80,29 @@ export class LocationService {
   constructor(private http: HttpClient) { }
 
   getProvinces(): Observable<any[]> {
-    if (!this.provincesCache$) {
-      this.provincesCache$ = this.http.get<any[]>(`${this.baseUrl}/p`).pipe(
-      shareReplay(1),
+    return this.http.get<any[]>(`${this.baseUrl}/p`).pipe(
       catchError(() => {
+        console.warn('API không khả dụng, sử dụng dữ liệu fallback');
         return of(this.fallbackProvinces);
       })
-      );
-    }
-
-    return this.provincesCache$;
+    );
   }
 
   getDistricts(provinceCode: string): Observable<any> {
-    if (!this.districtsCache.has(provinceCode)) {
-      this.districtsCache.set(
-        provinceCode,
-        this.http.get<any>(`${this.baseUrl}/p/${provinceCode}?depth=2`).pipe(
-          shareReplay(1),
-          catchError(() => of({ districts: [] }))
-        )
-      );
-    }
-
-    return this.districtsCache.get(provinceCode)!;
+    return this.http.get<any>(`${this.baseUrl}/p/${provinceCode}?depth=2`).pipe(
+      catchError(() => {
+        console.warn('Không thể tải danh sách quận/huyện');
+        return of({ districts: [] });
+      })
+    );
   }
 
   getWards(districtCode: string): Observable<any> {
-    if (!this.wardsCache.has(districtCode)) {
-      this.wardsCache.set(
-        districtCode,
-        this.http.get<any>(`${this.baseUrl}/d/${districtCode}?depth=2`).pipe(
-          shareReplay(1),
-          catchError(() => of({ wards: [] }))
-        )
-      );
-    }
-
-    return this.wardsCache.get(districtCode)!;
+    return this.http.get<any>(`${this.baseUrl}/d/${districtCode}?depth=2`).pipe(
+      catchError(() => {
+        console.warn('Không thể tải danh sách phường/xã');
+        return of({ wards: [] });
+      })
+    );
   }
 }

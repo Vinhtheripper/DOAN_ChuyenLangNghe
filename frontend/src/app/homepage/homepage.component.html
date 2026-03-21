@@ -7,8 +7,6 @@
         [src]="img.src" 
         [alt]="img.alt" 
         class="hero-bg" 
-        [attr.fetchpriority]="i === 0 ? 'high' : null"
-        [attr.loading]="i === 0 ? 'eager' : 'lazy'"
         [class.active]="currentHeroIndex === i">
     </div>
     <div class="hero-progress">
@@ -20,27 +18,27 @@
   </section>
 
   <!-- Giới thiệu -->
-  <section class="home-section intro">
+  <section class="home-section intro js-reveal" data-reveal-id="intro" [ngClass]="{ 'reveal': sectionRevealed['intro'] }">
     <div class="home-container">
       <div class="intro-grid">
         <div class="intro-content">
-          <h2 class="section-title">GIỚI THIỆU</h2>
-          <p class="section-description">
+          <h2 class="section-title reveal-el">GIỚI THIỆU</h2>
+          <p class="section-description reveal-el reveal-delay-1">
             Chuyện Làng Nghề ra đời từ tình yêu dành cho những giá trị thủ công truyền thống Việt Nam – nơi mỗi sản phẩm không chỉ là một món đồ, mà còn là câu chuyện của bàn tay, thời gian và tâm hồn người nghệ nhân.
             <br><br>
             Chúng tôi tuyển chọn và giới thiệu các sản phẩm thủ công mỹ nghệ đặc sắc từ nhiều làng nghề trên khắp cả nước: gốm thủ công, tranh nghệ thuật, đồ trang trí và quà tặng mang đậm dấu ấn văn hóa Việt. Mỗi đường nét, mỗi hoa văn đều chứa đựng sự tỉ mỉ, kiên nhẫn và niềm tự hào của những con người gắn bó trọn đời với nghề.
             <br><br>
             Chuyện Làng Nghề mong muốn trở thành cầu nối giữa làng nghề truyền thống và cuộc sống hiện đại – để những giá trị xưa tiếp tục được gìn giữ, lan tỏa và hiện diện trong từng không gian sống hôm nay.
           </p>
-          <a class="btn btn-outline-primary" routerLink="/about">
+          <a class="btn btn-outline-primary reveal-el reveal-delay-2" routerLink="/about">
             Tìm hiểu thêm
             <i class="fas fa-arrow-circle-right"></i>
           </a>
         </div>
         
         <!-- Intro image -->
-        <div class="intro-decor">
-          <img src="assets/New web images/gioithieu.png" alt="Giới thiệu làng nghề" class="gioithieu-image" loading="lazy">
+        <div class="intro-decor reveal-el reveal-delay-1">
+          <img src="assets/New web images/gioithieu.png" alt="Giới thiệu làng nghề" class="gioithieu-image">
         </div>
       </div>
     </div>
@@ -50,29 +48,31 @@
   </section>
 
   <!-- Sản phẩm -->
-  <section class="home-section products">
+  <section class="home-section products js-reveal" data-reveal-id="products" [ngClass]="{ 'reveal': sectionRevealed['products'] }">
     <div class="home-container">
-      <h2 class="section-title">SẢN PHẨM</h2>
-      <div class="product-grid" *ngIf="!isProductsLoading && featuredProducts.length > 0">
-        <div class="product-row" *ngFor="let row of getProductRows(); trackBy: trackByRowIndex">
-          <article class="product-card" *ngFor="let product of row; trackBy: trackByProductId" (click)="goToProduct(product._id)">
+      <h2 class="section-title reveal-el">SẢN PHẨM</h2>
+      <p class="section-description" *ngIf="isProductsLoading">Đang tải sản phẩm...</p>
+      <div class="product-grid" *ngIf="!isProductsLoading && homeProducts && homeProducts.length">
+        <div class="product-row" *ngFor="let row of getProductRows()">
+          <article
+            class="product-card reveal-el reveal-stagger"
+            *ngFor="let product of row"
+            (click)="viewProductDetail(product)">
             <div class="product-image">
-              <img
-                [src]="getProductImage(product)"
-                [alt]="product.product_name"
-                loading="lazy"
-                [attr.fetchpriority]="row[0]?._id === product._id ? 'high' : null" />
+              <img [src]="product.image_1" [alt]="product.product_name" />
             </div>
             <div class="product-body">
               <h3>{{ product.product_name }}</h3>
-              <span class="product-price">{{ product.unit_price | currency:'VND':'symbol':'1.0-0' }}</span>
+              <span class="product-price">
+                {{ (product.unit_price * (1 - (product.discount || 0))) | number:'1.0-0' }}đ
+              </span>
             </div>
           </article>
         </div>
       </div>
 
-      <p class="section-description" *ngIf="!isProductsLoading && featuredProducts.length === 0">
-        Chưa có sản phẩm thật để hiển thị trên trang chủ.
+      <p class="section-description" *ngIf="!isProductsLoading && homeProducts.length === 0">
+        Chưa có sản phẩm để hiển thị. Hãy chạy backend và đảm bảo database có dữ liệu sản phẩm.
       </p>
 
       <div style="text-align: center; margin-top: 50px;">
@@ -85,94 +85,68 @@
   </section>
 
   <!-- Series Tre Đan with overlapping images -->
-  <section class="home-section series">
+  <section class="home-section series js-reveal" #seriesSection data-reveal-id="series" [ngClass]="{ 'series-animate': seriesInView, 'reveal': sectionRevealed['series'] }">
     <div class="series-wrapper">
       <!-- Large basket on the left -->
       <img src="assets/New web images/bl11-3__met_tre_day_dan_chat__6_co__-_29cm_bc4bd30f7a7a44a59bc626678edc5b8f_master.png" alt="Tre đan lớn" class="series-basket-left">
       
       <!-- Center content -->
       <div class="series-content-center">
-        <p class="series-kicker">SẢN PHẨM MỚI</p>
-        <h2 class="series-title">Series Tre Đan</h2>
-        <p class="series-desc">Nón lá đan tre<br>Mẹt đan tre</p>
-        <a class="btn btn-primary" routerLink="/catalog">
+        <p class="series-kicker reveal-el">SẢN PHẨM MỚI</p>
+        <h2 class="series-title reveal-el reveal-delay-1">Series Tre Đan</h2>
+        <p class="series-desc reveal-el reveal-delay-2">Nón lá đan tre<br>Mẹt đan tre</p>
+        <a class="btn btn-primary reveal-el reveal-delay-3" routerLink="/catalog">
           Đặt hàng ngay
           <i class="fas fa-arrow-circle-right"></i>
         </a>
       </div>
 
-      <img src="assets/New web images/san-pham-moi-right.png" alt="Nón lá trang trí" class="series-artisan" loading="lazy">
+      <img src="assets/New web images/san-pham-moi-right.png" alt="Nón lá trang trí" class="series-artisan">
       
     </div>
   </section>
 
   <!-- Stats with brown background -->
-  <section class="stats">
-    <div class="stats-banner">
-      <img src="assets/New web images/bannertrangchu2.png" alt="Thống kê làng nghề" loading="lazy" />
+  <section class="stats js-reveal" data-reveal-id="stats" [ngClass]="{ 'reveal': sectionRevealed['stats'] }">
+    <div class="stats-banner reveal-el">
+      <img src="assets/New web images/bannertrangchu2.png" alt="Thống kê làng nghề" />
     </div>
   </section>
 
   <!-- Tin tức -->
-  <section class="home-section news">
+  <section class="home-section news js-reveal" data-reveal-id="news" [ngClass]="{ 'reveal': sectionRevealed['news'] }">
     <div class="home-container">
-      <h2 class="section-title">TIN TỨC & KHUYẾN MẠI</h2>
-      <div class="news-grid">
-        <article class="news-card">
-          <img src="assets/New web images/b4712cebbbbdce3651bfd9525f2d5043.jpg" alt="Nghệ nhân làng nghề" loading="lazy" />
-          <div class="news-body">
-            <h3>Hành trình giữ lửa làng nghề Việt</h3>
-            <p>Câu chuyện về nghệ nhân và giá trị thủ công truyền thống được lan tỏa đến thế hệ trẻ.</p>
-            <a routerLink="/blog" class="link-more">
-              Xem tin
-              <i class="fas fa-arrow-circle-right"></i>
-            </a>
-            <hr>
+      <h2 class="section-title reveal-el">TIN TỨC & KHUYẾN MẠI</h2>
+          <div class="news-grid" *ngIf="homeNews && homeNews.length">
+            <article class="news-card reveal-el reveal-stagger" *ngFor="let item of homeNews; let i = index" (click)="viewNewsDetail(item)" [attr.data-stagger]="i">
+              <img [src]="item.image" [alt]="item.title" />
+              <div class="news-body">
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.desc }}</p>
+                <a class="link-more">
+                  Xem tin
+                  <i class="fas fa-arrow-circle-right"></i>
+                </a>
+                <hr>
+              </div>
+            </article>
           </div>
-        </article>
-
-        <article class="news-card">
-          <img src="assets/New web images/ss_2649780747.jpg" alt="Video làng nghề" loading="lazy" />
-          <div class="news-body">
-            <h3>Gặp gỡ người giữ nghề thủ công</h3>
-            <p>Lắng nghe hành trình làm nghề, từ đôi tay tài hoa đến những sản phẩm mang linh hồn Việt.</p>
-            <a routerLink="/blog" class="link-more">
-              Xem tin
-              <i class="fas fa-arrow-circle-right"></i>
-            </a>
-            <hr>
-          </div>
-        </article>
-
-        <article class="news-card">
-          <img src="assets/New web images/hv14-01_binh_bo_o__15x26x9cm__-_luc__1__68fd0d9c394848ed80a710efe31caf82_master.jpg" alt="Sản phẩm gốm mới" loading="lazy" />
-          <div class="news-body">
-            <h3>Bộ sưu tập gốm thủ công mới</h3>
-            <p>Thiết kế hiện đại trên nền chất liệu truyền thống, phù hợp không gian sống đương đại.</p>
-            <a routerLink="/blog" class="link-more">
-              Xem tin
-              <i class="fas fa-arrow-circle-right"></i>
-            </a>
-            <hr>
-          </div>
-        </article>
-      </div>
     </div>
   </section>
 
   <!-- Video / Gặp gỡ người giữ nghề -->
-  <section class="home-section video-section">
+  <section class="home-section video-section js-reveal" data-reveal-id="video" [ngClass]="{ 'reveal': sectionRevealed['video'] }">
     <div class="home-container">
       <div class="video-grid">
-        <a href="https://www.youtube.com/watch?v=8k5xV2BZA8o" target="_blank" rel="noopener noreferrer" class="video-thumbnail">
-          <img src="assets/New web images/b4712cebbbbdce3651bfd9525f2d5043.jpg" alt="Gặp gỡ người giữ nghề" class="video-bg" loading="lazy">
+        <a href="https://www.youtube.com/watch?v=8k5xV2BZA8o" target="_blank" rel="noopener noreferrer" class="video-thumbnail reveal-el">
+          <img src="assets/New web images/b4712cebbbbdce3651bfd9525f2d5043.jpg" alt="Gặp gỡ người giữ nghề" class="video-bg">
           <div class="play-button">
             <i class="fab fa-youtube"></i>
           </div>
         </a>
         <div class="video-content">
-          <h3>Gặp Gỡ Người Giữ Nghề</h3>
-          <p>
+          <h3 class="reveal-el reveal-delay-1">Gặp Gỡ Người Giữ Nghề</h3>
+          <p class="reveal-el reveal-delay-2">
             Lắng nghe những câu chuyện nghề được kể bởi chính các nghệ nhân đang ngày đêm gìn giữ tinh hoa thủ công Việt. 
             Từ chất liệu mộc mạc đến kỹ thuật chế tác tỉ mỉ, mỗi sản phẩm đều mang theo ký ức văn hóa và niềm tự hào của làng nghề qua nhiều thế hệ.
           </p>
@@ -182,13 +156,13 @@
   </section>
 
   <!-- Những người giữ nghề -->
-  <section class="home-section keepers">
+  <section class="home-section keepers js-reveal" data-reveal-id="keepers" [ngClass]="{ 'reveal': sectionRevealed['keepers'] }">
     <div class="home-container" style="text-align: center;">
-      <h2 class="section-title">NHỮNG NGƯỜI GIỮ NGHỀ</h2>
-      <p class="section-description">
+      <h2 class="section-title reveal-el">NHỮNG NGƯỜI GIỮ NGHỀ</h2>
+      <p class="section-description reveal-el reveal-delay-1">
         Mỗi nghệ nhân là một câu chuyện, một kỉ vật gìn giữ tinh hoa văn hóa Việt nơi ấy – hãy cùng chúng tôi kết nối, lan tỏa và gìn giữ những giá trị ấy. Hãy cùng nhau thổi lửa bùng lên những giá trị truyền thống cha ông.
       </p>
-      <a class="btn btn-primary" routerLink="/contact">
+      <a class="btn btn-primary reveal-el reveal-delay-2" routerLink="/contact">
         Xem chi tiết
         <i class="fas fa-arrow-circle-right"></i>
       </a>
@@ -196,33 +170,33 @@
   </section>
 
   <!-- Banner người giữ lửa -->
-  <section class="home-section artisans">
-    <div class="artisan-banner">
-      <img src="assets/New web images/bannernguoigiulua.png" alt="Người giữ lửa" loading="lazy" />
+  <section class="home-section artisans js-reveal" data-reveal-id="artisans" [ngClass]="{ 'reveal': sectionRevealed['artisans'] }">
+    <div class="artisan-banner reveal-el">
+      <img src="assets/New web images/bannernguoigiulua.png" alt="Người giữ lửa" />
     </div>
   </section>
 
   <!-- Kết nối nghệ nhân -->
-  <section class="home-section connect">
+  <section class="home-section connect js-reveal" data-reveal-id="connect" [ngClass]="{ 'reveal': sectionRevealed['connect'] }">
     <div class="home-container">
       <div class="connect-grid">
         <div class="connect-content">
-          <h2 class="section-title">KẾT NỐI NGHỆ NHÂN</h2>
-          <p class="section-description">
+          <h2 class="section-title reveal-el">KẾT NỐI NGHỆ NHÂN</h2>
+          <p class="section-description reveal-el reveal-delay-1">
             Đăng ký để nhận thông tin hợp tác, đặt hàng số lượng lớn hoặc kết nối trực tiếp với đội ngũ Chuyện Làng Nghề.
             Chúng tôi sẽ liên hệ sớm để đồng hành cùng bạn lan tỏa giá trị thủ công Việt.
           </p>
-          <div class="email-input-wrapper">
+          <div class="email-input-wrapper reveal-el reveal-delay-2">
             <input type="email" placeholder="Nhập email để chúng tôi liên hệ" class="email-input">
             <i class="fas fa-envelope"></i>
           </div>
-          <a class="btn btn-primary" routerLink="/contact">
+          <a class="btn btn-primary reveal-el reveal-delay-3" routerLink="/contact">
             Đăng ký kết nối
             <i class="fas fa-arrow-circle-right"></i>
           </a>
         </div>
-        <div class="connect-image">
-          <video autoplay muted loop playsinline preload="metadata" poster="assets/New web images/b4712cebbbbdce3651bfd9525f2d5043.jpg" aria-label="Kết nối nghệ nhân">
+        <div class="connect-image reveal-el reveal-delay-2">
+          <video autoplay muted loop playsinline preload="auto" aria-label="Kết nối nghệ nhân">
             <source src="assets/New web images/ket-noi-nghe-nhan.mp4" type="video/mp4" />
           </video>
         </div>

@@ -14,16 +14,23 @@ export class QrComponent implements OnInit, OnChanges {
   activeTab: 'momo' | 'internet_banking' = 'momo';
   selectedBank: 'vietcombank' | 'bidv' | null = null;
   countdown: number = 300;
+  panelOpen = false;
 
   intervalId: any;
 
   ngOnInit(): void {
     if (this.isVisible) {
       this.startCountdown();
+      setTimeout(() => (this.panelOpen = true), 20);
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isVisible'] && this.isVisible) {
+      this.panelOpen = false;
+      setTimeout(() => (this.panelOpen = true), 20);
+      this.startCountdown();
+    }
     if (changes['modalPaymentMethod'] && this.modalPaymentMethod) {
       this.activeTab = this.modalPaymentMethod;
       if (this.activeTab === 'internet_banking') {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
 import { ProductAPIService } from '../product-api.service';
 import { Product } from '../../interface/Product';
 
@@ -8,18 +8,23 @@ import { Product } from '../../interface/Product';
   styleUrls: ['./related-product.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class RelatedProductComponent implements OnInit {
+export class RelatedProductComponent implements OnInit, AfterViewInit {
   @Input() currentProductId: string = '';
   @Input() currentProductDescription: string = '';
   @Input() currentProductDept: string = '';
   relatedProducts: Product[] = [];
   maxRelatedProducts: number = 10;
-  isLoading: boolean = true;
+
+  @ViewChild('carouselEl') carouselEl?: ElementRef<HTMLDivElement>;
+  canScrollLeft = false;
+  canScrollRight = false;
+
+  private readonly scrollStep = 320;
 
   constructor(private productService: ProductAPIService) { }
 
   ngOnInit(): void {
-    this.productService.getProducts(1, 12, this.currentProductDept).subscribe((data: { products: Product[]; total: number; page: number; pages: number }) => {
+    this.productService.getProducts(1, 100).subscribe((data: { products: Product[]; total: number; page: number; pages: number }) => {
       const otherProducts = data.products.filter(product => product._id && product._id !== this.currentProductId);
 
       const scoredProducts = otherProducts.map(product => ({
@@ -43,7 +48,7 @@ export class RelatedProductComponent implements OnInit {
           product.unit_price || 0,
           product.discount || 0,
           product.createdAt || '',
-          this.productService.getProductThumbnailSrc(product.image_1, product._id || '', { width: 480, height: 480 }),
+          product.image_1 || '',
           product.image_2 || '',
           product.image_3 || '',
           product.image_4 || '',
@@ -55,8 +60,36 @@ export class RelatedProductComponent implements OnInit {
         newProduct.checkIfNew();
         return newProduct;
       });
-      this.isLoading = false;
+      setTimeout(() => this.updateScrollState(), 100);
     });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.updateScrollState(), 0);
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateScrollState();
+  }
+
+  updateScrollState(): void {
+    const el = this.carouselEl?.nativeElement;
+    if (!el) return;
+    this.canScrollLeft = el.scrollLeft > 0;
+    this.canScrollRight = el.scrollLeft < el.scrollWidth - el.clientWidth - 2;
+  }
+
+  scrollRelated(direction: 'left' | 'right'): void {
+    const el = this.carouselEl?.nativeElement;
+    if (!el) return;
+    const delta = direction === 'left' ? -this.scrollStep : this.scrollStep;
+    el.scrollBy({ left: delta, behavior: 'smooth' });
+    setTimeout(() => this.updateScrollState(), 300);
+  }
+
+  onCarouselScroll(): void {
+    this.updateScrollState();
   }
 
   calculateSimilarity(desc1: string, desc2: string, dept1: string, dept2: string): number {

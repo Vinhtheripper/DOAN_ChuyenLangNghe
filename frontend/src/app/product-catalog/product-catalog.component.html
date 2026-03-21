@@ -19,7 +19,7 @@
       <div class="filter-block">
         <h3 class="filter-block-title">Theo danh mục</h3>
         <ul class="filter-list">
-          <li *ngFor="let category of categories; trackBy: trackByCategory">
+          <li *ngFor="let category of categories">
             <button type="button" class="filter-option" [class.active]="selectedCategory === category.filterKey"
               (click)="applyFilter(category.filterKey)">
               {{ category.name }}
@@ -94,7 +94,7 @@
             </button>
           </div>
           <div class="province-suggestions" *ngIf="showProvinceSuggestions && filteredProvinces.length > 0">
-            <div *ngFor="let province of filteredProvinces; trackBy: trackByText" class="province-suggestion-item"
+            <div *ngFor="let province of filteredProvinces" class="province-suggestion-item"
               (click)="selectProvince(province)">
               <i class="fas fa-map-marker-alt suggestion-icon"></i>
               <span class="province-name">{{ province }}</span>
@@ -106,6 +106,17 @@
           </div>
         </div>
       </div>
+
+      <!-- Hình crafted by hand & poster bên dưới khung lọc -->
+      <div class="sidebar-crafted-image">
+        <img src="assets/catalog-sidebar-crafted.png" alt="Crafted by hand - rooted in nature" />
+      </div>
+      <div class="sidebar-crafted-image">
+        <img src="assets/catalog-sidebar-wineclay.png" alt="Wine & Clay workshop" />
+      </div>
+      <div class="sidebar-crafted-image">
+        <img src="assets/catalog-sidebar-basket.png" alt="Handmade basket" />
+      </div>
     </aside>
 
     <!-- Right: main content -->
@@ -116,13 +127,25 @@
         <div class="topbar-right">
           <div class="active-filters" *ngIf="getActiveFilters().length > 0">
             <span class="active-label">Bộ lọc đang chọn:</span>
-            <span *ngFor="let f of getActiveFilters(); trackBy: trackByFilter" class="filter-pill">
+            <span *ngFor="let f of getActiveFilters()" class="filter-pill">
               {{ f.label }}
               <button type="button" class="pill-remove" (click)="removeFilter(f.key)" aria-label="Xóa">×</button>
             </span>
             <button type="button" class="clear-all" (click)="clearAllFilters()">Xóa tất cả</button>
           </div>
         </div>
+      </div>
+
+      <!-- Intro video: full width under filter/topbar -->
+      <div class="catalog-video-wrap">
+        <video
+          class="catalog-video"
+          src="assets/catalog-intro-video.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+        ></video>
       </div>
 
       <div *ngIf="isLoading" class="loading-state">
@@ -134,7 +157,7 @@
       </div>
 
       <div *ngIf="!isLoading && paginatedProducts.length > 0" class="product-grid three-col">
-        <div *ngFor="let product of paginatedProducts; trackBy: trackByProductId" class="product-grid-item">
+        <div *ngFor="let product of paginatedProducts" class="product-grid-item">
           <app-product-item [product]="product"></app-product-item>
         </div>
       </div>
@@ -152,7 +175,7 @@
                 <span aria-hidden="true">‹</span> Trước
               </a>
             </li>
-            <li *ngFor="let page of getPageNumbers(); trackBy: trackByNumber" class="page-item" [class.active]="currentPage === page">
+            <li *ngFor="let page of getPageNumbers()" class="page-item" [class.active]="currentPage === page">
               <a class="page-link" href="#" (click)="goToPage(page); $event.preventDefault()">{{ page }}</a>
             </li>
             <li class="page-item" [class.disabled]="currentPage === totalPages">

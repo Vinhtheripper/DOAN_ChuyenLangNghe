@@ -3,9 +3,6 @@ import { Product } from '../../../interface/Product';
 import { ProductAPIService } from '../../product-api.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { MediaUploadService } from '../../services/media-upload.service';
-import { forkJoin, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-management',
@@ -31,14 +28,12 @@ export class ProductManagementComponent implements OnInit {
   canEdit: boolean = false;
   canView: boolean = false;
   images: string[] = ['', '', '', '', ''];
-  imageFiles: (File | null)[] = [null, null, null, null, null];
   showFilters: boolean = false;
 
   constructor(
     private productService: ProductAPIService,
     private fb: FormBuilder,
-    private authService: AuthService,
-    private mediaUploadService: MediaUploadService
+    private authService: AuthService
   ) {
     this.productForm = this.fb.group({
       product_name: ['', Validators.required],
@@ -72,7 +67,6 @@ export class ProductManagementComponent implements OnInit {
 
   clearImage(index: number): void {
     this.images[index] = '';
-    this.imageFiles[index] = null;
     this.productForm.patchValue({ [`image_${index + 1}`]: '' });
     this.productForm.updateValueAndValidity();
   }
@@ -101,28 +95,15 @@ export class ProductManagementComponent implements OnInit {
   onImageChange(event: Event, index: number): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.imageFiles[index] = file;
-    this.images[index] = URL.createObjectURL(file);
-  }
 
-  private uploadPendingImages(): Observable<Record<string, string>> {
-    const uploads = this.imageFiles.map((file, index) => {
-      const field = `image_${index + 1}`;
-      if (!file) {
-        return of({ field, url: this.productForm.value[field] || '' });
-      }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      this.images[index] = base64String;
+      this.productForm.patchValue({ [`image_${index + 1}`]: base64String });
+    };
 
-      return this.mediaUploadService.uploadImage(file, 'products').pipe(
-        map((result) => ({ field, url: result.url }))
-      );
-    });
-
-    return forkJoin(uploads).pipe(
-      map((results) => results.reduce<Record<string, string>>((acc, item) => {
-        acc[item.field] = item.url;
-        return acc;
-      }, {}))
-    );
+    reader.readAsDataURL(file);
   }
 
   createProduct(): void {
@@ -146,21 +127,16 @@ export class ProductManagementComponent implements OnInit {
       }
     }, 200);
 
-    this.uploadPendingImages().subscribe({
-      next: (uploadedImages) => {
-        const sanitizedProduct: Record<string, any> = {
-          ...this.productForm.value,
-          ...uploadedImages
-        };
+    const sanitizedProduct: Record<string, any> = { ...this.productForm.value };
 
-        const imageFields = ['image_1', 'image_2', 'image_3', 'image_4', 'image_5'];
-        for (const field of imageFields) {
-          if (!sanitizedProduct[field]) {
-            sanitizedProduct[field] = '';
-          }
-        }
+    const imageFields = ['image_1', 'image_2', 'image_3', 'image_4', 'image_5'];
+    for (const field of imageFields) {
+      if (!sanitizedProduct[field]) {
+        sanitizedProduct[field] = '';
+      }
+    }
 
-        this.productService.createProduct(sanitizedProduct).subscribe({
+    this.productService.createProduct(sanitizedProduct).subscribe({
       next: () => {
         clearInterval(progressInterval);
         this.uploadProgress = 100;
@@ -169,7 +145,6 @@ export class ProductManagementComponent implements OnInit {
           this.loadProducts();
           this.productForm.reset();
           this.images = ['', '', '', '', ''];
-          this.imageFiles = [null, null, null, null, null];
           const fileInputs = document.querySelectorAll('input[type="file"]');
           fileInputs.forEach(input => {
             (input as HTMLInputElement).value = '';
@@ -185,16 +160,7 @@ export class ProductManagementComponent implements OnInit {
         this.loading = false;
         this.uploadProgress = 0;
         alert(err.message);
-          }
-        });
       },
-      error: (err) => {
-        clearInterval(progressInterval);
-        this.isUploading = false;
-        this.loading = false;
-        this.uploadProgress = 0;
-        alert(err.message);
-      }
     });
   }
 
@@ -212,7 +178,6 @@ export class ProductManagementComponent implements OnInit {
       product.image_4 || '',
       product.image_5 || '',
     ];
-    this.imageFiles = [null, null, null, null, null];
   }
 
   updateProduct(): void {
@@ -220,44 +185,28 @@ export class ProductManagementComponent implements OnInit {
       return;
     }
 
-    const selectedProductId = this.selectedProduct._id!;
-    this.loading = true;
-    this.uploadPendingImages().subscribe({
-      next: (uploadedImages) => {
-        const sanitizedProduct: Record<string, any> = {
-          ...this.productForm.value,
-          ...uploadedImages
-        };
+    const sanitizedProduct: Record<string, any> = { ...this.productForm.value };
 
-        const imageFields = ['image_1', 'image_2', 'image_3', 'image_4', 'image_5'];
-        for (const field of imageFields) {
-          if (!sanitizedProduct[field]) {
-            sanitizedProduct[field] = '';
-          }
-        }
+    const imageFields = ['image_1', 'image_2', 'image_3', 'image_4', 'image_5'];
+    for (const field of imageFields) {
+      if (!sanitizedProduct[field]) {
+        sanitizedProduct[field] = '';
+      }
+    }
 
-        this.productService.updateProduct(selectedProductId, sanitizedProduct).subscribe({
-          next: () => {
-            this.loadProducts();
-            this.cancelEdit();
-            this.images = ['', '', '', '', ''];
-            this.imageFiles = [null, null, null, null, null];
-            const fileInputs = document.querySelectorAll('input[type="file"]');
-            fileInputs.forEach(input => {
-              (input as HTMLInputElement).value = '';
-            });
-            this.loading = false;
-          },
-          error: (err) => {
-            this.loading = false;
-            alert(err.message);
-          },
+    this.productService.updateProduct(this.selectedProduct._id!, sanitizedProduct).subscribe({
+      next: () => {
+        this.loadProducts();
+        this.cancelEdit();
+        this.images = ['', '', '', '', ''];
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+          (input as HTMLInputElement).value = '';
         });
       },
       error: (err) => {
-        this.loading = false;
         alert(err.message);
-      }
+      },
     });
   }
 
@@ -275,7 +224,6 @@ export class ProductManagementComponent implements OnInit {
     this.selectedProduct = null;
     this.productForm.reset();
     this.images = ['', '', '', '', ''];
-    this.imageFiles = [null, null, null, null, null];
     const fileInputs = document.querySelectorAll('input[type="file"]');
     fileInputs.forEach(input => {
       (input as HTMLInputElement).value = '';

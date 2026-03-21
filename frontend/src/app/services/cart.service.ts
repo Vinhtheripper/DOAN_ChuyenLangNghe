@@ -4,7 +4,7 @@ import { CartAPIService } from '../cart-api.service';
 import { CartItem } from '../../interface/Cart';
 import { AuthService } from './auth.service';
 import { tap, catchError } from 'rxjs/operators';
-import { decompressFromUTF16 } from 'lz-string';
+import { compressToUTF16, decompressFromUTF16 } from 'lz-string';
 
 @Injectable({
   providedIn: 'root',
@@ -32,76 +32,45 @@ export class CartService {
       if (loggedIn) {
         this.loadCartFromDatabase();
       } else {
-        const items = this.readGuestCartFromStorage();
+        const items = this.getCartItemsFromSessionStorage();
         this.cartItems.next(items);
         this.updateCartCount(items);
       }
     });
   }
 
-  private readGuestCartFromStorage(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
-    const rawItems = sessionStorage.getItem(this.cartKey);
-    if (!rawItems) {
-      return [];
-    }
-
-    try {
-      return JSON.parse(rawItems);
-    } catch {
-      try {
-        const decompressed = decompressFromUTF16(rawItems);
-        return decompressed ? JSON.parse(decompressed) : [];
-      } catch {
-        return [];
-      }
-    }
+  private getCartItemsFromSessionStorage(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
+    const compressedItems = sessionStorage.getItem(this.cartKey);
+    return compressedItems ? JSON.parse(decompressFromUTF16(compressedItems)) : [];
   }
 
-  private persistGuestCart(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
+  /** Chuẩn bị bản copy an toàn để lưu storage: không lưu ảnh base64 (data URL) để tránh vượt giới hạn 5MB. */
+  private toStorageSafeCartItems(
+    items: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]
+  ): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
+    return items.map((item) => {
+      const img = item.image_1 || '';
+      const isDataUrl = img.startsWith('data:');
+      return {
+        ...item,
+        image_1: isDataUrl ? '' : img,
+      };
+    });
+  }
+
+  private saveCartItemsToSessionStorage(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
     try {
-      const serializedData = JSON.stringify(cartItems);
-      if (serializedData.length > 5000000) {
+      const safeItems = this.toStorageSafeCartItems(cartItems);
+      const serializedData = JSON.stringify(safeItems);
+      const compressedData = compressToUTF16(serializedData);
+      if (compressedData.length > 5000000) {
         alert('Không thể lưu giỏ hàng vì dữ liệu quá lớn.');
         return;
       }
-      sessionStorage.setItem(this.cartKey, serializedData);
+      sessionStorage.setItem(this.cartKey, compressedData);
     } catch (error) {
       alert('Lỗi khi lưu dữ liệu vào sessionStorage. Vui lòng thử lại.');
     }
-  }
-
-  private getCurrentCartItems(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
-    return [...this.cartItems.getValue()];
-  }
-
-  private upsertCartItem(
-    cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[],
-    nextItem: CartItem & { product_name: string; image_1: string; stocked_quantity: number }
-  ): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
-    const cloned = cartItems.map((item) => ({ ...item }));
-    const existingItem = cloned.find((item) => item.productId === nextItem.productId);
-    if (existingItem) {
-      existingItem.quantity += nextItem.quantity;
-      existingItem.unit_price = nextItem.unit_price;
-      existingItem.product_name = nextItem.product_name;
-      existingItem.image_1 = nextItem.image_1;
-      existingItem.stocked_quantity = nextItem.stocked_quantity;
-      return cloned;
-    }
-
-    cloned.push({ ...nextItem });
-    return cloned;
-  }
-
-  private syncGuestCart(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
-    this.persistGuestCart(cartItems);
-    this.cartItems.next(cartItems);
-    this.updateCartCount(cartItems);
-  }
-
-  private syncRuntimeCart(cartItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
-    this.cartItems.next(cartItems);
-    this.updateCartCount(cartItems);
   }
 
   private freeUpStorageIfNecessary(): void {
@@ -141,105 +110,85 @@ export class CartService {
     stocked_quantity: number
   ): void {
     if (this.isUserLoggedIn) {
-      const previousCartItems = this.getCurrentCartItems();
-      const optimisticCartItems = this.upsertCartItem(previousCartItems, {
-        productId,
-        quantity,
-        unit_price,
-        product_name,
-        image_1,
-        stocked_quantity,
-      });
-      this.cartItems.next(optimisticCartItems);
-      this.updateCartCount(optimisticCartItems);
-
       this.cartAPIService
         .addToCart(productId, quantity, unit_price)
         .pipe(
-          catchError((error) => {
-            this.cartItems.next(previousCartItems);
-            this.updateCartCount(previousCartItems);
-            return this.handleError(error);
-          })
+          tap(() => this.loadCartFromDatabase()),
+          catchError(this.handleError)
         )
         .subscribe();
     } else {
-      const cartItems = this.upsertCartItem(this.getCurrentCartItems(), {
-        productId,
-        quantity,
-        unit_price,
-        product_name,
-        image_1,
-        stocked_quantity,
-      });
-      this.syncGuestCart(cartItems);
+      const cartItems = this.getCartItemsFromSessionStorage();
+      const existingItem = cartItems.find((item) => item.productId === productId);
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cartItems.push({
+          productId,
+          quantity,
+          unit_price,
+          product_name,
+          image_1,
+          stocked_quantity,
+        });
+      }
+      this.saveCartItemsToSessionStorage(cartItems);
+      this.cartItems.next(cartItems);
+      this.updateCartCount(cartItems);
     }
   }
 
   removeFromCart(productId: string): void {
     if (this.isUserLoggedIn) {
-      const previousCartItems = this.getCurrentCartItems();
-      const nextCartItems = previousCartItems.filter((item) => item.productId !== productId);
-      this.syncRuntimeCart(nextCartItems);
       this.cartAPIService
         .removeFromCart(productId)
         .pipe(
-          catchError((error) => {
-            this.syncRuntimeCart(previousCartItems);
-            return this.handleError(error);
-          })
+          tap(() => this.loadCartFromDatabase()),
+          catchError(this.handleError)
         )
         .subscribe();
     } else {
-      const cartItems = this.getCurrentCartItems().filter((item) => item.productId !== productId);
-      this.syncGuestCart(cartItems);
+      const cartItems = this.getCartItemsFromSessionStorage().filter((item) => item.productId !== productId);
+      this.saveCartItemsToSessionStorage(cartItems);
+      this.cartItems.next(cartItems);
+      this.updateCartCount(cartItems);
     }
   }
 
   removeOrderedItems(orderedItemIds: string[]): void {
     if (this.isUserLoggedIn) {
-      const previousCartItems = this.getCurrentCartItems();
-      const nextCartItems = previousCartItems.filter(
-        (item) => item.productId && !orderedItemIds.includes(item.productId)
-      );
-      this.syncRuntimeCart(nextCartItems);
       this.cartAPIService
         .removeOrderedItems(orderedItemIds)
         .pipe(
-          catchError((error) => {
-            this.syncRuntimeCart(previousCartItems);
-            return this.handleError(error);
-          })
+          tap(() => this.loadCartFromDatabase()),
+          catchError(this.handleError)
         )
         .subscribe();
     } else {
-      const remainingItems = this.getCurrentCartItems().filter(
+      const remainingItems = this.getCartItemsFromSessionStorage().filter(
         (item) => item.productId && !orderedItemIds.includes(item.productId)
       );
-      this.syncGuestCart(remainingItems);
+      this.saveCartItemsToSessionStorage(remainingItems);
+      this.cartItems.next(remainingItems);
+      this.updateCartCount(remainingItems);
     }
   }
 
   updateQuantity(productId: string, quantity: number): Observable<any> {
     if (this.isUserLoggedIn) {
-      const previousCartItems = this.getCurrentCartItems();
-      const nextCartItems = previousCartItems.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
-      );
-      this.syncRuntimeCart(nextCartItems);
       return this.cartAPIService.updateQuantity(productId, quantity).pipe(
-        catchError((error) => {
-          this.syncRuntimeCart(previousCartItems);
-          return this.handleError(error);
-        })
+        tap(() => this.loadCartFromDatabase()),
+        catchError(this.handleError)
       );
     } else {
-      const cartItems = this.getCurrentCartItems();
+      const cartItems = this.getCartItemsFromSessionStorage();
       const item = cartItems.find((item) => item.productId === productId);
       if (item) {
         item.quantity = quantity;
       }
-      this.syncGuestCart(cartItems);
+      this.saveCartItemsToSessionStorage(cartItems);
+      this.cartItems.next(cartItems);
+      this.updateCartCount(cartItems);
       return of(null);
     }
   }
@@ -273,7 +222,7 @@ export class CartService {
           const mappedItems = cartItems.map((item) => ({
             ...item,
             product_name: item.product_name || 'Tên sản phẩm',
-            image_1: item.image_1 || 'default-image.jpg',
+            image_1: item.image_1 || '',
             stocked_quantity: item.stocked_quantity ?? 0,
           }));
 
@@ -306,8 +255,11 @@ export class CartService {
   }
 
   saveSelectedItems(selectedItems: (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[]): void {
-    const serializedData = JSON.stringify(selectedItems);
-    if (serializedData.length > 5000000) {
+    const safeItems = this.toStorageSafeCartItems(selectedItems);
+    const serializedData = JSON.stringify(safeItems);
+    const compressedData = compressToUTF16(serializedData);
+
+    if (compressedData.length > 5000000) {
       alert('Không thể lưu dữ liệu vì kích thước quá lớn. Vui lòng kiểm tra giỏ hàng.');
       return;
     }
@@ -317,26 +269,13 @@ export class CartService {
     if (this.isUserLoggedIn) {
       this.cartAPIService.saveSelectedItems(selectedItems).pipe(catchError(this.handleError)).subscribe();
     } else {
-      localStorage.setItem(this.selectedItemsKey, serializedData);
+      localStorage.setItem(this.selectedItemsKey, compressedData);
     }
   }
 
   loadSelectedItemsFromLocalStorage(): (CartItem & { product_name: string; image_1: string; stocked_quantity: number })[] {
-    const storedItems = localStorage.getItem(this.selectedItemsKey);
-    if (!storedItems) {
-      return [];
-    }
-
-    try {
-      return JSON.parse(storedItems);
-    } catch {
-      try {
-        const decompressed = decompressFromUTF16(storedItems);
-        return decompressed ? JSON.parse(decompressed) : [];
-      } catch {
-        return [];
-      }
-    }
+    const compressedItems = localStorage.getItem(this.selectedItemsKey);
+    return compressedItems ? JSON.parse(decompressFromUTF16(compressedItems)) : [];
   }
 
   clearSelectedItems(): void {

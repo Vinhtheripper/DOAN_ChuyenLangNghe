@@ -1,6 +1,46 @@
 {
   "rewrites": [
     {
+      "source": "/products/:path*",
+      "destination": "/products/:path*"
+    },
+    {
+      "source": "/user/:path*",
+      "destination": "/user/:path*"
+    },
+    {
+      "source": "/orders/:path*",
+      "destination": "/orders/:path*"
+    },
+    {
+      "source": "/feedback/:path*",
+      "destination": "/feedback/:path*"
+    },
+    {
+      "source": "/cart/:path*",
+      "destination": "/cart/:path*"
+    },
+    {
+      "source": "/blogs/:path*",
+      "destination": "/blogs/:path*"
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "/dashboard/:path*"
+    },
+    {
+      "source": "/coupons/:path*",
+      "destination": "/coupons/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "/uploads/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "/health"
+    },
+    {
       "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }

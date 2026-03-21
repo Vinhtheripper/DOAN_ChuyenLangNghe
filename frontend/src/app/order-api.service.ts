@@ -1,19 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError, shareReplay, tap } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Order } from '../interface/Order';
-import { buildUrl } from './utils/url.util';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderAPIService {
-  private apiUrl = buildUrl('/orders');
-  private productStockUrl = buildUrl('/products');
+  private apiUrl = '/orders';
+  private productStockUrl = '/products';
   private token: string | null = null;
-  private readonly cacheTtlMs = 60 * 1000;
-  private myOrdersCache = new Map<string, { expiresAt: number; request$: Observable<{ orders: any[]; total: number; page: number; pages: number }> }>();
 
   constructor(private http: HttpClient) { }
 
@@ -47,20 +44,6 @@ export class OrderAPIService {
     return throwError(() => new Error(errorMessage));
   }
 
-  private getCachedMyOrders(key: string): Observable<{ orders: any[]; total: number; page: number; pages: number }> | null {
-    const cached = this.myOrdersCache.get(key);
-    if (!cached) return null;
-    if (cached.expiresAt <= Date.now()) {
-      this.myOrdersCache.delete(key);
-      return null;
-    }
-    return cached.request$;
-  }
-
-  private clearOrderCaches(): void {
-    this.myOrdersCache.clear();
-  }
-
   getOrders(
     page: number = 1,
     limit: number = 10,
@@ -92,6 +75,8 @@ export class OrderAPIService {
     selectedItems: { _id: string; quantity: number; unit_price: number }[];
     totalPrice: number;
     paymentMethod: string;
+    shippingFee?: number;
+    shippingMethod?: string;
     shippingAddress: {
       firstName: string;
       lastName: string;
@@ -103,6 +88,9 @@ export class OrderAPIService {
       email: string;
       phone: string;
       additionalNotes?: string;
+      provinceCode?: string;
+      districtCode?: string;
+      wardCode?: string;
     };
   }): Observable<{ orderId: string; message: string }> {
     if (!Array.isArray(orderData.selectedItems) || orderData.selectedItems.length === 0) {
@@ -144,10 +132,7 @@ export class OrderAPIService {
         headers: this.getHeaders(),
         withCredentials: true
       })
-      .pipe(
-        tap(() => this.clearOrderCaches()),
-        catchError(this.handleError)
-      );
+      .pipe(catchError(this.handleError));
   }
 
   updateOrderStatus(orderId: string, status: string): Observable<{ message: string }> {
@@ -163,10 +148,7 @@ export class OrderAPIService {
         headers: this.getHeaders(),
         withCredentials: true
       })
-      .pipe(
-        tap(() => this.clearOrderCaches()),
-        catchError(this.handleError)
-      );
+      .pipe(catchError(this.handleError));
   }
 
   cancelOrder(orderId: string): Observable<{ message: string }> {
@@ -175,10 +157,7 @@ export class OrderAPIService {
         headers: this.getHeaders(),
         withCredentials: true
       })
-      .pipe(
-        tap(() => this.clearOrderCaches()),
-        catchError(this.handleError)
-      );
+      .pipe(catchError(this.handleError));
   }
 
   getOrderHistory(userId: string): Observable<Order[]> {
@@ -190,34 +169,39 @@ export class OrderAPIService {
       .pipe(catchError(this.handleError));
   }
 
+  /** Địa chỉ giao hàng từ đơn hàng gần nhất (để tự điền cho lần mua sau) */
+  getLastShippingAddress(): Observable<{
+    firstName: string;
+    lastName: string;
+    address: string;
+    province: string;
+    district: string;
+    ward: string;
+    email: string;
+    phone: string;
+    additionalNotes?: string;
+    provinceCode?: string;
+    districtCode?: string;
+    wardCode?: string;
+    company?: string;
+  } | null> {
+    return this.http
+      .get<any>(`${this.apiUrl}/me/last-address`, {
+        headers: this.getHeaders(),
+        withCredentials: true
+      })
+      .pipe(catchError(this.handleError));
+  }
+
   /** Đơn hàng của user đang đăng nhập */
   getMyOrders(page: number = 1, limit: number = 10): Observable<{ orders: any[]; total: number; page: number; pages: number }> {
-    const cacheKey = `${page}:${limit}`;
-    const cached = this.getCachedMyOrders(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    const request$ = this.http
+    return this.http
       .get<{ orders: any[]; total: number; page: number; pages: number }>(`${this.apiUrl}/me`, {
         headers: this.getHeaders(),
         withCredentials: true,
         params: { page: page.toString(), limit: limit.toString() }
       })
-      .pipe(
-        catchError((error) => {
-          this.myOrdersCache.delete(cacheKey);
-          return this.handleError(error);
-        }),
-        shareReplay(1)
-      );
-
-    this.myOrdersCache.set(cacheKey, {
-      expiresAt: Date.now() + this.cacheTtlMs,
-      request$
-    });
-
-    return request$;
+      .pipe(catchError(this.handleError));
   }
 
   updateProductStock(productId: string, quantity: number): Observable<any> {

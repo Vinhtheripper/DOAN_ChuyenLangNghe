@@ -4,6 +4,7 @@ import { ProductAPIService } from '../product-api.service';
 import { Product } from '../../interface/Product';
 import { CartService } from '../services/cart.service';
 import { AuthService } from '../services/auth.service';
+import { CartFlyAnimationService } from '../services/cart-fly-animation.service';
 
 @Component({
   selector: 'app-product-section-3',
@@ -23,7 +24,8 @@ export class ProductSection3Component implements OnInit {
     private router: Router,
     private _service: ProductAPIService,
     private cartService: CartService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cartFly: CartFlyAnimationService
   ) { }
 
   ngOnInit(): void {
@@ -31,10 +33,34 @@ export class ProductSection3Component implements OnInit {
       this.isLoggedIn = status;
     });
 
-    this._service.getProducts(1, 12, '', 'gom_su').subscribe({
+    this._service.getProducts(1, 100).subscribe({
       next: (data) => {
-        this.products = data.products.map(product => this._service.mapToProduct(product));
-        this.displayedProducts = this.products.slice(0, this.initialDisplayCount);
+        this.products = data.products.map(product => {
+          const newProduct = new Product(
+            product._id || '',
+            product.product_name || '',
+            product.product_detail || '',
+            product.stocked_quantity || 0,
+            product.unit_price || 0,
+            product.discount || 0,
+            product.createdAt || '',
+            product.image_1 || '',
+            product.image_2 || '',
+            product.image_3 || '',
+            product.image_4 || '',
+            product.image_5 || '',
+            product.product_dept || '',
+            product.rating || 0,
+            product.isNew || false,
+            product.type || 'food'
+          );
+          newProduct.checkIfNew();
+          return newProduct;
+        });
+        
+        // Filter products for gốm sứ
+        const gomSuProducts = this.products.filter(product => product.type === 'gom_su');
+        this.displayedProducts = gomSuProducts.slice(0, this.initialDisplayCount);
         this.isLoading = false;
       },
       error: (err) => {
@@ -50,23 +76,26 @@ export class ProductSection3Component implements OnInit {
 
   addToCart(event: Event, product: Product): void {
     event.stopPropagation();
-    if (product) {
-      this.cartService.addToCart(
-        product._id,
-        1,
-        product.unit_price,
-        product.product_name,
-        product.image_1,
-        product.stocked_quantity
-      );
+    if (!product) return;
+    const rect = this.cartFly.getImageRectFromEvent(event);
+    if (rect && product.image_1) {
+      this.cartFly.flyToCart(product.image_1, rect);
     }
+    this.cartService.addToCart(
+      product._id,
+      1,
+      product.unit_price,
+      product.product_name,
+      product.image_1,
+      product.stocked_quantity
+    );
   }
 
   shareOnFacebook(event: Event, product: Product): void {
     event.stopPropagation();
     const productUrl = `${window.location.origin}/product/${product._id}`;
-    const quote = `Check out this amazing product: ${product.product_name}! It's available for just ${product.unit_price.toLocaleString()} VND.`;
-    const hashtag = '#AmazingProduct #ĐẶC SẢN 3 MIỀN #BeĐẶC SẢN 3 MIỀN';
+    const quote = `Chia sẻ một sản phẩm thủ công từ Chuyện Làng Nghề: ${product.product_name}.`;
+    const hashtag = '#ChuyenLangNghe #DoThuCong #LangNgheTruyenThong';
     
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(quote)}&hashtag=${encodeURIComponent(hashtag)}`;
     window.open(url, '_blank');
@@ -84,7 +113,8 @@ export class ProductSection3Component implements OnInit {
 
   showMore(): void {
     const currentLength = this.displayedProducts.length;
-    const additionalProducts = this.products.slice(currentLength, currentLength + this.loadMoreCount);
+    const gomSuProducts = this.products.filter(product => product.type === 'gom_su');
+    const additionalProducts = gomSuProducts.slice(currentLength, currentLength + this.loadMoreCount);
     this.displayedProducts = [...this.displayedProducts, ...additionalProducts];
   }
 
@@ -98,16 +128,5 @@ export class ProductSection3Component implements OnInit {
       return Math.round(originalPrice / 1000) * 1000;
     }
     return null;
-  }
-
-  getImageSrc(product: Product): string {
-    return this._service.getProductThumbnailSrc(product?.image_1, product?._id || '', {
-      width: 480,
-      height: 480
-    });
-  }
-
-  trackByProductId(_index: number, product: Product): string {
-    return product._id;
   }
 }

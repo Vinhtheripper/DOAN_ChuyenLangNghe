@@ -1,21 +1,20 @@
 <div class="product-card card shadow-sm" (click)="goToDetail()">
   <div class="product-image position-relative">
-    <img [src]="getImageSrc()" alt="{{ product.product_name }}" class="card-img-top img-fluid rounded" loading="lazy">
+    <img [src]="product.image_1" alt="{{ product.product_name }}" class="card-img-top img-fluid rounded">
     <span class="badge badge-label label-new" *ngIf="product.isNew">New</span>
     <span class="badge badge-label label-discount" *ngIf="product.discount > 0">
       -{{ (product.discount * 100) | number:'1.0-0' }}%
     </span>
 
     <div class="overlay d-flex flex-column align-items-center justify-content-center">
-      <button *ngIf="product.stocked_quantity > 0" class="btn add-to-cart" (click)="addToCart($event)" [disabled]="isAddingToCart">
-        {{ isAddingToCart ? 'Adding...' : 'Add to cart' }}
-      </button>
+      <button *ngIf="product.stocked_quantity > 0" class="btn add-to-cart" (click)="addToCart($event)">Add to
+        cart</button>
 
       <div class="actions d-flex justify-content-center mt-2">
         <span class="mx-2" (click)="shareOnFacebook($event)">
           <i class="fas fa-share-alt"></i> Share
         </span>
-        <span *ngIf="isLoggedIn()" class="mx-2" (click)="toggleLike($event)">
+        <span *ngIf="isLoggedIn" class="mx-2" (click)="toggleLike($event)">
           <i class="fas fa-heart" [class.liked]="isLiked"></i> Like
         </span>
       </div>

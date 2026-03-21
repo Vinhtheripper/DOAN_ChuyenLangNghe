@@ -1,32 +1,35 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product } from '../../interface/Product';
 import { CartService } from '../services/cart.service';
 import { AuthService } from '../services/auth.service';
-import { ProductAPIService } from '../product-api.service';
+import { CartFlyAnimationService } from '../services/cart-fly-animation.service';
 
 @Component({
   selector: 'app-product-item',
   templateUrl: './product-item.component.html',
-  styleUrls: ['./product-item.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./product-item.component.css']
 })
-export class ProductItemComponent implements OnChanges {
+export class ProductItemComponent implements OnInit {
   @Input() product!: Product;
   isLiked: boolean = false;
-  isAddingToCart: boolean = false;
+  isLoggedIn: boolean = false;
 
   constructor(
     private cartService: CartService,
     private authService: AuthService,
     private router: Router,
-    private productService: ProductAPIService
+    private cartFly: CartFlyAnimationService
   ) { }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['product']) {
-      this.syncLikedState();
-    }
+  ngOnInit(): void {
+    this.authService.isLoggedIn$.subscribe(status => {
+      this.isLoggedIn = status;
+      if (this.isLoggedIn && this.product._id) {
+        const likedProducts = this.authService.getLikedProducts();
+        this.isLiked = likedProducts.includes(this.product._id);
+      }
+    });
   }
 
   goToDetail(): void {
@@ -37,7 +40,7 @@ export class ProductItemComponent implements OnChanges {
 
   toggleLike(event: Event): void {
     event.stopPropagation();
-    if (this.isLoggedIn()) {
+    if (this.isLoggedIn) {
       this.isLiked = !this.isLiked;
       this.updateLikedProducts();
     } else {
@@ -60,28 +63,27 @@ export class ProductItemComponent implements OnChanges {
 
   addToCart(event: Event): void {
     event.stopPropagation();
-    if (this.product && !this.isAddingToCart) {
-      this.isAddingToCart = true;
-      this.cartService.addToCart(
-        this.product._id,
-        1,
-        this.product.unit_price,
-        this.product.product_name,
-        this.product.image_1,
-        this.product.stocked_quantity
-      );
-      setTimeout(() => {
-        this.isAddingToCart = false;
-      }, 400);
+    if (!this.product) return;
+    const rect = this.cartFly.getImageRectFromEvent(event);
+    if (rect && this.product.image_1) {
+      this.cartFly.flyToCart(this.product.image_1, rect);
     }
+    this.cartService.addToCart(
+      this.product._id,
+      1,
+      this.product.unit_price,
+      this.product.product_name,
+      this.product.image_1,
+      this.product.stocked_quantity
+    );
   }
 
   shareOnFacebook(event: Event): void {
     event.stopPropagation();
 
     const productUrl = `${window.location.origin}/product/${this.product._id}`;
-    const quote = `Check out this amazing product: ${this.product.product_name}! It's available for just ${this.product.unit_price.toLocaleString()} VND.`;
-    const hashtag = '#AmazingProduct #ĐẶC SẢN 3 MIỀN #BeĐẶC SẢN 3 MIỀN';
+    const quote = `Chia sẻ một câu chuyện thủ công từ Chuyện Làng Nghề: ${this.product.product_name}.`;
+    const hashtag = '#ChuyenLangNghe #DoThuCong #LangNgheTruyenThong';
 
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(quote)}&hashtag=${encodeURIComponent(hashtag)}`;
 
@@ -94,25 +96,5 @@ export class ProductItemComponent implements OnChanges {
       return Math.round(originalPrice / 1000) * 1000;
     }
     return null;
-  }
-
-  getImageSrc(): string {
-    return this.productService.getProductThumbnailSrc(this.product?.image_1, this.product?._id || '', {
-      width: 480,
-      height: 480
-    });
-  }
-
-  isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
-  }
-
-  private syncLikedState(): void {
-    if (!this.isLoggedIn() || !this.product?._id) {
-      this.isLiked = false;
-      return;
-    }
-
-    this.isLiked = this.authService.getLikedProducts().includes(this.product._id);
   }
 }

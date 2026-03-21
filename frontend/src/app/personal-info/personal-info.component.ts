@@ -5,7 +5,6 @@ import { OrderAPIService } from '../order-api.service';
 import { CartService } from '../services/cart.service';
 import { User } from '../../interface/User';
 import { DateService } from '../services/date.service';
-import { MediaUploadService } from '../services/media-upload.service';
 
 @Component({
   selector: 'app-personal-info',
@@ -21,7 +20,6 @@ export class PersonalInfoComponent implements OnInit {
   };
   isEditing = false;
   avatarPreview: string | null = null;
-  selectedAvatarFile: File | null = null;
 
   months: string[] = [];
   days: number[] = [];
@@ -39,8 +37,7 @@ export class PersonalInfoComponent implements OnInit {
     private dateService: DateService,
     private orderAPIService: OrderAPIService,
     private cartService: CartService,
-    private router: Router,
-    private mediaUploadService: MediaUploadService
+    private router: Router
   ) { }
 
   private cloneUser(user: Partial<User>): Partial<User> {
@@ -114,18 +111,16 @@ export class PersonalInfoComponent implements OnInit {
   }
 
   saveInfo(): void {
-    const persistProfile = (avatarUrl: string | null) => {
-      const updateData: any = { ...this.personalInfo };
-      delete updateData._id;
-      delete updateData.email;
-      if (avatarUrl !== null) {
-        updateData.avatar = avatarUrl;
-      }
+    const updateData: any = { ...this.personalInfo };
+    delete updateData._id;
+    delete updateData.email;
+    if (this.avatarPreview !== undefined) {
+      updateData.avatar = this.avatarPreview;
+    }
 
-      this.userAPIService.updateMyProfile(updateData).subscribe({
+    this.userAPIService.updateMyProfile(updateData).subscribe({
       next: (res) => {
         this.isEditing = false;
-        this.selectedAvatarFile = null;
         if (res?.user) {
           const refreshed = this.cloneUser({
             ...res.user,
@@ -141,39 +136,29 @@ export class PersonalInfoComponent implements OnInit {
       error: (err) => {
         console.error('Error updating user info:', err);
       }
-      });
-    };
-
-    if (this.selectedAvatarFile) {
-      this.mediaUploadService.uploadImage(this.selectedAvatarFile, 'avatars').subscribe({
-        next: (result) => persistProfile(result.url),
-        error: (err) => console.error('Error uploading avatar:', err)
-      });
-      return;
-    }
-
-    persistProfile(this.avatarPreview ?? '');
+    });
   }
 
   cancelEdit(): void {
     this.isEditing = false;
     this.personalInfo = this.cloneUser(this.originalInfo);
     this.avatarPreview = (this.originalInfo as any).avatar || null;
-    this.selectedAvatarFile = null;
   }
 
   onAvatarSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
     const file = input.files[0];
-    this.selectedAvatarFile = file;
-    this.avatarPreview = URL.createObjectURL(file);
-    (this.personalInfo as any).avatar = this.avatarPreview;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.avatarPreview = reader.result as string;
+      (this.personalInfo as any).avatar = this.avatarPreview;
+    };
+    reader.readAsDataURL(file);
   }
 
   removeAvatar(): void {
     this.avatarPreview = null;
-    this.selectedAvatarFile = null;
     (this.personalInfo as any).avatar = '';
   }
 

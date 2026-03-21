@@ -1,61 +1,83 @@
-<div class="modal fade show d-block" *ngIf="isVisible" tabindex="-1" role="dialog"
-    style="background: rgba(0, 0, 0, 0.5)">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thanh toán</h5>
-                <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">X</button>
-            </div>
-
-            <div class="modal-body">
-                <ul class="nav nav-tabs justify-content-center">
-                    <li class="nav-item">
-                        <a class="nav-link" [class.active]="activeTab === 'momo'" (click)="switchTab('momo')"
-                            href="javascript:void(0)">
-                            Momo
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" [class.active]="activeTab === 'internet_banking'"
-                            (click)="switchTab('internet_banking')" href="javascript:void(0)">
-                            Internet Banking
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="tab-content mt-4">
-                    <div *ngIf="activeTab === 'momo'" class="text-center">
-                        <img src="assets/momo.jpg" alt="QR Code Momo" class="img-fluid rounded shadow-sm" />
-                    </div>
-
-                    <div *ngIf="activeTab === 'internet_banking'">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="vietcombank" name="bank"
-                                value="vietcombank" [(ngModel)]="selectedBank" />
-                            <label class="form-check-label" for="vietcombank">Vietcombank</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="bidv" name="bank" value="bidv"
-                                [(ngModel)]="selectedBank" />
-                            <label class="form-check-label" for="bidv">BIDV</label>
-                        </div>
-                        <div class="text-center mt-3">
-                            <img *ngIf="selectedBank === 'vietcombank'" src="assets/Vietcombank.jpg"
-                                alt="Vietcombank QR" class="img-fluid rounded shadow-sm" />
-                            <img *ngIf="selectedBank === 'bidv'" src="assets/BIDV.jpg" alt="BIDV QR"
-                                class="img-fluid rounded shadow-sm" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer d-flex justify-content-between">
-                <span class="text-danger fw-bold">{{ countdown }} giây</span>
-                <div>
-                    <button class="btn btn-success me-2" (click)="confirmPayment()">Kiểm tra</button>
-                    <button class="btn btn-danger" (click)="closeModal()">Hủy</button>
-                </div>
-            </div>
+<div class="qr-modal" *ngIf="isVisible" tabindex="-1" role="dialog" (click)="closeModal()">
+  <div class="qr-side-panel" [class.open]="panelOpen" role="document" (click)="$event.stopPropagation()">
+    <div class="qr-modal-content" [attr.data-active-tab]="activeTab">
+      <div class="modal-header qr-modal-header">
+        <div class="qr-header-text">
+          <h5 class="modal-title qr-modal-title">Thanh toán</h5>
+          <div class="qr-modal-subtitle">Quét QR để hoàn tất giao dịch an toàn</div>
         </div>
+        <button type="button" class="btn-close qr-close" aria-label="Close" (click)="closeModal()">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="modal-body qr-modal-body">
+        <div class="qr-tabs" role="tablist" aria-label="Chọn phương thức thanh toán">
+          <button type="button" class="qr-tab" [class.active]="activeTab === 'momo'" (click)="switchTab('momo')">
+            MoMo
+          </button>
+          <button type="button" class="qr-tab" [class.active]="activeTab === 'internet_banking'" (click)="switchTab('internet_banking')">
+            Internet Banking
+          </button>
+        </div>
+
+        <div class="qr-panel">
+          <div *ngIf="activeTab === 'momo'" class="qr-momo-layout">
+            <div class="qr-instructions">
+              <div class="qr-badge">MoMo</div>
+              <div class="qr-steps">
+                <div class="qr-step"><span class="qr-step-dot"></span>Mở ứng dụng MoMo</div>
+                <div class="qr-step"><span class="qr-step-dot"></span>Chọn <b>Quét mã</b> và đưa camera vào QR</div>
+                <div class="qr-step"><span class="qr-step-dot"></span>Xác nhận số tiền và hoàn tất</div>
+              </div>
+            </div>
+            <div class="qr-code-wrap">
+              <div class="qr-code-frame">
+                <img src="assets/momo.jpg" alt="QR Code MoMo" class="qr-code-img" />
+              </div>
+              <div class="qr-note">Nếu không quét được, vui lòng thử tăng độ sáng màn hình.</div>
+            </div>
+          </div>
+
+          <div *ngIf="activeTab === 'internet_banking'" class="qr-bank-layout">
+            <div class="qr-instructions">
+              <div class="qr-badge">Ngân hàng</div>
+              <div class="qr-bank-picker" role="group" aria-label="Chọn ngân hàng">
+                <label class="qr-bank-option" [class.active]="selectedBank === 'vietcombank'">
+                  <input class="visually-hidden" type="radio" id="vietcombank" name="bank" value="vietcombank" [(ngModel)]="selectedBank" />
+                  Vietcombank
+                </label>
+                <label class="qr-bank-option" [class.active]="selectedBank === 'bidv'">
+                  <input class="visually-hidden" type="radio" id="bidv" name="bank" value="bidv" [(ngModel)]="selectedBank" />
+                  BIDV
+                </label>
+              </div>
+              <div class="qr-steps">
+                <div class="qr-step"><span class="qr-step-dot"></span>Mở app ngân hàng và chọn <b>QR Pay</b></div>
+                <div class="qr-step"><span class="qr-step-dot"></span>Quét mã và xác nhận nội dung chuyển khoản</div>
+              </div>
+            </div>
+            <div class="qr-code-wrap">
+              <div class="qr-code-frame">
+                <img *ngIf="selectedBank === 'vietcombank'" src="assets/Vietcombank.jpg" alt="Vietcombank QR" class="qr-code-img" />
+                <img *ngIf="selectedBank === 'bidv'" src="assets/BIDV.jpg" alt="BIDV QR" class="qr-code-img" />
+              </div>
+              <div class="qr-note">Chỉ chuyển khoản đúng thông tin hiển thị trong mã QR.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer qr-modal-footer">
+        <div class="qr-countdown" [class.warning]="countdown <= 30">
+          <span class="qr-countdown-label">Thời gian còn lại</span>
+          <span class="qr-countdown-value">{{ countdown }}s</span>
+        </div>
+        <div class="qr-actions">
+          <button class="btn qr-btn qr-btn-primary" (click)="confirmPayment()">Kiểm tra</button>
+          <button class="btn qr-btn qr-btn-ghost" (click)="closeModal()">Hủy</button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

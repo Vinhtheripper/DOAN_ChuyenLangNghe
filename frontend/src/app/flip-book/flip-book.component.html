@@ -1,0 +1,108 @@
+<section class="flip-book-section">
+  <div class="flip-book-wrap">
+    <h2 class="flip-book-heading">CÂU CHUYỆN LÀNG NGHỀ</h2>
+    <p class="flip-book-sub">Lật trang để khám phá</p>
+
+    <div class="flip-book-container" #bookContainer
+      [style.width.px]="isBookOpen ? (bookWidth * 2) : bookWidth" [style.height.px]="bookHeight"
+      [class.flip-book-closed]="!isBookOpen"
+      (mousedown)="onDragStart($event)" (touchstart)="onDragStart($event); $event.preventDefault()"
+      [class.dragging]="isDragging">
+      <div class="flip-book-inner" [style.perspective]="(bookWidth * 2.2) + 'px'">
+        <div class="flip-book-spread" [class.flipping]="isFlipping" [class.flip-next]="flipDirection === 'next'" [class.flip-prev]="flipDirection === 'prev'">
+          <!-- Lớp lật khi kéo sang trái (mở sách / lật trang phải) -->
+          <div class="flip-layer flip-next-layer" *ngIf="(flipProgress > 0.02 || (animating && animTarget === 1)) && canGoNext"
+            [style.width.px]="bookWidth" [style.height.px]="bookHeight"
+            [style.left]="isBookOpen ? '50%' : '0'"
+            [class.flip-layer-animating]="animating && animTarget === 1"
+            [style.transform]="'rotateY(' + (-180 * flipProgress) + 'deg)'">
+            <div class="flip-face flip-front">
+              <!-- Khi đóng: mặt trước là bìa; khi mở: mặt trước là trang phải hiện tại -->
+              <div class="page-inner page-cover-image" *ngIf="!isBookOpen">
+                <img src="assets/book-cover-page.png" alt="Bìa sách" class="page-img" />
+              </div>
+              <div class="page-inner" *ngIf="isBookOpen && currentPage < totalPages && pages[currentPage] as page">
+                <img *ngIf="page.imageRight" [src]="page.imageRight" alt="" class="page-img" />
+                <div *ngIf="!page.imageRight" class="page-placeholder">{{ page.title || '' }}</div>
+              </div>
+            </div>
+            <div class="flip-face flip-back">
+              <div class="page-inner page-cover-image" *ngIf="!isBookOpen">
+                <img src="assets/book-cover-page.png" alt="" class="page-img" />
+              </div>
+              <div class="page-inner" *ngIf="isBookOpen && currentPage + 1 < totalPages && pages[currentPage + 1] as nextPage">
+                <img *ngIf="nextPage.imageLeft" [src]="nextPage.imageLeft" alt="" class="page-img" />
+                <div *ngIf="!nextPage.imageLeft" class="page-placeholder">{{ nextPage.title || '' }}</div>
+              </div>
+              <div class="page-inner page-cover-right" *ngIf="isBookOpen && currentPage + 1 >= totalPages">
+                <span class="cover-text">Hết</span>
+              </div>
+            </div>
+          </div>
+          <!-- Lớp lật khi kéo sang phải (đóng sách / lật trang trái) -->
+          <div class="flip-layer flip-prev-layer" *ngIf="(flipProgress < -0.02 || (animating && animTarget === -1)) && canGoPrev"
+            [style.width.px]="bookWidth" [style.height.px]="bookHeight"
+            [class.flip-layer-animating]="animating && animTarget === -1"
+            [style.transform]="'rotateY(' + (-180 * flipProgress) + 'deg)'">
+            <div class="flip-face flip-front">
+              <div class="page-inner page-cover-image" *ngIf="currentPage === 0">
+                <img src="assets/book-cover-page.png" alt="" class="page-img" />
+              </div>
+              <div class="page-inner" *ngIf="currentPage > 0 && pages[currentPage - 1] as prevPage">
+                <img *ngIf="prevPage.imageLeft" [src]="prevPage.imageLeft" alt="" class="page-img" />
+                <div *ngIf="!prevPage.imageLeft" class="page-placeholder">{{ prevPage.title || '' }}</div>
+              </div>
+            </div>
+            <div class="flip-face flip-back">
+              <div class="page-inner" *ngIf="currentPage > 0 && pages[currentPage - 1] as prevPage">
+                <img *ngIf="prevPage.imageRight" [src]="prevPage.imageRight" alt="" class="page-img" />
+                <div *ngIf="!prevPage.imageRight" class="page-placeholder">{{ prevPage.title || '' }}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Trang trái của spread (ẩn khi sách đóng) -->
+          <div class="book-page page-left" *ngIf="isBookOpen"
+            [style.width.px]="bookWidth" [style.height.px]="bookHeight">
+            <div class="page-inner">
+              <ng-container *ngIf="currentPage === 0">
+                <div class="page-cover-image">
+                  <img src="assets/book-cover-page.png" alt="Bìa sách" class="page-img" />
+                </div>
+              </ng-container>
+              <ng-container *ngIf="currentPage > 0 && pages[currentPage - 1] as prevPage">
+                <img *ngIf="prevPage.imageLeft" [src]="prevPage.imageLeft" alt="" class="page-img" />
+                <div *ngIf="!prevPage.imageLeft" class="page-placeholder">{{ prevPage.title || 'Trang ' + currentPage }}</div>
+              </ng-container>
+            </div>
+          </div>
+          <!-- Trang phải của spread (khi đóng = chỉ bìa; khi mở = nội dung) -->
+          <div class="book-page page-right" [style.width.px]="bookWidth" [style.height.px]="bookHeight"
+            [class.cover-only]="!isBookOpen">
+            <div class="page-inner">
+              <ng-container *ngIf="!isBookOpen">
+                <div class="page-cover-image">
+                  <img src="assets/book-cover-page.png" alt="Bìa sách" class="page-img" />
+                </div>
+              </ng-container>
+              <ng-container *ngIf="isBookOpen && currentPage < totalPages && pages[currentPage] as page">
+                <img *ngIf="page.imageRight" [src]="page.imageRight" alt="" class="page-img" />
+                <div *ngIf="!page.imageRight" class="page-placeholder">{{ page.title || 'Trang ' + (currentPage + 1) }}</div>
+              </ng-container>
+              <ng-container *ngIf="isBookOpen && currentPage >= totalPages">
+                <div class="page-cover-right">
+                  <span class="cover-text">Hết</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-book-controls">
+      <button type="button" class="flip-btn flip-prev" [disabled]="!canGoPrev" (click)="prev()">{{ isBookOpen && currentPage === 0 ? '← Đóng sách' : '← Trang trước' }}</button>
+      <span class="flip-page-num">{{ isBookOpen ? (currentPage + 1) + ' / ' + totalSpreads : 'Bìa' }}</span>
+      <button type="button" class="flip-btn flip-next" [disabled]="!canGoNext" (click)="next()">{{ isBookOpen ? 'Trang sau →' : 'Mở sách →' }}</button>
+    </div>
+  </div>
+</section>

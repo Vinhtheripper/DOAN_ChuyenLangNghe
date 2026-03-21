@@ -1,168 +1,167 @@
-<div class="container my-5">
-    <h2 class="mb-4">THÔNG TIN THANH TOÁN</h2>
+<div class="checkout-page">
+  <div class="checkout-container">
+    <a routerLink="/cart" class="back-to-cart">← Quay về giỏ hàng</a>
     <form [formGroup]="paymentForm" (ngSubmit)="placeOrder()">
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="order-info p-4 rounded shadow-sm bg-white">
-                    <h4>Thông tin đơn hàng</h4>
-                    <div class="row mt-3">
-                        <div class="col-md-4 mb-3">
-                            <label for="firstName">Họ</label>
-                            <input type="text" id="firstName" class="form-control" formControlName="firstName"
-                                placeholder="Nhập họ" required>
-                            <div *ngIf="paymentForm.get('firstName')?.invalid && paymentForm.get('firstName')?.touched"
-                                class="text-danger">
-                                Họ là bắt buộc.
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="lastName">Tên</label>
-                            <input type="text" id="lastName" class="form-control" formControlName="lastName"
-                                placeholder="Nhập tên" required>
-                            <div *ngIf="paymentForm.get('lastName')?.invalid && paymentForm.get('lastName')?.touched"
-                                class="text-danger">
-                                Tên là bắt buộc.
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="company">Tên công ty (không bắt buộc)</label>
-                            <input type="text" id="company" class="form-control" formControlName="company"
-                                placeholder="Tên công ty">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="address">Địa chỉ nhận hàng <span class="label-hint">(Vui lòng dùng thông tin sau sáp nhập)</span></label>
-                        <input type="text" id="address" class="form-control" formControlName="address"
-                            placeholder="Nhập địa chỉ - Vui lòng điền cụ thể Số nhà, Tòa nhà, Tên đường" required>
-                        <div *ngIf="paymentForm.get('address')?.invalid && paymentForm.get('address')?.touched"
-                            class="text-danger">
-                            Địa chỉ là bắt buộc.
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="province">Tỉnh/ Thành phố</label>
-                            <select id="province" class="form-select" formControlName="selectedProvince"
-                                (change)="onProvinceChange()">
-                                <option value="" disabled selected>Chọn</option>
-                                <option *ngFor="let province of provinces" [value]="province.code">{{ province.name }}
-                                </option>
-                            </select>
-                            <div *ngIf="paymentForm.get('selectedProvince')?.invalid && paymentForm.get('selectedProvince')?.touched"
-                                class="text-danger">
-                                Vui lòng chọn tỉnh/thành phố.
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="district">Quận/ Huyện</label>
-                            <select id="district" class="form-select" formControlName="selectedDistrict"
-                                (change)="onDistrictChange()">
-                                <option value="" disabled selected>Chọn</option>
-                                <option *ngFor="let district of districts" [value]="district.code">{{ district.name }}
-                                </option>
-                            </select>
-                            <div *ngIf="paymentForm.get('selectedDistrict')?.invalid && paymentForm.get('selectedDistrict')?.touched"
-                                class="text-danger">
-                                Vui lòng chọn quận/huyện.
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="ward">Phường/ Xã</label>
-                            <select id="ward" class="form-select" formControlName="selectedWard">
-                                <option value="" disabled selected>Chọn</option>
-                                <option *ngFor="let ward of wards" [value]="ward.code">{{ ward.name }}</option>
-                            </select>
-                            <div *ngIf="paymentForm.get('selectedWard')?.invalid && paymentForm.get('selectedWard')?.touched"
-                                class="text-danger">
-                                Vui lòng chọn phường/xã.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" class="form-control" formControlName="email"
-                                placeholder="Nhập email" required>
-                            <div *ngIf="paymentForm.get('email')?.invalid && paymentForm.get('email')?.touched"
-                                class="text-danger">
-                                Email không hợp lệ.
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="phone">Số điện thoại</label>
-                            <input type="text" id="phone" class="form-control" formControlName="phone"
-                                placeholder="Nhập số điện thoại" required>
-                            <div *ngIf="paymentForm.get('phone')?.invalid && paymentForm.get('phone')?.touched"
-                                class="text-danger">
-                                Số điện thoại không hợp lệ.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <input type="checkbox" id="shipToDifferentAddress" class="form-check-input"
-                            formControlName="shipToDifferentAddress">
-                        <label for="shipToDifferentAddress" class="form-check-label">Vận chuyển đến một địa chỉ
-                            khác</label>
-                    </div>
-                    <div class="mb-3">
-                        <h5>Yêu cầu bổ sung</h5>
-                        <textarea class="form-control" formControlName="additionalNotes"
-                            placeholder="Ghi chú về đơn hàng của bạn, yêu cầu vận chuyển đặc biệt,..."></textarea>
-                    </div>
+      <div class="checkout-layout">
+        <!-- CỘT TRÁI: Địa chỉ đã lưu + Thông tin khách hàng & giao hàng gộp chung + Vận chuyển -->
+        <div class="checkout-left">
+          <section class="checkout-section main-form-section">
+            <h3 class="section-title">Thông tin khách hàng & giao hàng</h3>
+
+            <!-- Địa chỉ đã lưu (nếu có) -->
+            <div class="saved-addresses" *ngIf="savedAddresses.length > 0">
+              <div *ngFor="let addr of savedAddresses; let i = index"
+                class="address-card"
+                [class.selected]="selectedAddressIndex === i"
+                (click)="selectSavedAddress(i)">
+                <div class="address-card-body">
+                  <div class="address-main">
+                    <span class="address-name">{{ addr.fullName }} - {{ addr.phone }}</span>
+                    <span class="address-detail">{{ addr.address }}, {{ addr.ward }}, {{ addr.district }}, {{ addr.province }}</span>
+                  </div>
+                  <div class="address-actions">
+                    <button type="button" class="btn-icon" title="Sửa" (click)="editAddress(i); $event.stopPropagation()">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button type="button" class="btn-icon btn-delete" title="Xóa" (click)="removeAddress(i); $event.stopPropagation()">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
                 </div>
+              </div>
             </div>
 
-            <div class="col-lg-4">
-                <div class="order-summary p-4 rounded shadow-sm bg-white">
-                    <h4>Tổng Đơn Hàng</h4>
-                    <div *ngFor="let item of selectedItems" class="d-flex justify-content-between mt-2">
-                        <div class="d-flex align-items-center">
-                            <img [src]="item.image_1" alt="{{ item.product_name }}" class="me-2">
-                            <span>{{ item.product_name }} x{{ item.quantity }}</span>
-                        </div>
-                        <span>{{ item.unit_price * item.quantity | currency: 'VND' }}</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <span>Tổng tiền hàng:</span>
-                        <span>{{ subtotalPrice | currency: 'VND' }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between" *ngIf="discountAmount > 0">
-                        <span>Giảm giá ({{ couponCode }}):</span>
-                        <span>-{{ discountAmount | currency: 'VND' }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Phí vận chuyển:</span>
-                        <span>Miễn phí</span>
-                    </div>
-                    <div class="d-flex justify-content-between mt-3">
-                        <span>Thành tiền:</span>
-                        <span>{{ totalPrice | currency: 'VND' }}</span>
-                    </div>
-                    <h5 class="mt-4">Phương thức thanh toán</h5>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="cod" formControlName="paymentMethod"
-                            value="cash_on_delivery">
-                        <label class="form-check-label" for="cod">Thanh toán khi nhận hàng</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="banking" formControlName="paymentMethod"
-                            value="internet_banking">
-                        <label class="form-check-label" for="banking">Internet Banking</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="momo" formControlName="paymentMethod"
-                            value="momo">
-                        <label class="form-check-label" for="momo">Momo</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-4 rounded-pill" [disabled]="isSubmittingOrder">
-                        {{ isSubmittingOrder ? 'Đang xử lý...' : 'Đặt hàng' }}
-                    </button>
-                </div>
+            <!-- Form gộp: Khách hàng + Giao hàng -->
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="fullName">Họ tên</label>
+                <input type="text" id="fullName" class="form-control" formControlName="fullName" placeholder="Nhập họ tên" />
+                <div *ngIf="paymentForm.get('fullName')?.invalid && paymentForm.get('fullName')?.touched" class="text-danger small">Bắt buộc</div>
+              </div>
+              <div class="form-group">
+                <label for="phone">Số điện thoại</label>
+                <input type="text" id="phone" class="form-control" formControlName="phone" placeholder="Số điện thoại" />
+                <div *ngIf="paymentForm.get('phone')?.invalid && paymentForm.get('phone')?.touched" class="text-danger small">Không hợp lệ</div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="form-control" formControlName="email" placeholder="Email" />
+                <div *ngIf="paymentForm.get('email')?.invalid && paymentForm.get('email')?.touched" class="text-danger small">Không hợp lệ</div>
+              </div>
+              <div class="form-group full-width">
+                <label for="province">Tỉnh/Thành phố</label>
+                <select id="province" class="form-control" formControlName="selectedProvince" (change)="onProvinceChange()">
+                  <option value="" disabled selected>Chọn tỉnh/thành phố</option>
+                  <option *ngFor="let p of provinces" [value]="p.code">{{ p.name }}</option>
+                </select>
+                <div *ngIf="paymentForm.get('selectedProvince')?.invalid && paymentForm.get('selectedProvince')?.touched" class="text-danger small">Bắt buộc</div>
+              </div>
+              <div class="form-group">
+                <label for="district">Quận/Huyện</label>
+                <select id="district" class="form-control" formControlName="selectedDistrict" (change)="onDistrictChange()">
+                  <option value="" disabled selected>Chọn quận/huyện</option>
+                  <option *ngFor="let d of districts" [value]="d.code">{{ d.name }}</option>
+                </select>
+                <div *ngIf="paymentForm.get('selectedDistrict')?.invalid && paymentForm.get('selectedDistrict')?.touched" class="text-danger small">Bắt buộc</div>
+              </div>
+              <div class="form-group">
+                <label for="ward">Phường/Xã</label>
+                <select id="ward" class="form-control" formControlName="selectedWard">
+                  <option value="" disabled selected>Chọn phường/xã</option>
+                  <option *ngFor="let w of wards" [value]="w.code">{{ w.name }}</option>
+                </select>
+                <div *ngIf="paymentForm.get('selectedWard')?.invalid && paymentForm.get('selectedWard')?.touched" class="text-danger small">Bắt buộc</div>
+              </div>
+              <div class="form-group full-width">
+                <label for="address">Số nhà, đường</label>
+                <input type="text" id="address" class="form-control" formControlName="address" placeholder="Số nhà, tên đường" />
+                <div *ngIf="paymentForm.get('address')?.invalid && paymentForm.get('address')?.touched" class="text-danger small">Bắt buộc</div>
+              </div>
+              <div class="form-group full-width">
+                <label for="additionalNotes">Ghi chú (nếu có)</label>
+                <input type="text" id="additionalNotes" class="form-control" formControlName="additionalNotes" placeholder="Ghi chú đặc biệt" />
+              </div>
+              <div class="form-row-actions full-width">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="setAsDefault" />
+                  <span>Đặt làm địa chỉ mặc định</span>
+                </label>
+                <button type="button" class="btn-update-address" (click)="updateAddressFromForm()">Cập nhật địa chỉ</button>
+              </div>
             </div>
+          </section>
+
+          <!-- Phương thức vận chuyển -->
+          <section class="checkout-section shipping-section">
+            <h3 class="section-title">Phương thức vận chuyển</h3>
+            <div class="shipping-options">
+              <label class="shipping-option" [class.selected]="shippingMethod === 'standard'">
+                <input type="radio" name="shipping" value="standard" [(ngModel)]="shippingMethod" [ngModelOptions]="{standalone: true}" (change)="onShippingChange()" />
+                <span class="option-label">TIÊU CHUẨN</span>
+                <span class="option-detail">Free · 3-4 ngày</span>
+              </label>
+              <label class="shipping-option" [class.selected]="shippingMethod === 'express'">
+                <input type="radio" name="shipping" value="express" [(ngModel)]="shippingMethod" [ngModelOptions]="{standalone: true}" (change)="onShippingChange()" />
+                <span class="option-label">SIÊU TỐC</span>
+                <span class="option-detail">45.000 ₫ · 1-2 ngày</span>
+              </label>
+            </div>
+          </section>
         </div>
+
+        <!-- CỘT PHẢI: Giỏ hàng + Phương thức thanh toán + Nút đặt hàng -->
+        <aside class="checkout-right">
+          <div class="cart-summary">
+            <h3 class="cart-title">Giỏ hàng <span class="product-count">({{ selectedItems.length }})</span></h3>
+            <div class="cart-items">
+              <div *ngFor="let item of selectedItems" class="cart-item">
+                <div class="cart-item-image">
+                  <img [src]="item.image_1 || placeholderImage" [alt]="item.product_name" />
+                </div>
+                <div class="cart-item-info">
+                  <span class="cart-item-name">{{ item.product_name }}</span>
+                  <span class="cart-item-variant" *ngIf="item.product_dept">Phân loại: {{ item.product_dept }}</span>
+                  <span class="cart-item-variant" *ngIf="!item.product_dept">Phân loại: Tiêu chuẩn</span>
+                  <span class="cart-item-qty">Số lượng: {{ item.quantity || item.tempQuantity || 1 }}</span>
+                  <span class="cart-item-price">{{ ((item.unit_price || 0) * (item.quantity || item.tempQuantity || 1)) | currency:'VND' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="cart-summary-row">
+              <span>Phí vận chuyển</span>
+              <span>{{ shippingFee | currency:'VND' }}</span>
+            </div>
+            <div class="cart-total">
+              <span>THÀNH TIỀN</span>
+              <span class="total-amount">{{ totalPrice + shippingFee | currency:'VND' }}</span>
+            </div>
+          </div>
+
+          <!-- Phương thức thanh toán (chuyển sang phải, dưới giỏ hàng) -->
+          <section class="checkout-section payment-section">
+            <h3 class="section-title">Phương thức thanh toán</h3>
+            <div class="payment-options">
+              <label class="payment-option" [class.selected]="paymentForm.get('paymentMethod')?.value === 'cash_on_delivery'">
+                <input type="radio" formControlName="paymentMethod" value="cash_on_delivery" />
+                <span class="payment-label">Thanh toán khi nhận hàng (COD)</span>
+              </label>
+              <label class="payment-option" [class.selected]="paymentForm.get('paymentMethod')?.value === 'momo'">
+                <input type="radio" formControlName="paymentMethod" value="momo" />
+                <span class="payment-label">Momo</span>
+              </label>
+              <label class="payment-option" [class.selected]="paymentForm.get('paymentMethod')?.value === 'internet_banking'">
+                <input type="radio" formControlName="paymentMethod" value="internet_banking" />
+                <span class="payment-label">Internet Banking</span>
+              </label>
+            </div>
+            <p class="security-note">Chúng tôi cam kết bảo mật thông tin của bạn</p>
+            <button type="submit" class="btn-submit">THANH TOÁN & ĐẶT HÀNG</button>
+          </section>
+        </aside>
+      </div>
     </form>
-    <app-qr *ngIf="isModalVisible" [isVisible]="isModalVisible" [modalPaymentMethod]="modalPaymentMethod"
-        (close)="closeModal()" (paymentSuccess)="handlePaymentSuccess()">
-    </app-qr>
+  </div>
 </div>
+
+<app-qr *ngIf="isModalVisible" [isVisible]="isModalVisible" [modalPaymentMethod]="modalPaymentMethod"
+  (close)="closeModal()" (paymentSuccess)="handlePaymentSuccess()"></app-qr>

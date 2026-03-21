@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Contact } from '../interface/Contact';
-import { buildUrl } from './utils/url.util';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContactAPIService {
-  private baseURL = buildUrl('/feedback');
+  private baseURL = '/feedback';
 
   constructor(private http: HttpClient) { }
 
