@@ -17,5 +17,8 @@ module.exports = {
   CORS_ORIGINS: parseCorsOrigins(process.env.CORS_ORIGIN),
   FILESTACK_API_KEY: process.env.FILESTACK_API_KEY || '',
   FILESTACK_STORE_LOCATION: process.env.FILESTACK_STORE_LOCATION || 'S3',
-  FILESTACK_STORE_PATH: process.env.FILESTACK_STORE_PATH || ''
+  FILESTACK_STORE_PATH: process.env.FILESTACK_STORE_PATH || '',
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
+  GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+  GEMINI_API_BASE_URL: process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta'
 };

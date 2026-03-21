@@ -17,6 +17,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 const blogsRoutes = require('./routes/blogs.routes');
 const couponsRoutes = require('./routes/coupons.routes');
 const uploadsRoutes = require('./routes/uploads.routes');
+const aiRoutes = require('./routes/ai.routes');
 
 const app = express();
 const isProduction = NODE_ENV === 'production';
@@ -73,6 +74,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/blogs', blogsRoutes);
 app.use('/coupons', couponsRoutes);
 app.use('/uploads', uploadsRoutes);
+app.use('/ai', aiRoutes);
 
 app.use((err, _req, res, _next) => {
   if (err && err.message.startsWith('CORS blocked')) {

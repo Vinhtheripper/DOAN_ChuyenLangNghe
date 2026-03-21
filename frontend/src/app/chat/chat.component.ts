@@ -11,7 +11,7 @@ export class ChatComponent {
   userMessage = '';
   unreadMessages = 1;
   isSending = false;
-  messages: { role: string; content: string; read?: boolean }[] = [];
+  messages: { role: 'user' | 'assistant'; content: string; read?: boolean }[] = [];
 
   private messageSubject = new Subject<string>();
   private maxMessagesToSend = 10;
@@ -60,55 +60,46 @@ export class ChatComponent {
   }
 
   private sendMessageToOpenAi(message: string): void {
-    // Simulate response delay
     setTimeout(() => {
       const response = this.getResponseForMessage(message.toLowerCase());
       this.messages.push({ role: 'assistant', content: response, read: false });
       if (!this.isChatOpen) {
         this.unreadMessages++;
       }
-      
-      // Reset sending state
       this.isSending = false;
     }, 1000);
   }
 
   private getResponseForMessage(message: string): string {
-    // Simple keyword-based responses
     if (message.includes('xin chào') || message.includes('hello') || message.includes('chào')) {
-      return 'Xin chào! Tôi là trợ lý của ĐẶC SẢN 3 MIỀN. Tôi có thể giúp bạn tìm hiểu về sản phẩm, đặt hàng hoặc hỗ trợ khác. Bạn cần gì ạ?';
+      return 'Xin chào! Tôi là trợ lý của Chuyện Làng Nghề. Tôi có thể hỗ trợ bạn về sản phẩm, cách đặt hàng và thông tin liên hệ.';
     }
-    
+
     if (message.includes('sản phẩm') || message.includes('mua') || message.includes('giá')) {
-      return 'Chúng tôi có rất nhiều đặc sản từ 3 miền Bắc - Trung - Nam như thịt trâu gác bếp, chè xanh, kẹo lạc... Bạn có thể xem danh mục sản phẩm hoặc cho tôi biết bạn quan tâm đến sản phẩm nào nhé!';
+      return 'Bạn có thể xem các sản phẩm thủ công tại trang danh mục. Nếu muốn, hãy nói rõ loại bạn quan tâm như gốm, mây tre đan hoặc quà tặng thủ công.';
     }
-    
+
     if (message.includes('đặt hàng') || message.includes('mua hàng')) {
-      return 'Để đặt hàng, bạn có thể:\n1. Chọn sản phẩm từ danh mục\n2. Thêm vào giỏ hàng\n3. Thanh toán khi nhận hàng hoặc qua Internet Banking, Momo\n4. Chúng tôi sẽ giao hàng tận nơi cho bạn!';
+      return 'Để đặt hàng, bạn chọn sản phẩm, thêm vào giỏ, sau đó vào thanh toán và điền thông tin giao hàng.';
     }
-    
+
     if (message.includes('vận chuyển') || message.includes('giao hàng')) {
-      return 'Chúng tôi giao hàng toàn quốc với phí vận chuyển hợp lý. Đơn hàng trên 500.000đ sẽ được miễn phí vận chuyển. Thời gian giao hàng từ 2-5 ngày làm việc.';
+      return 'Chúng tôi hỗ trợ giao hàng tận nơi. Bạn có thể xem thêm ở trang giao hàng hoặc phương thức giao hàng trên website.';
     }
-    
+
     if (message.includes('liên hệ') || message.includes('hotline') || message.includes('điện thoại')) {
-      return 'Bạn có thể liên hệ với chúng tôi qua:\n📞 Hotline: 1900-xxxx\n📧 Email: info@dacsan3mien.com\n💬 Chat trực tiếp như này\n🌐 Website: dacsan3mien.com';
+      return 'Bạn có thể liên hệ qua trang Liên hệ trên website để được hỗ trợ trực tiếp từ đội ngũ Chuyện Làng Nghề.';
     }
-    
-    if (message.includes('cảm ơn') || message.includes('thank')) {
-      return 'Không có gì ạ! Rất vui được hỗ trợ bạn. Nếu cần thêm thông tin gì, bạn cứ hỏi tôi nhé! 😊';
-    }
-    
-    if (message.includes('giờ mở cửa') || message.includes('giờ làm việc')) {
-      return 'Chúng tôi hoạt động 24/7 online! Bạn có thể đặt hàng bất cứ lúc nào. Đội ngũ chăm sóc khách hàng sẽ phản hồi trong giờ hành chính (8:00-17:00).';
-    }
-    
+
     if (message.includes('khuyến mãi') || message.includes('giảm giá') || message.includes('sale')) {
-      return 'Hiện tại chúng tôi đang có nhiều chương trình khuyến mãi hấp dẫn:\n🎉 Giảm giá lên đến 50% cho các sản phẩm đặc biệt\n🎁 Miễn phí vận chuyển cho đơn hàng trên 500k\n🎊 Tặng kèm quà cho khách hàng VIP';
+      return 'Bạn có thể theo dõi mục tin tức và khuyến mãi hoặc trang sản phẩm để xem các ưu đãi hiện có.';
     }
-    
-    // Default response
-    return 'Cảm ơn bạn đã liên hệ! Tôi hiểu bạn đang tìm hiểu về "ĐẶC SẢN 3 MIỀN". Bạn có thể hỏi tôi về:\n• Sản phẩm và giá cả\n• Cách đặt hàng\n• Chính sách vận chuyển\n• Thông tin liên hệ\n• Khuyến mãi hiện tại\nHoặc bất kỳ câu hỏi nào khác, tôi sẵn sàng hỗ trợ! 😊';
+
+    if (message.includes('cảm ơn') || message.includes('thank')) {
+      return 'Rất vui được hỗ trợ bạn. Nếu cần thêm thông tin, bạn cứ tiếp tục hỏi.';
+    }
+
+    return 'Mình hiện đang hỗ trợ các câu hỏi cơ bản về sản phẩm, đặt hàng, giao hàng và liên hệ. Nếu bạn cần, hãy mô tả rõ hơn nội dung muốn hỏi.';
   }
 
   private markMessagesAsRead(): void {
@@ -127,8 +118,7 @@ export class ChatComponent {
   }
 
   formatMessage(content: string): string {
-    // Convert line breaks to HTML
-    return content.replace(/\n/g, '<br>');
+    return this.escapeHtml(content).replace(/\n/g, '<br>');
   }
 
   getCurrentTime(): string {
@@ -137,5 +127,14 @@ export class ChatComponent {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+  }
+
+  private escapeHtml(content: string): string {
+    return content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 }
