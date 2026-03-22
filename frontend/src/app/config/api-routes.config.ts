@@ -8,6 +8,7 @@ export const API_ROUTE_PREFIXES = [
   '/dashboard',
   '/coupons',
   '/uploads',
+  '/ai',
   '/health'
 ];
 

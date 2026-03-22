@@ -1,37 +1,72 @@
-<div class="chatbot-container position-fixed">
-    <button class="btn btn-primary rounded-circle p-3 shadow position-relative" (click)="toggleChat()">
-        <i class="fa fa-comments fa-lg"></i>
-        <span *ngIf="unreadMessages > 0" class="badge unread-badge position-absolute">{{ unreadMessages }}</span>
-    </button>
-
-    <div class="chatbox card shadow-lg" *ngIf="isChatOpen">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Chat with us</h5>
-            <button class="btn btn-sm btn-light" (click)="toggleChat()">
-                <i class="fa fa-times"></i>
-            </button>
-        </div>
-        <div class="card-body overflow-auto" style="max-height: 300px;">
-            <div *ngFor="let message of messages"
-                [ngClass]="{ 'text-end': message.role === 'user', 'text-start': message.role === 'assistant' }"
-                class="mb-3">
-                <div class="message-bubble" 
-                     [ngClass]="{ 'user-message': message.role === 'user', 'assistant-message': message.role === 'assistant' }">
-                    <div class="message-content" [innerHTML]="formatMessage(message.content)"></div>
-                    <small class="message-time">{{ getCurrentTime() }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="card-footer">
-            <div class="input-group">
-                <input type="text" class="form-control" [(ngModel)]="userMessage" placeholder="Nhập tin nhắn..."
-                    (keydown.enter)="sendMessage()" [disabled]="isSending" />
-                <button class="btn btn-primary" (click)="sendMessage()" [disabled]="isSending || userMessage.trim() === ''">
-                    <i *ngIf="!isSending" class="fa fa-paper-plane"></i>
-                    <i *ngIf="isSending" class="fa fa-spinner fa-spin"></i>
-                    {{ isSending ? 'Đang gửi...' : 'Gửi' }}
-                </button>
-            </div>
-        </div>
+<div class="chatbot-container">
+  <div class="chatbox" *ngIf="isChatOpen">
+    <div class="chatbox-header">
+      <div class="chatbox-heading">
+        <span class="chatbox-kicker">Tro ly AI</span>
+        <h5>Chuyen Lang Nghe</h5>
+        <p>Hoi ve san pham, bai viet, uu dai va dat hang.</p>
+      </div>
+      <button class="chatbox-close" type="button" (click)="toggleChat()" aria-label="Dong chat">
+        <i class="fa fa-times"></i>
+      </button>
     </div>
+
+    <div #messageList class="chatbox-body">
+      <div
+        *ngFor="let message of messages; trackBy: trackByMessage"
+        class="message-row"
+        [ngClass]="{ 'message-row-user': message.role === 'user' }"
+      >
+        <div
+          class="message-bubble"
+          [ngClass]="{ 'user-message': message.role === 'user', 'assistant-message': message.role === 'assistant' }"
+        >
+          <div class="message-content" [innerHTML]="formatMessage(message.content)"></div>
+          <div *ngIf="message.sources?.length" class="message-sources">
+            Nguon: {{ message.sources?.join(', ') }}
+          </div>
+          <small class="message-time">{{ formatTime(message.createdAt) }}</small>
+        </div>
+      </div>
+
+      <div class="typing-row" *ngIf="isSending">
+        <div class="message-bubble assistant-message typing-bubble">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chatbox-footer">
+      <div class="input-shell">
+        <input
+          type="text"
+          class="chat-input"
+          [(ngModel)]="userMessage"
+          placeholder="Nhap cau hoi cho tro ly AI..."
+          (keydown.enter)="sendMessage()"
+          [disabled]="isSending"
+        />
+        <button
+          class="chat-send"
+          type="button"
+          (click)="sendMessage()"
+          [disabled]="isSending || userMessage.trim() === ''"
+        >
+          <i *ngIf="!isSending" class="fa fa-paper-plane"></i>
+          <i *ngIf="isSending" class="fa fa-spinner fa-spin"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="chat-trigger position-relative" type="button" (click)="toggleChat()" aria-label="Mo tro ly AI">
+    <span class="trigger-icon"><i class="fa fa-comments"></i></span>
+    <span class="trigger-copy" *ngIf="!isChatOpen">
+      <strong>Tro ly AI</strong>
+      <small>Tu van nhanh</small>
+    </span>
+    <span *ngIf="unreadMessages > 0" class="unread-badge">{{ unreadMessages }}</span>
+  </button>
 </div>
