@@ -19,6 +19,7 @@ interface ChatMessage {
 })
 export class ChatComponent {
   @ViewChild('messageList') private messageList?: ElementRef<HTMLDivElement>;
+  @ViewChild('chatInput') private chatInput?: ElementRef<HTMLInputElement>;
 
   isChatOpen = false;
   userMessage = '';
@@ -49,7 +50,7 @@ export class ChatComponent {
     if (this.userMessage.trim() === '' || this.isSending) return;
 
     const messageToSend = this.userMessage.trim();
-    this.userMessage = '';
+    this.clearComposer();
     this.isSending = true;
     this.pushMessage({
       role: 'user',
@@ -99,6 +100,14 @@ export class ChatComponent {
       createdAt: new Date(),
       read: false
     });
+  }
+
+  private clearComposer(): void {
+    this.userMessage = '';
+
+    if (this.chatInput?.nativeElement) {
+      this.chatInput.nativeElement.value = '';
+    }
   }
 
   formatMessage(content: string): string {
