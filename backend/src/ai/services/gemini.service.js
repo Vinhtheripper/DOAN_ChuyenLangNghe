@@ -1,5 +1,13 @@
 const { getGeminiConfig } = require('../config/gemini.config');
 
+class GeminiServiceError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.name = 'GeminiServiceError';
+    this.code = code;
+  }
+}
+
 function extractTextFromResponse(data) {
   const candidate = data?.candidates?.[0];
   const parts = candidate?.content?.parts;
@@ -17,7 +25,7 @@ function extractTextFromResponse(data) {
 async function generateGeminiAnswer({ systemInstruction, history, userMessage }) {
   const { apiKey, model, apiBaseUrl } = getGeminiConfig();
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured');
+    throw new GeminiServiceError('GEMINI_API_KEY is not configured', 'GEMINI_API_KEY_MISSING');
   }
 
   const contents = [
@@ -52,17 +60,18 @@ async function generateGeminiAnswer({ systemInstruction, history, userMessage })
   const data = await response.json();
   if (!response.ok) {
     const message = data?.error?.message || 'Gemini request failed';
-    throw new Error(message);
+    throw new GeminiServiceError(message, 'GEMINI_REQUEST_FAILED');
   }
 
   const text = extractTextFromResponse(data);
   if (!text) {
-    throw new Error('Gemini returned an empty response');
+    throw new GeminiServiceError('Gemini returned an empty response', 'GEMINI_EMPTY_RESPONSE');
   }
 
   return text;
 }
 
 module.exports = {
+  GeminiServiceError,
   generateGeminiAnswer
 };

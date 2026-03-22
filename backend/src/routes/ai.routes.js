@@ -12,6 +12,7 @@ router.post('/chat', async (req, res) => {
 
     return res.status(200).json(result);
   } catch (error) {
+    console.error('[ai/chat] Request failed:', error);
     const status = error.message === 'Message is required' ? 400 : 500;
     return res.status(status).json({
       message: error.message || 'AI chat failed'
